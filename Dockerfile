@@ -5,7 +5,10 @@ FROM node:22-alpine AS deps
 WORKDIR /app
 RUN corepack enable
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+# --ignore-scripts: postinstall runs `payload generate:*`, which needs tsconfig.json
+# and src/ — not copied in this stage. Both artifacts (importMap.js, payload-types.ts)
+# are committed per Payload convention and land via COPY in the builder stage.
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # ---- builder: compile the standalone Next.js build ----
 FROM node:22-alpine AS builder
