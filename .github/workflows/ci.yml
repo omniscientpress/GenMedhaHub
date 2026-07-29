@@ -64,19 +64,22 @@ jobs:
         run: |
           docker buildx build --load \
             --build-arg NEXT_PUBLIC_SERVER_URL=https://staging.genmedhahub.com \
+            -t ghcr.io/omniscientpress/genmedhahub:${GITHUB_SHA} \
             -t ghcr.io/omniscientpress/genmedhahub:${GITHUB_SHA::7} \
             -t ghcr.io/omniscientpress/genmedhahub:latest .
       - name: Trivy — HIGH/CRITICAL (blocking)
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          image-ref: ghcr.io/omniscientpress/genmedhahub:${GITHUB_SHA::7}
+          # NOTE: ${{ github.sha }} (Actions expression), not ${GITHUB_SHA::7} —
+          # bash substring expansion is not evaluated inside `with:` blocks.
+          image-ref: ghcr.io/omniscientpress/genmedhahub:${{ github.sha }}
           severity: HIGH,CRITICAL
           exit-code: 1
           ignore-unfixed: true
       - name: Trivy — MEDIUM (warn only)
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          image-ref: ghcr.io/omniscientpress/genmedhahub:${GITHUB_SHA::7}
+          image-ref: ghcr.io/omniscientpress/genmedhahub:${{ github.sha }}
           severity: MEDIUM
           exit-code: 0
           ignore-unfixed: true
@@ -88,6 +91,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Push image
         run: |
+          docker push ghcr.io/omniscientpress/genmedhahub:${GITHUB_SHA}
           docker push ghcr.io/omniscientpress/genmedhahub:${GITHUB_SHA::7}
           docker push ghcr.io/omniscientpress/genmedhahub:latest
 
