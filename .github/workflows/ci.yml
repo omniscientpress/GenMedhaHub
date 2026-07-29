@@ -1,0 +1,125 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  # Gates 1–4: run on every push and PR.
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Gate 1 — lint (blocking)
+        run: pnpm lint
+      - name: Gate 2 — typecheck (blocking)
+        run: pnpm typecheck
+      - name: Gate 3 — tests (blocking)
+        run: pnpm test
+      - name: Gate 4 — env docs (blocking)
+        run: node scripts/check-env-docs.mjs
+
+  # Gate 5: production build — main only.
+  build:
+    if: github.ref == 'refs/heads/main'
+    needs: gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Gate 5 — build (blocking)
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_SERVER_URL: https://staging.genmedhahub.com
+
+  # Gate 6: docker image + Trivy scan + push to GHCR — main only.
+  docker:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build image
+        run: |
+          docker buildx build --load \
+            --build-arg NEXT_PUBLIC_SERVER_URL=https://staging.genmedhahub.com \
+            -t ghcr.io/omniscientpress/genmedhahub:${GITHUB_SHA::7} \
+            -t ghcr.io/omniscientpress/genmedhahub:latest .
+      - name: Trivy — HIGH/CRITICAL (blocking)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ghcr.io/omniscientpress/genmedhahub:${GITHUB_SHA::7}
+          severity: HIGH,CRITICAL
+          exit-code: 1
+          ignore-unfixed: true
+      - name: Trivy — MEDIUM (warn only)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ghcr.io/omniscientpress/genmedhahub:${GITHUB_SHA::7}
+          severity: MEDIUM
+          exit-code: 0
+          ignore-unfixed: true
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push image
+        run: |
+          docker push ghcr.io/omniscientpress/genmedhahub:${GITHUB_SHA::7}
+          docker push ghcr.io/omniscientpress/genmedhahub:latest
+
+  # Gate 7: trigger Dokploy deploy + post-deploy health check — main only.
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Dokploy deploy (retry ×3, blocking)
+        run: |
+          for i in 1 2 3; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "${{ secrets.DOKPLOY_DEPLOY_WEBHOOK_URL }}")
+            if [ "$code" -ge 200 ] && [ "$code" -lt 300 ]; then
+              echo "Deploy webhook accepted (HTTP $code)"
+              exit 0
+            fi
+            echo "Attempt $i failed (HTTP $code), retrying in 5s..."
+            sleep 5
+          done
+          echo "Deploy webhook failed after 3 attempts"
+          exit 1
+      - name: Post-deploy health check (poll up to 60s, blocking)
+        run: |
+          for i in $(seq 1 12); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' https://staging.genmedhahub.com/api/health || true)
+            if [ "$code" = "200" ]; then
+              echo "Health check passed (HTTP 200)"
+              exit 0
+            fi
+            echo "Waiting for healthy deploy... (attempt $i/12, HTTP $code)"
+            sleep 5
+          done
+          echo "Health check failed after 60s — blocking release"
+          exit 1
