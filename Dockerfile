@@ -33,6 +33,13 @@ ENV NODE_ENV=production \
 
 RUN addgroup -S nodejs && adduser -S nextjs -u 1001
 
+# Strip npm/corepack from the runtime image: it only runs `node server.js`, and the
+# bundled npm dependency tree (tar, sigstore, brace-expansion) is what Trivy flags
+# in the base image. Justification: runtime hardening, no runtime cost.
+RUN rm -rf /usr/local/lib/node_modules/npm \
+           /usr/local/lib/node_modules/corepack \
+           /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
+
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public

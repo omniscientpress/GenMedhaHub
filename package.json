@@ -29,7 +29,7 @@
     "payload": "3.86.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "sharp": "0.34.2",
+    "sharp": "0.35.3",
     "zod": "4.4.3"
   },
   "devDependencies": {
@@ -49,6 +49,11 @@
       "sharp",
       "esbuild",
       "unrs-resolver"
-    ]
+    ],
+    "overrides": {
+      "sharp": "0.35.3",
+      "picomatch@^4.0.0": "4.0.4",
+      "brace-expansion@^2.0.0": "2.1.2"
+    }
   }
 }

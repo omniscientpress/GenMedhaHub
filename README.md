@@ -63,7 +63,12 @@ No new runtime dependency without a short justification comment above its import
 (or here). Current runtime deps beyond the pinned stack:
 
 - `graphql` — required peer for Payload's GraphQL endpoint
-- `sharp` — Payload image processing (Media uploads)
+- `sharp` — Payload image processing (Media uploads); pinned to 0.35.0 (also via
+  `pnpm.overrides`) because ≤0.34.x carries GHSA-f88m-g3jw-g9cj (libvips)
 - `zod` — env validation schema in `src/lib/env.ts`
+
+`pnpm.overrides` also pins `picomatch@^4.0.0 → 4.0.4` (CVE-2026-33671) and
+`brace-expansion@^2.0.0 → 2.1.2` (CVE-2026-13149) — transitive fixes required to
+keep the Trivy HIGH/CRITICAL gate green.
 
 Dev-only: `tsx` — run TS scripts (`scripts/seed.ts`) without a build step.
