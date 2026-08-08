@@ -7,6 +7,8 @@ const isStagingOrPreview = serverUrl.includes('staging') || serverUrl.includes('
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  // Keep sharp external so standalone traces native @img/* deps (see scripts/fix-standalone-sharp.mjs).
+  serverExternalPackages: ['sharp'],
   // Standalone trace misses sharp's platform @img/* binaries (Payload Media uploads).
   outputFileTracingIncludes: {
     '/**/*': ['./node_modules/sharp/**/*', './node_modules/@img/**/*'],

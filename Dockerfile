@@ -50,15 +50,6 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
-# Standalone output tracing omits @img/sharp-libvips-linuxmusl-x64 (sharp#4543).
-COPY --from=builder /app/node_modules/.pnpm/@img+sharp-libvips-linuxmusl-x64@*/node_modules/@img/sharp-libvips-linuxmusl-x64 /tmp/sharp-libvips-linuxmusl-x64
-RUN set -e; \
-  for img_dir in $(find ./node_modules -type d -path '*/@img/sharp-linuxmusl-x64' -exec dirname {} \;); do \
-    rm -rf "$img_dir/sharp-libvips-linuxmusl-x64"; \
-    cp -a /tmp/sharp-libvips-linuxmusl-x64 "$img_dir/sharp-libvips-linuxmusl-x64"; \
-  done; \
-  rm -rf /tmp/sharp-libvips-linuxmusl-x64
-
 RUN chown -R nextjs:nodejs /app
 USER nextjs
 
