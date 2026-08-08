@@ -5,6 +5,8 @@ export interface HealthBody {
   status: 'ok' | 'error'
   db: 'connected' | 'error'
   payloadSecret: boolean
+  /** Set at Docker build time (BUILD_ID) so deploys are verifiable via /api/health */
+  buildId?: string
   error?: string
   timestamp: string
 }
@@ -32,12 +34,14 @@ export async function runHealthChecks(options: {
   }
 
   const ok = payloadSecret && db === 'connected'
+  const buildId = process.env.BUILD_ID
   return {
     statusCode: ok ? 200 : 503,
     body: {
       status: ok ? 'ok' : 'error',
       db,
       payloadSecret,
+      ...(buildId ? { buildId } : {}),
       ...(failures.length > 0 ? { error: failures.join('; ') } : {}),
       timestamp: new Date().toISOString(),
     },

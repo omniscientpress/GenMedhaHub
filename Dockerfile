@@ -19,6 +19,9 @@ RUN corepack enable
 # Public URL is baked into client bundles at build time.
 ARG NEXT_PUBLIC_SERVER_URL=http://localhost:3000
 ENV NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL
+# Bumped when admin/deploy fixes change — visible at /api/health as buildId.
+ARG BUILD_ID=admin-fix-v6
+ENV BUILD_ID=$BUILD_ID
 # Postgres scheme at build time keeps sqlite/libsql out of the standalone server bundle.
 ARG DATABASE_URI=postgresql://build:build@127.0.0.1:5432/build
 ENV DATABASE_URI=$DATABASE_URI
@@ -32,9 +35,12 @@ RUN pnpm build
 FROM node:22-bookworm-slim AS runner
 WORKDIR /app
 
+ARG BUILD_ID=admin-fix-v6
+
 ENV NODE_ENV=production \
     PORT=3000 \
-    HOSTNAME=0.0.0.0
+    HOSTNAME=0.0.0.0 \
+    BUILD_ID=$BUILD_ID
 
 RUN groupadd --system nodejs && useradd --system --gid nodejs --uid 1001 nextjs \
   && apt-get update \
