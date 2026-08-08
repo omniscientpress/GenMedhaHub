@@ -33,6 +33,9 @@ ENV NODE_ENV=production \
 
 RUN addgroup -S nodejs && adduser -S nextjs -u 1001
 
+# musl compatibility shim for native modules (sharp) on Alpine.
+RUN apk add --no-cache libc6-compat
+
 # Strip npm/corepack from the runtime image: it only runs `node server.js`, and the
 # bundled npm dependency tree (tar, sigstore, brace-expansion) is what Trivy flags
 # in the base image. Justification: runtime hardening, no runtime cost.
@@ -43,6 +46,15 @@ RUN rm -rf /usr/local/lib/node_modules/npm \
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
+
+# Standalone output tracing omits @img/sharp-libvips-linuxmusl-x64 (sharp#4543).
+COPY --from=builder /app/node_modules/.pnpm/@img+sharp-libvips-linuxmusl-x64@*/node_modules/@img/sharp-libvips-linuxmusl-x64 /tmp/sharp-libvips-linuxmusl-x64
+RUN set -e; \
+  for img_dir in $(find ./node_modules -type d -path '*/@img/sharp-linuxmusl-x64' -exec dirname {} \;); do \
+    rm -rf "$img_dir/sharp-libvips-linuxmusl-x64"; \
+    cp -a /tmp/sharp-libvips-linuxmusl-x64 "$img_dir/sharp-libvips-linuxmusl-x64"; \
+  done; \
+  rm -rf /tmp/sharp-libvips-linuxmusl-x64
 
 RUN chown -R nextjs:nodejs /app
 USER nextjs

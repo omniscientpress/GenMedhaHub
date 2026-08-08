@@ -104,8 +104,12 @@ jobs:
       - name: Trigger Dokploy deploy (retry ×3, blocking)
         run: |
           for i in 1 2 3; do
-            code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "${{ secrets.DOKPLOY_DEPLOY_WEBHOOK_URL }}")
-            if [ "$code" -ge 200 ] && [ "$code" -lt 300 ]; then
+            code=$(curl -s -o /tmp/dokploy-deploy.json -w '%{http_code}' -X POST "${{ secrets.DOKPLOY_DEPLOY_WEBHOOK_URL }}" \
+              -H "Content-Type: application/json" \
+              -H "X-GitHub-Event: push" \
+              -d "{\"ref\":\"refs/heads/main\",\"repository\":{\"full_name\":\"${{ github.repository }}\"},\"head_commit\":{\"id\":\"${{ github.sha }}\",\"message\":\"CI deploy\"},\"commits\":[{\"added\":[\".\"],\"modified\":[],\"removed\":[]}]}")
+            cat /tmp/dokploy-deploy.json
+            if [ "$code" = "200" ]; then
               echo "Deploy webhook accepted (HTTP $code)"
               exit 0
             fi
@@ -117,7 +121,7 @@ jobs:
       - name: Post-deploy health check (poll up to 60s, blocking)
         run: |
           for i in $(seq 1 12); do
-            code=$(curl -s -o /dev/null -w '%{http_code}' https://staging.genmedhahub.com/api/health || true)
+            code=$(curl -s -o /dev/null -w '%{http_code}' https://genmedha.in/api/health || true)
             if [ "$code" = "200" ]; then
               echo "Health check passed (HTTP 200)"
               exit 0
