@@ -56,6 +56,8 @@ function isRealS3Configured(): boolean {
 const s3Configured = isRealS3Configured()
 
 export default buildConfig({
+  // Absolute URL for admin/media links in production (Dokploy build arg + runtime env).
+  serverURL: process.env.NEXT_PUBLIC_SERVER_URL || '',
   admin: {
     user: Users.slug,
     importMap: {
