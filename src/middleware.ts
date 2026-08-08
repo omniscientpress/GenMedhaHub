@@ -12,6 +12,10 @@ export function middleware(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.protocol = 'https:'
     url.host = CANONICAL_HOST
+    // NextURL's `.host` setter doesn't reliably clear a port inherited from the
+    // internal request (e.g. behind Traefik on port 3000) — clear it explicitly
+    // so the redirect target is https://genmedha.in, not https://genmedha.in:3000.
+    url.port = ''
     return NextResponse.redirect(url, 301)
   }
 
