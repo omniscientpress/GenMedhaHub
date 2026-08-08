@@ -4,10 +4,10 @@ import config from '@payload-config'
 import '@payloadcms/next/css'
 import type { ServerFunctionClient } from 'payload'
 import { handleServerFunctions, RootLayout } from '@payloadcms/next/layouts'
-import React from 'react'
+import React, { Suspense } from 'react'
 
 import { importMap } from './admin/importMap.js'
-import './custom.scss'
+import './custom.css'
 
 type Args = {
   children: React.ReactNode
@@ -22,9 +22,18 @@ const serverFunction: ServerFunctionClient = async function (args) {
   })
 }
 
+/**
+ * Keep the admin page slot inside a Server Component + Suspense boundary before it
+ * crosses Payload's client RootProvider. Without this, some production standalone
+ * builds serialize RootProvider children as `null` and /admin stays blank.
+ */
+function AdminPageSlot({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={null}>{children}</Suspense>
+}
+
 const Layout = ({ children }: Args) => (
   <RootLayout config={config} importMap={importMap} serverFunction={serverFunction}>
-    {children}
+    <AdminPageSlot>{children}</AdminPageSlot>
   </RootLayout>
 )
 
