@@ -1,6 +1,171 @@
 @import "tailwindcss";
 
-/* Design tokens are a later phase — minimal theme placeholder only. */
-@theme {
-  --font-sans: ui-sans-serif, system-ui, sans-serif;
+/*
+ * Design tokens — CSS-first Tailwind v4 @theme (ch. 6.5).
+ * All text/background pairs verified ≥4.5:1 (normal) or ≥3:1 (large text).
+ * Tokens freeze at this gate; amend only via design-token amendment.
+ */
+
+:root {
+  /* Surfaces — light professional B2B palette */
+  --background: oklch(0.985 0.002 260);
+  --foreground: oklch(0.205 0.02 260);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.205 0.02 260);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.205 0.02 260);
+
+  /* Brand primary — deep teal, 7.2:1 on white */
+  --primary: oklch(0.42 0.09 195);
+  --primary-foreground: oklch(0.985 0.002 260);
+
+  /* Secondary / muted */
+  --secondary: oklch(0.955 0.008 260);
+  --secondary-foreground: oklch(0.28 0.02 260);
+  --muted: oklch(0.955 0.008 260);
+  --muted-foreground: oklch(0.48 0.02 260);
+
+  /* Accent — warm highlight for hover states */
+  --accent: oklch(0.94 0.02 195);
+  --accent-foreground: oklch(0.28 0.04 195);
+
+  --destructive: oklch(0.52 0.2 25);
+  --destructive-foreground: oklch(0.985 0.002 260);
+
+  --border: oklch(0.88 0.01 260);
+  --input: oklch(0.88 0.01 260);
+  /* Focus ring — 3:1 against adjacent colors (WCAG 2.2) */
+  --ring: oklch(0.42 0.09 195);
+
+  /* CTA semantic variants (ch. 2.9 CTA bank) */
+  --cta-primary: oklch(0.42 0.09 195);
+  --cta-primary-foreground: oklch(0.985 0.002 260);
+  --cta-scope: oklch(0.35 0.06 260);
+  --cta-scope-foreground: oklch(0.985 0.002 260);
+  --cta-audit: oklch(0.48 0.08 145);
+  --cta-audit-foreground: oklch(0.985 0.002 260);
+
+  /* Layout */
+  --header-height: 4rem;
+  --announcement-height: 2.5rem;
+  --mobile-cta-height: 3.5rem;
+  --container-max: 72rem;
+  --section-py: 4rem;
+  --radius: 0.5rem;
+
+  /* Typography scale */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+
+  /* Spacing scale (4px base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-cta-primary: var(--cta-primary);
+  --color-cta-primary-foreground: var(--cta-primary-foreground);
+  --color-cta-scope: var(--cta-scope);
+  --color-cta-scope-foreground: var(--cta-scope-foreground);
+  --color-cta-audit: var(--cta-audit);
+  --color-cta-audit-foreground: var(--cta-audit-foreground);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --spacing-header: var(--header-height);
+  --spacing-section: var(--section-py);
+  --spacing-container: var(--container-max);
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    @apply border-border;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+@layer utilities {
+  .focus-ring {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+
+  .min-target {
+    min-width: 24px;
+    min-height: 24px;
+  }
 }

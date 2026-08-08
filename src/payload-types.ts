@@ -69,6 +69,23 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    authors: Author;
+    categories: Category;
+    tags: Tag;
+    testimonials: Testimonial;
+    clients: Client;
+    services: Service;
+    'platform-hubs': PlatformHub;
+    'migration-pages': MigrationPage;
+    solutions: Solution;
+    markets: Market;
+    'case-studies': CaseStudy;
+    'open-source-projects': OpenSourceProject;
+    posts: Post;
+    'lead-magnets': LeadMagnet;
+    pages: Page;
+    forms: Form;
+    'form-submissions': FormSubmission;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,6 +95,23 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    authors: AuthorsSelect<false> | AuthorsSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    tags: TagsSelect<false> | TagsSelect<true>;
+    testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
+    clients: ClientsSelect<false> | ClientsSelect<true>;
+    services: ServicesSelect<false> | ServicesSelect<true>;
+    'platform-hubs': PlatformHubsSelect<false> | PlatformHubsSelect<true>;
+    'migration-pages': MigrationPagesSelect<false> | MigrationPagesSelect<true>;
+    solutions: SolutionsSelect<false> | SolutionsSelect<true>;
+    markets: MarketsSelect<false> | MarketsSelect<true>;
+    'case-studies': CaseStudiesSelect<false> | CaseStudiesSelect<true>;
+    'open-source-projects': OpenSourceProjectsSelect<false> | OpenSourceProjectsSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
+    'lead-magnets': LeadMagnetsSelect<false> | LeadMagnetsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    forms: FormsSelect<false> | FormsSelect<true>;
+    'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -87,8 +121,20 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'site-settings': SiteSetting;
+    navigation: Navigation;
+    'seo-defaults': SeoDefault;
+    redirects: Redirect;
+    'cta-config': CtaConfig;
+  };
+  globalsSelect: {
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    navigation: NavigationSelect<false> | NavigationSelect<true>;
+    'seo-defaults': SeoDefaultsSelect<false> | SeoDefaultsSelect<true>;
+    redirects: RedirectsSelect<false> | RedirectsSelect<true>;
+    'cta-config': CtaConfigSelect<false> | CtaConfigSelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
@@ -123,6 +169,10 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: number;
+  /**
+   * Two-role matrix (ch. 5.9): editors cannot publish.
+   */
+  roles: ('admin' | 'editor')[];
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -148,7 +198,13 @@ export interface User {
  */
 export interface Media {
   id: number;
+  /**
+   * Required at upload — frontend refuses images without alt (5.7, 6.7).
+   */
   alt: string;
+  caption?: string | null;
+  credit?: string | null;
+  kind: 'image' | 'document' | 'video-embed-poster';
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -160,6 +216,2554 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+  sizes?: {
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    hero?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    og?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "authors".
+ */
+export interface Author {
+  id: number;
+  name: string;
+  role: string;
+  bio: string;
+  headshot?: (number | null) | Media;
+  socialUrl?: string | null;
+  slug?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  /**
+   * Categories only; internal reference.
+   */
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags".
+ */
+export interface Tag {
+  id: number;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials".
+ */
+export interface Testimonial {
+  id: number;
+  quote: string;
+  authorName: string;
+  authorRole: string;
+  company: string;
+  headshot?: (number | null) | Media;
+  platform?: (number | null) | PlatformHub;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "platform-hubs".
+ */
+export interface PlatformHub {
+  id: number;
+  /**
+   * Canonical short name; drives slug rules (3.4.1).
+   */
+  name: string;
+  tier: 'flagship' | 'hub';
+  positioningLine: string;
+  economics: {
+    costLine: string;
+    licenseNote: string;
+    source: string;
+  };
+  eosDate?: string | null;
+  services: (number | Service)[];
+  /**
+   * Denormalized cross-link list (3.7); updated via hook/seed.
+   */
+  migrationPagesFrom?: (number | MigrationPage)[] | null;
+  relatedSolutions?: (number | Solution)[] | null;
+  layout: (
+    | {
+        eyebrow?: string | null;
+        headline: string;
+        subhead?: string | null;
+        /**
+         * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+         */
+        ctaKey?:
+          | (
+              | 'book-call'
+              | 'get-audit'
+              | 'scope-app'
+              | 'download-checklist'
+              | 'subscribe'
+              | 'view-work'
+              | 'read-migration-guide'
+            )
+          | null;
+        media?: (number | null) | Media;
+        variant?: ('default' | 'platform' | 'migration') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'hero';
+      }
+    | {
+        content: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        maxWidth?: ('prose' | 'wide') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'richTextSection';
+      }
+    | {
+        heading?: string | null;
+        items: {
+          icon: 'build' | 'migrate' | 'support' | 'web-app' | 'mobile-app';
+          title: string;
+          body: string;
+          id?: string | null;
+        }[];
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'featureGrid';
+      }
+    | {
+        heading?: string | null;
+        /**
+         * ad:D9 — exactly 2 Build & Grow pillar cards with proofLine + link.
+         */
+        cards: {
+          title: string;
+          /**
+           * Stack-coherence proof ≤120 chars (ad:D9/D1).
+           */
+          proofLine: string;
+          /**
+           * Relative path to pillar service page.
+           */
+          link: string;
+          icon: 'build' | 'migrate' | 'support' | 'web-app' | 'mobile-app';
+          id?: string | null;
+        }[];
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'pillarCards';
+      }
+    | {
+        /**
+         * bp:4.13 — context line mandatory for every metric.
+         */
+        metrics: {
+          label: string;
+          value: string;
+          context: string;
+          id?: string | null;
+        }[];
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'metricsCalloutRow';
+      }
+    | {
+        heading?: string | null;
+        source?: ('manual' | 'related') | null;
+        caseStudies?: (number | CaseStudy)[] | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'caseStudyCardList';
+      }
+    | {
+        heading: string;
+        body?: string | null;
+        /**
+         * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+         */
+        ctaKey:
+          | 'book-call'
+          | 'get-audit'
+          | 'scope-app'
+          | 'download-checklist'
+          | 'subscribe'
+          | 'view-work'
+          | 'read-migration-guide';
+        /**
+         * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+         */
+        secondaryCtaKey?:
+          | (
+              | 'book-call'
+              | 'get-audit'
+              | 'scope-app'
+              | 'download-checklist'
+              | 'subscribe'
+              | 'view-work'
+              | 'read-migration-guide'
+            )
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'ctaBand';
+      }
+    | {
+        heading?: string | null;
+        /**
+         * bp:4.9/4.11 — feeds FAQPage JSON-LD at render (P3).
+         */
+        faqs: {
+          question: string;
+          answer: {
+            root: {
+              type: string;
+              children: {
+                type: any;
+                version: number;
+                [k: string]: unknown;
+              }[];
+              direction: ('ltr' | 'rtl') | null;
+              format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+              indent: number;
+              version: number;
+            };
+            [k: string]: unknown;
+          };
+          id?: string | null;
+        }[];
+        /**
+         * Emit FAQPage structured data when true.
+         */
+        emitSchema?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'faqAccordion';
+      }
+    | {
+        source: 'clients' | 'partner-badges' | 'oss';
+        heading?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'trustStrip';
+      }
+    | {
+        heading?: string | null;
+        tiers: {
+          name: string;
+          priceFrom: string;
+          features?:
+            | {
+                feature?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          /**
+           * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+           */
+          ctaKey:
+            | 'book-call'
+            | 'get-audit'
+            | 'scope-app'
+            | 'download-checklist'
+            | 'subscribe'
+            | 'view-work'
+            | 'read-migration-guide';
+          id?: string | null;
+        }[];
+        /**
+         * Citation / benchmark footnote slot.
+         */
+        footnote?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'pricingTable';
+      }
+    | {
+        embedKind: 'cal-inline' | 'cal-popup' | 'video';
+        url: string;
+        /**
+         * From cta-config.bookingEventTypes; cal kinds only.
+         */
+        eventTypeKey?: ('discovery-30' | 'audit-scoping') | null;
+        /**
+         * Video poster only.
+         */
+        poster?: (number | null) | Media;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'embed';
+      }
+    | {
+        testimonial: number | Testimonial;
+        layout?: ('quote' | 'card') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'testimonial';
+      }
+    | {
+        heading?: string | null;
+        columns?:
+          | {
+              label: string;
+              id?: string | null;
+            }[]
+          | null;
+        rows: {
+          criterion: string;
+          cells: {
+            value: string;
+            id?: string | null;
+          }[];
+          id?: string | null;
+        }[];
+        /**
+         * Mandatory citation slot for quantitative claims (5.11).
+         */
+        footnote?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'comparisonTable';
+      }
+  )[];
+  /**
+   * Lowercase-hyphen URL segment; auto-generated from title on create (ch. 3.4.1).
+   */
+  slug: string;
+  /**
+   * Standard set (5.1.1) — meta tags and OG image.
+   */
+  seo?: {
+    /**
+     * ≤60 chars; falls back to seo-defaults titleTemplate.
+     */
+    metaTitle?: string | null;
+    /**
+     * ≤160 chars; falls back to seo-defaults.
+     */
+    metaDescription?: string | null;
+    /**
+     * 1200×630 OG image; falls back to site-settings.defaultOgImage.
+     */
+    ogImage?: (number | null) | Media;
+    /**
+     * Exclude from search indexes when checked.
+     */
+    noindex?: boolean | null;
+  };
+  /**
+   * Set once on first publish by hook; exposed for schema dateModified (5.1.1).
+   */
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services".
+ */
+export interface Service {
+  id: number;
+  title: string;
+  /**
+   * ad:D4 — nav grouping Commerce vs Build & Grow.
+   */
+  servicePillar: 'commerce' | 'build-grow';
+  /**
+   * ad:D4/D16 — one service-taxonomy vocabulary site-wide.
+   */
+  serviceCategory: 'new-build' | 'replatforming-migration' | 'support-retainer' | 'web-app' | 'mobile-app';
+  /**
+   * ad:D4/D16 — parent for future child services; none at launch.
+   */
+  parentService?: (number | null) | Service;
+  shortPitch: string;
+  icon: 'build' | 'migrate' | 'support' | 'web-app' | 'mobile-app';
+  engagementModels: {
+    name: string;
+    priceFrom: string;
+    typicalDuration?: string | null;
+    id?: string | null;
+  }[];
+  /**
+   * ad:D1/D2 — stack-coherence proof for Build & Grow services.
+   */
+  proofPoints?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  relatedCaseStudies?: (number | CaseStudy)[] | null;
+  layout: (
+    | {
+        eyebrow?: string | null;
+        headline: string;
+        subhead?: string | null;
+        /**
+         * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+         */
+        ctaKey?:
+          | (
+              | 'book-call'
+              | 'get-audit'
+              | 'scope-app'
+              | 'download-checklist'
+              | 'subscribe'
+              | 'view-work'
+              | 'read-migration-guide'
+            )
+          | null;
+        media?: (number | null) | Media;
+        variant?: ('default' | 'platform' | 'migration') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'hero';
+      }
+    | {
+        content: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        maxWidth?: ('prose' | 'wide') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'richTextSection';
+      }
+    | {
+        heading?: string | null;
+        items: {
+          icon: 'build' | 'migrate' | 'support' | 'web-app' | 'mobile-app';
+          title: string;
+          body: string;
+          id?: string | null;
+        }[];
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'featureGrid';
+      }
+    | {
+        heading?: string | null;
+        /**
+         * ad:D9 — exactly 2 Build & Grow pillar cards with proofLine + link.
+         */
+        cards: {
+          title: string;
+          /**
+           * Stack-coherence proof ≤120 chars (ad:D9/D1).
+           */
+          proofLine: string;
+          /**
+           * Relative path to pillar service page.
+           */
+          link: string;
+          icon: 'build' | 'migrate' | 'support' | 'web-app' | 'mobile-app';
+          id?: string | null;
+        }[];
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'pillarCards';
+      }
+    | {
+        /**
+         * bp:4.13 — context line mandatory for every metric.
+         */
+        metrics: {
+          label: string;
+          value: string;
+          context: string;
+          id?: string | null;
+        }[];
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'metricsCalloutRow';
+      }
+    | {
+        heading?: string | null;
+        source?: ('manual' | 'related') | null;
+        caseStudies?: (number | CaseStudy)[] | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'caseStudyCardList';
+      }
+    | {
+        heading: string;
+        body?: string | null;
+        /**
+         * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+         */
+        ctaKey:
+          | 'book-call'
+          | 'get-audit'
+          | 'scope-app'
+          | 'download-checklist'
+          | 'subscribe'
+          | 'view-work'
+          | 'read-migration-guide';
+        /**
+         * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+         */
+        secondaryCtaKey?:
+          | (
+              | 'book-call'
+              | 'get-audit'
+              | 'scope-app'
+              | 'download-checklist'
+              | 'subscribe'
+              | 'view-work'
+              | 'read-migration-guide'
+            )
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'ctaBand';
+      }
+    | {
+        heading?: string | null;
+        /**
+         * bp:4.9/4.11 — feeds FAQPage JSON-LD at render (P3).
+         */
+        faqs: {
+          question: string;
+          answer: {
+            root: {
+              type: string;
+              children: {
+                type: any;
+                version: number;
+                [k: string]: unknown;
+              }[];
+              direction: ('ltr' | 'rtl') | null;
+              format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+              indent: number;
+              version: number;
+            };
+            [k: string]: unknown;
+          };
+          id?: string | null;
+        }[];
+        /**
+         * Emit FAQPage structured data when true.
+         */
+        emitSchema?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'faqAccordion';
+      }
+    | {
+        source: 'clients' | 'partner-badges' | 'oss';
+        heading?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'trustStrip';
+      }
+    | {
+        heading?: string | null;
+        tiers: {
+          name: string;
+          priceFrom: string;
+          features?:
+            | {
+                feature?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          /**
+           * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+           */
+          ctaKey:
+            | 'book-call'
+            | 'get-audit'
+            | 'scope-app'
+            | 'download-checklist'
+            | 'subscribe'
+            | 'view-work'
+            | 'read-migration-guide';
+          id?: string | null;
+        }[];
+        /**
+         * Citation / benchmark footnote slot.
+         */
+        footnote?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'pricingTable';
+      }
+    | {
+        embedKind: 'cal-inline' | 'cal-popup' | 'video';
+        url: string;
+        /**
+         * From cta-config.bookingEventTypes; cal kinds only.
+         */
+        eventTypeKey?: ('discovery-30' | 'audit-scoping') | null;
+        /**
+         * Video poster only.
+         */
+        poster?: (number | null) | Media;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'embed';
+      }
+    | {
+        testimonial: number | Testimonial;
+        layout?: ('quote' | 'card') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'testimonial';
+      }
+    | {
+        heading?: string | null;
+        columns?:
+          | {
+              label: string;
+              id?: string | null;
+            }[]
+          | null;
+        rows: {
+          criterion: string;
+          cells: {
+            value: string;
+            id?: string | null;
+          }[];
+          id?: string | null;
+        }[];
+        /**
+         * Mandatory citation slot for quantitative claims (5.11).
+         */
+        footnote?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'comparisonTable';
+      }
+  )[];
+  /**
+   * Lowercase-hyphen URL segment; auto-generated from title on create (ch. 3.4.1).
+   */
+  slug: string;
+  /**
+   * Standard set (5.1.1) — meta tags and OG image.
+   */
+  seo?: {
+    /**
+     * ≤60 chars; falls back to seo-defaults titleTemplate.
+     */
+    metaTitle?: string | null;
+    /**
+     * ≤160 chars; falls back to seo-defaults.
+     */
+    metaDescription?: string | null;
+    /**
+     * 1200×630 OG image; falls back to site-settings.defaultOgImage.
+     */
+    ogImage?: (number | null) | Media;
+    /**
+     * Exclude from search indexes when checked.
+     */
+    noindex?: boolean | null;
+  };
+  /**
+   * Set once on first publish by hook; exposed for schema dateModified (5.1.1).
+   */
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "case-studies".
+ */
+export interface CaseStudy {
+  id: number;
+  /**
+   * bp:4.13 — outcome-led headline, not client name.
+   */
+  outcomeTitle: string;
+  client: string;
+  industry: string;
+  platformFrom?: (number | null) | PlatformHub;
+  platformTo: number | PlatformHub;
+  /**
+   * ad:D4 — single hasMany covers all five pillars.
+   */
+  services: (number | Service)[];
+  commerceModels: ('b2b' | 'dtc' | 'marketplace' | 'subscriptions' | 'multi-region')[];
+  /**
+   * ad:D4 — cross-references markets.proofLinks.
+   */
+  markets?: (number | Market)[] | null;
+  challenge: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  approach: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  solution: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  results: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * bp:4.13 — context mandatory for every metric row.
+   */
+  metrics: {
+    label: string;
+    value: string;
+    context: string;
+    id?: string | null;
+  }[];
+  testimonial?: (number | null) | Testimonial;
+  liveUrl?: string | null;
+  gallery?: (number | Media)[] | null;
+  tags?: (number | Tag)[] | null;
+  /**
+   * Build-in-public entries; excluded from headline claims (2.8).
+   */
+  isPlaceholder: boolean;
+  /**
+   * Lowercase-hyphen URL segment; auto-generated from title on create (ch. 3.4.1).
+   */
+  slug: string;
+  /**
+   * Standard set (5.1.1) — meta tags and OG image.
+   */
+  seo?: {
+    /**
+     * ≤60 chars; falls back to seo-defaults titleTemplate.
+     */
+    metaTitle?: string | null;
+    /**
+     * ≤160 chars; falls back to seo-defaults.
+     */
+    metaDescription?: string | null;
+    /**
+     * 1200×630 OG image; falls back to site-settings.defaultOgImage.
+     */
+    ogImage?: (number | null) | Media;
+    /**
+     * Exclude from search indexes when checked.
+     */
+    noindex?: boolean | null;
+  };
+  /**
+   * Set once on first publish by hook; exposed for schema dateModified (5.1.1).
+   */
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "markets".
+ */
+export interface Market {
+  id: number;
+  /**
+   * ad:D4 — H1 source e.g. "India", "UAE & GCC".
+   */
+  name: string;
+  /**
+   * ad:D4 — one published document per region value.
+   */
+  region: 'india' | 'usa' | 'uae-gcc';
+  /**
+   * ad:D4/D5 — demand landscape; logistical facts only, no physical-office claims.
+   */
+  marketContext: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * ad:D4 — all three sub-fields required.
+   */
+  engagementLogistics: {
+    timezoneOverlap: string;
+    contractingNotes: string;
+    paymentNotes: string;
+  };
+  /**
+   * ad:D4/D7 — data-protection summary per region.
+   */
+  complianceNotes: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * ad:D4 — polymorphic proof; hides when empty at render.
+   */
+  proofLinks?:
+    | {
+        doc:
+          | {
+              relationTo: 'case-studies';
+              value: number | CaseStudy;
+            }
+          | {
+              relationTo: 'posts';
+              value: number | Post;
+            };
+        id?: string | null;
+      }[]
+    | null;
+  layout: (
+    | {
+        eyebrow?: string | null;
+        headline: string;
+        subhead?: string | null;
+        /**
+         * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+         */
+        ctaKey?:
+          | (
+              | 'book-call'
+              | 'get-audit'
+              | 'scope-app'
+              | 'download-checklist'
+              | 'subscribe'
+              | 'view-work'
+              | 'read-migration-guide'
+            )
+          | null;
+        media?: (number | null) | Media;
+        variant?: ('default' | 'platform' | 'migration') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'hero';
+      }
+    | {
+        content: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        maxWidth?: ('prose' | 'wide') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'richTextSection';
+      }
+    | {
+        heading?: string | null;
+        items: {
+          icon: 'build' | 'migrate' | 'support' | 'web-app' | 'mobile-app';
+          title: string;
+          body: string;
+          id?: string | null;
+        }[];
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'featureGrid';
+      }
+    | {
+        heading?: string | null;
+        /**
+         * ad:D9 — exactly 2 Build & Grow pillar cards with proofLine + link.
+         */
+        cards: {
+          title: string;
+          /**
+           * Stack-coherence proof ≤120 chars (ad:D9/D1).
+           */
+          proofLine: string;
+          /**
+           * Relative path to pillar service page.
+           */
+          link: string;
+          icon: 'build' | 'migrate' | 'support' | 'web-app' | 'mobile-app';
+          id?: string | null;
+        }[];
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'pillarCards';
+      }
+    | {
+        /**
+         * bp:4.13 — context line mandatory for every metric.
+         */
+        metrics: {
+          label: string;
+          value: string;
+          context: string;
+          id?: string | null;
+        }[];
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'metricsCalloutRow';
+      }
+    | {
+        heading?: string | null;
+        source?: ('manual' | 'related') | null;
+        caseStudies?: (number | CaseStudy)[] | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'caseStudyCardList';
+      }
+    | {
+        heading: string;
+        body?: string | null;
+        /**
+         * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+         */
+        ctaKey:
+          | 'book-call'
+          | 'get-audit'
+          | 'scope-app'
+          | 'download-checklist'
+          | 'subscribe'
+          | 'view-work'
+          | 'read-migration-guide';
+        /**
+         * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+         */
+        secondaryCtaKey?:
+          | (
+              | 'book-call'
+              | 'get-audit'
+              | 'scope-app'
+              | 'download-checklist'
+              | 'subscribe'
+              | 'view-work'
+              | 'read-migration-guide'
+            )
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'ctaBand';
+      }
+    | {
+        heading?: string | null;
+        /**
+         * bp:4.9/4.11 — feeds FAQPage JSON-LD at render (P3).
+         */
+        faqs: {
+          question: string;
+          answer: {
+            root: {
+              type: string;
+              children: {
+                type: any;
+                version: number;
+                [k: string]: unknown;
+              }[];
+              direction: ('ltr' | 'rtl') | null;
+              format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+              indent: number;
+              version: number;
+            };
+            [k: string]: unknown;
+          };
+          id?: string | null;
+        }[];
+        /**
+         * Emit FAQPage structured data when true.
+         */
+        emitSchema?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'faqAccordion';
+      }
+    | {
+        source: 'clients' | 'partner-badges' | 'oss';
+        heading?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'trustStrip';
+      }
+    | {
+        heading?: string | null;
+        tiers: {
+          name: string;
+          priceFrom: string;
+          features?:
+            | {
+                feature?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          /**
+           * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+           */
+          ctaKey:
+            | 'book-call'
+            | 'get-audit'
+            | 'scope-app'
+            | 'download-checklist'
+            | 'subscribe'
+            | 'view-work'
+            | 'read-migration-guide';
+          id?: string | null;
+        }[];
+        /**
+         * Citation / benchmark footnote slot.
+         */
+        footnote?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'pricingTable';
+      }
+    | {
+        embedKind: 'cal-inline' | 'cal-popup' | 'video';
+        url: string;
+        /**
+         * From cta-config.bookingEventTypes; cal kinds only.
+         */
+        eventTypeKey?: ('discovery-30' | 'audit-scoping') | null;
+        /**
+         * Video poster only.
+         */
+        poster?: (number | null) | Media;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'embed';
+      }
+    | {
+        testimonial: number | Testimonial;
+        layout?: ('quote' | 'card') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'testimonial';
+      }
+    | {
+        heading?: string | null;
+        columns?:
+          | {
+              label: string;
+              id?: string | null;
+            }[]
+          | null;
+        rows: {
+          criterion: string;
+          cells: {
+            value: string;
+            id?: string | null;
+          }[];
+          id?: string | null;
+        }[];
+        /**
+         * Mandatory citation slot for quantitative claims (5.11).
+         */
+        footnote?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'comparisonTable';
+      }
+  )[];
+  /**
+   * Lowercase-hyphen URL segment; auto-generated from title on create (ch. 3.4.1).
+   */
+  slug: string;
+  /**
+   * Standard set (5.1.1) — meta tags and OG image.
+   */
+  seo?: {
+    /**
+     * ≤60 chars; falls back to seo-defaults titleTemplate.
+     */
+    metaTitle?: string | null;
+    /**
+     * ≤160 chars; falls back to seo-defaults.
+     */
+    metaDescription?: string | null;
+    /**
+     * 1200×630 OG image; falls back to site-settings.defaultOgImage.
+     */
+    ogImage?: (number | null) | Media;
+    /**
+     * Exclude from search indexes when checked.
+     */
+    noindex?: boolean | null;
+  };
+  /**
+   * Set once on first publish by hook; exposed for schema dateModified (5.1.1).
+   */
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: number;
+  title: string;
+  excerpt: string;
+  author: number | Author;
+  categories: (number | Category)[];
+  tags?: (number | Tag)[] | null;
+  body: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  relatedService: (number | Service)[];
+  relatedMigrationPage?: (number | null) | MigrationPage;
+  /**
+   * Auto-estimated by hook; editor-overridable.
+   */
+  readingTimeMin?: number | null;
+  /**
+   * Lowercase-hyphen URL segment; auto-generated from title on create (ch. 3.4.1).
+   */
+  slug: string;
+  /**
+   * Standard set (5.1.1) — meta tags and OG image.
+   */
+  seo?: {
+    /**
+     * ≤60 chars; falls back to seo-defaults titleTemplate.
+     */
+    metaTitle?: string | null;
+    /**
+     * ≤160 chars; falls back to seo-defaults.
+     */
+    metaDescription?: string | null;
+    /**
+     * 1200×630 OG image; falls back to site-settings.defaultOgImage.
+     */
+    ogImage?: (number | null) | Media;
+    /**
+     * Exclude from search indexes when checked.
+     */
+    noindex?: boolean | null;
+  };
+  /**
+   * Set once on first publish by hook; exposed for schema dateModified (5.1.1).
+   */
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "migration-pages".
+ */
+export interface MigrationPage {
+  id: number;
+  title: string;
+  sourcePlatform: number | PlatformHub;
+  targetPlatform: number | PlatformHub;
+  hero: {
+    headline: string;
+    subhead: string;
+  };
+  /**
+   * bp:4.11 — quantified cost of status quo; sourced math only.
+   */
+  costOfStaying: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  urgencyAnchor: {
+    date: string;
+    label: string;
+    source: string;
+  };
+  tcoBlock: {
+    comparisonRows: {
+      item: string;
+      sourceCost: string;
+      targetCost: string;
+      note?: string | null;
+      id?: string | null;
+    }[];
+    methodologyNote: string;
+  };
+  cutoverSteps: {
+    stepTitle: string;
+    detail: string;
+    durationWeeks: string;
+    id?: string | null;
+  }[];
+  rollbackPlan: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  seoPreservation: {
+    action: string;
+    id?: string | null;
+  }[];
+  timelineBands: {
+    band: string;
+    scope: string;
+    priceFrom: string;
+    id?: string | null;
+  }[];
+  /**
+   * bp:4.11 — honest counter-cases; never empty.
+   */
+  whenNotToMigrate: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  faqs: {
+    question: string;
+    answer: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    };
+    id?: string | null;
+  }[];
+  gatedAsset?: (number | null) | LeadMagnet;
+  relatedCaseStudies?: (number | CaseStudy)[] | null;
+  /**
+   * Lowercase-hyphen URL segment; auto-generated from title on create (ch. 3.4.1).
+   */
+  slug: string;
+  /**
+   * Standard set (5.1.1) — meta tags and OG image.
+   */
+  seo?: {
+    /**
+     * ≤60 chars; falls back to seo-defaults titleTemplate.
+     */
+    metaTitle?: string | null;
+    /**
+     * ≤160 chars; falls back to seo-defaults.
+     */
+    metaDescription?: string | null;
+    /**
+     * 1200×630 OG image; falls back to site-settings.defaultOgImage.
+     */
+    ogImage?: (number | null) | Media;
+    /**
+     * Exclude from search indexes when checked.
+     */
+    noindex?: boolean | null;
+  };
+  /**
+   * Set once on first publish by hook; exposed for schema dateModified (5.1.1).
+   */
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lead-magnets".
+ */
+export interface LeadMagnet {
+  id: number;
+  title: string;
+  /**
+   * PDF served via signed URL after capture (5.6.1).
+   */
+  assetFile: number | Media;
+  layout: (
+    | {
+        eyebrow?: string | null;
+        headline: string;
+        subhead?: string | null;
+        /**
+         * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+         */
+        ctaKey?:
+          | (
+              | 'book-call'
+              | 'get-audit'
+              | 'scope-app'
+              | 'download-checklist'
+              | 'subscribe'
+              | 'view-work'
+              | 'read-migration-guide'
+            )
+          | null;
+        media?: (number | null) | Media;
+        variant?: ('default' | 'platform' | 'migration') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'hero';
+      }
+    | {
+        content: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        maxWidth?: ('prose' | 'wide') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'richTextSection';
+      }
+    | {
+        heading?: string | null;
+        items: {
+          icon: 'build' | 'migrate' | 'support' | 'web-app' | 'mobile-app';
+          title: string;
+          body: string;
+          id?: string | null;
+        }[];
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'featureGrid';
+      }
+    | {
+        heading?: string | null;
+        /**
+         * ad:D9 — exactly 2 Build & Grow pillar cards with proofLine + link.
+         */
+        cards: {
+          title: string;
+          /**
+           * Stack-coherence proof ≤120 chars (ad:D9/D1).
+           */
+          proofLine: string;
+          /**
+           * Relative path to pillar service page.
+           */
+          link: string;
+          icon: 'build' | 'migrate' | 'support' | 'web-app' | 'mobile-app';
+          id?: string | null;
+        }[];
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'pillarCards';
+      }
+    | {
+        /**
+         * bp:4.13 — context line mandatory for every metric.
+         */
+        metrics: {
+          label: string;
+          value: string;
+          context: string;
+          id?: string | null;
+        }[];
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'metricsCalloutRow';
+      }
+    | {
+        heading?: string | null;
+        source?: ('manual' | 'related') | null;
+        caseStudies?: (number | CaseStudy)[] | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'caseStudyCardList';
+      }
+    | {
+        heading: string;
+        body?: string | null;
+        /**
+         * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+         */
+        ctaKey:
+          | 'book-call'
+          | 'get-audit'
+          | 'scope-app'
+          | 'download-checklist'
+          | 'subscribe'
+          | 'view-work'
+          | 'read-migration-guide';
+        /**
+         * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+         */
+        secondaryCtaKey?:
+          | (
+              | 'book-call'
+              | 'get-audit'
+              | 'scope-app'
+              | 'download-checklist'
+              | 'subscribe'
+              | 'view-work'
+              | 'read-migration-guide'
+            )
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'ctaBand';
+      }
+    | {
+        heading?: string | null;
+        /**
+         * bp:4.9/4.11 — feeds FAQPage JSON-LD at render (P3).
+         */
+        faqs: {
+          question: string;
+          answer: {
+            root: {
+              type: string;
+              children: {
+                type: any;
+                version: number;
+                [k: string]: unknown;
+              }[];
+              direction: ('ltr' | 'rtl') | null;
+              format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+              indent: number;
+              version: number;
+            };
+            [k: string]: unknown;
+          };
+          id?: string | null;
+        }[];
+        /**
+         * Emit FAQPage structured data when true.
+         */
+        emitSchema?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'faqAccordion';
+      }
+    | {
+        source: 'clients' | 'partner-badges' | 'oss';
+        heading?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'trustStrip';
+      }
+    | {
+        heading?: string | null;
+        tiers: {
+          name: string;
+          priceFrom: string;
+          features?:
+            | {
+                feature?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          /**
+           * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+           */
+          ctaKey:
+            | 'book-call'
+            | 'get-audit'
+            | 'scope-app'
+            | 'download-checklist'
+            | 'subscribe'
+            | 'view-work'
+            | 'read-migration-guide';
+          id?: string | null;
+        }[];
+        /**
+         * Citation / benchmark footnote slot.
+         */
+        footnote?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'pricingTable';
+      }
+    | {
+        embedKind: 'cal-inline' | 'cal-popup' | 'video';
+        url: string;
+        /**
+         * From cta-config.bookingEventTypes; cal kinds only.
+         */
+        eventTypeKey?: ('discovery-30' | 'audit-scoping') | null;
+        /**
+         * Video poster only.
+         */
+        poster?: (number | null) | Media;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'embed';
+      }
+    | {
+        testimonial: number | Testimonial;
+        layout?: ('quote' | 'card') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'testimonial';
+      }
+    | {
+        heading?: string | null;
+        columns?:
+          | {
+              label: string;
+              id?: string | null;
+            }[]
+          | null;
+        rows: {
+          criterion: string;
+          cells: {
+            value: string;
+            id?: string | null;
+          }[];
+          id?: string | null;
+        }[];
+        /**
+         * Mandatory citation slot for quantitative claims (5.11).
+         */
+        footnote?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'comparisonTable';
+      }
+  )[];
+  form: number | Form;
+  migrationPage?: (number | null) | MigrationPage;
+  listmonkListId: number;
+  /**
+   * Lowercase-hyphen URL segment; auto-generated from title on create (ch. 3.4.1).
+   */
+  slug: string;
+  /**
+   * Standard set (5.1.1) — meta tags and OG image.
+   */
+  seo?: {
+    /**
+     * ≤60 chars; falls back to seo-defaults titleTemplate.
+     */
+    metaTitle?: string | null;
+    /**
+     * ≤160 chars; falls back to seo-defaults.
+     */
+    metaDescription?: string | null;
+    /**
+     * 1200×630 OG image; falls back to site-settings.defaultOgImage.
+     */
+    ogImage?: (number | null) | Media;
+    /**
+     * Exclude from search indexes when checked.
+     */
+    noindex?: boolean | null;
+  };
+  /**
+   * Set once on first publish by hook; exposed for schema dateModified (5.1.1).
+   */
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forms".
+ */
+export interface Form {
+  id: number;
+  title: string;
+  fields?:
+    | (
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            defaultValue?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'checkbox';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'country';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'email';
+          }
+        | {
+            message?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'message';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: number | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'number';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            placeholder?: string | null;
+            options?:
+              | {
+                  label: string;
+                  value: string;
+                  id?: string | null;
+                }[]
+              | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'select';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'state';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'text';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'textarea';
+          }
+      )[]
+    | null;
+  submitButtonLabel?: string | null;
+  confirmationType?: ('message' | 'redirect') | null;
+  confirmationMessage?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  redirect?: {
+    url: string;
+  };
+  emails?:
+    | {
+        emailTo?: string | null;
+        cc?: string | null;
+        bcc?: string | null;
+        replyTo?: string | null;
+        emailFrom?: string | null;
+        subject: string;
+        message?: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "solutions".
+ */
+export interface Solution {
+  id: number;
+  title: string;
+  /**
+   * Must match case-studies.commerceModels vocabulary (5.8.1).
+   */
+  modelKey: 'b2b' | 'dtc' | 'marketplace' | 'subscriptions' | 'multi-region';
+  painSummary: string;
+  capabilityChecklist: {
+    capability: string;
+    platformNote: string;
+    id?: string | null;
+  }[];
+  recommendedPlatforms: (number | PlatformHub)[];
+  relatedCaseStudies?: (number | CaseStudy)[] | null;
+  layout: (
+    | {
+        eyebrow?: string | null;
+        headline: string;
+        subhead?: string | null;
+        /**
+         * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+         */
+        ctaKey?:
+          | (
+              | 'book-call'
+              | 'get-audit'
+              | 'scope-app'
+              | 'download-checklist'
+              | 'subscribe'
+              | 'view-work'
+              | 'read-migration-guide'
+            )
+          | null;
+        media?: (number | null) | Media;
+        variant?: ('default' | 'platform' | 'migration') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'hero';
+      }
+    | {
+        content: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        maxWidth?: ('prose' | 'wide') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'richTextSection';
+      }
+    | {
+        heading?: string | null;
+        items: {
+          icon: 'build' | 'migrate' | 'support' | 'web-app' | 'mobile-app';
+          title: string;
+          body: string;
+          id?: string | null;
+        }[];
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'featureGrid';
+      }
+    | {
+        heading?: string | null;
+        /**
+         * ad:D9 — exactly 2 Build & Grow pillar cards with proofLine + link.
+         */
+        cards: {
+          title: string;
+          /**
+           * Stack-coherence proof ≤120 chars (ad:D9/D1).
+           */
+          proofLine: string;
+          /**
+           * Relative path to pillar service page.
+           */
+          link: string;
+          icon: 'build' | 'migrate' | 'support' | 'web-app' | 'mobile-app';
+          id?: string | null;
+        }[];
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'pillarCards';
+      }
+    | {
+        /**
+         * bp:4.13 — context line mandatory for every metric.
+         */
+        metrics: {
+          label: string;
+          value: string;
+          context: string;
+          id?: string | null;
+        }[];
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'metricsCalloutRow';
+      }
+    | {
+        heading?: string | null;
+        source?: ('manual' | 'related') | null;
+        caseStudies?: (number | CaseStudy)[] | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'caseStudyCardList';
+      }
+    | {
+        heading: string;
+        body?: string | null;
+        /**
+         * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+         */
+        ctaKey:
+          | 'book-call'
+          | 'get-audit'
+          | 'scope-app'
+          | 'download-checklist'
+          | 'subscribe'
+          | 'view-work'
+          | 'read-migration-guide';
+        /**
+         * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+         */
+        secondaryCtaKey?:
+          | (
+              | 'book-call'
+              | 'get-audit'
+              | 'scope-app'
+              | 'download-checklist'
+              | 'subscribe'
+              | 'view-work'
+              | 'read-migration-guide'
+            )
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'ctaBand';
+      }
+    | {
+        heading?: string | null;
+        /**
+         * bp:4.9/4.11 — feeds FAQPage JSON-LD at render (P3).
+         */
+        faqs: {
+          question: string;
+          answer: {
+            root: {
+              type: string;
+              children: {
+                type: any;
+                version: number;
+                [k: string]: unknown;
+              }[];
+              direction: ('ltr' | 'rtl') | null;
+              format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+              indent: number;
+              version: number;
+            };
+            [k: string]: unknown;
+          };
+          id?: string | null;
+        }[];
+        /**
+         * Emit FAQPage structured data when true.
+         */
+        emitSchema?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'faqAccordion';
+      }
+    | {
+        source: 'clients' | 'partner-badges' | 'oss';
+        heading?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'trustStrip';
+      }
+    | {
+        heading?: string | null;
+        tiers: {
+          name: string;
+          priceFrom: string;
+          features?:
+            | {
+                feature?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          /**
+           * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+           */
+          ctaKey:
+            | 'book-call'
+            | 'get-audit'
+            | 'scope-app'
+            | 'download-checklist'
+            | 'subscribe'
+            | 'view-work'
+            | 'read-migration-guide';
+          id?: string | null;
+        }[];
+        /**
+         * Citation / benchmark footnote slot.
+         */
+        footnote?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'pricingTable';
+      }
+    | {
+        embedKind: 'cal-inline' | 'cal-popup' | 'video';
+        url: string;
+        /**
+         * From cta-config.bookingEventTypes; cal kinds only.
+         */
+        eventTypeKey?: ('discovery-30' | 'audit-scoping') | null;
+        /**
+         * Video poster only.
+         */
+        poster?: (number | null) | Media;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'embed';
+      }
+    | {
+        testimonial: number | Testimonial;
+        layout?: ('quote' | 'card') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'testimonial';
+      }
+    | {
+        heading?: string | null;
+        columns?:
+          | {
+              label: string;
+              id?: string | null;
+            }[]
+          | null;
+        rows: {
+          criterion: string;
+          cells: {
+            value: string;
+            id?: string | null;
+          }[];
+          id?: string | null;
+        }[];
+        /**
+         * Mandatory citation slot for quantitative claims (5.11).
+         */
+        footnote?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'comparisonTable';
+      }
+  )[];
+  /**
+   * Lowercase-hyphen URL segment; auto-generated from title on create (ch. 3.4.1).
+   */
+  slug: string;
+  /**
+   * Standard set (5.1.1) — meta tags and OG image.
+   */
+  seo?: {
+    /**
+     * ≤60 chars; falls back to seo-defaults titleTemplate.
+     */
+    metaTitle?: string | null;
+    /**
+     * ≤160 chars; falls back to seo-defaults.
+     */
+    metaDescription?: string | null;
+    /**
+     * 1200×630 OG image; falls back to site-settings.defaultOgImage.
+     */
+    ogImage?: (number | null) | Media;
+    /**
+     * Exclude from search indexes when checked.
+     */
+    noindex?: boolean | null;
+  };
+  /**
+   * Set once on first publish by hook; exposed for schema dateModified (5.1.1).
+   */
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "clients".
+ */
+export interface Client {
+  id: number;
+  name: string;
+  logo: number | Media;
+  kind: 'client' | 'partner-badge';
+  /**
+   * Required when kind=partner-badge.
+   */
+  badgeUrl?: string | null;
+  url?: string | null;
+  displayOrder?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "open-source-projects".
+ */
+export interface OpenSourceProject {
+  id: number;
+  name: string;
+  /**
+   * Must be github.com host.
+   */
+  repoUrl: string;
+  description: string;
+  platform: number | PlatformHub;
+  starsSnapshot?: number | null;
+  asOf?: string | null;
+  status: 'active' | 'maintained' | 'archived';
+  slug?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  /**
+   * H1 source.
+   */
+  title: string;
+  /**
+   * Full path e.g. /services — decouples slug from nested URLs (3.2.1).
+   */
+  routePath: string;
+  /**
+   * Drives blueprint QA; no not-found kind — /404 is static.
+   */
+  pageKind: 'home' | 'index' | 'about' | 'pricing' | 'contact' | 'legal' | 'thank-you';
+  layout: (
+    | {
+        eyebrow?: string | null;
+        headline: string;
+        subhead?: string | null;
+        /**
+         * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+         */
+        ctaKey?:
+          | (
+              | 'book-call'
+              | 'get-audit'
+              | 'scope-app'
+              | 'download-checklist'
+              | 'subscribe'
+              | 'view-work'
+              | 'read-migration-guide'
+            )
+          | null;
+        media?: (number | null) | Media;
+        variant?: ('default' | 'platform' | 'migration') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'hero';
+      }
+    | {
+        content: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        maxWidth?: ('prose' | 'wide') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'richTextSection';
+      }
+    | {
+        heading?: string | null;
+        items: {
+          icon: 'build' | 'migrate' | 'support' | 'web-app' | 'mobile-app';
+          title: string;
+          body: string;
+          id?: string | null;
+        }[];
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'featureGrid';
+      }
+    | {
+        heading?: string | null;
+        /**
+         * ad:D9 — exactly 2 Build & Grow pillar cards with proofLine + link.
+         */
+        cards: {
+          title: string;
+          /**
+           * Stack-coherence proof ≤120 chars (ad:D9/D1).
+           */
+          proofLine: string;
+          /**
+           * Relative path to pillar service page.
+           */
+          link: string;
+          icon: 'build' | 'migrate' | 'support' | 'web-app' | 'mobile-app';
+          id?: string | null;
+        }[];
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'pillarCards';
+      }
+    | {
+        /**
+         * bp:4.13 — context line mandatory for every metric.
+         */
+        metrics: {
+          label: string;
+          value: string;
+          context: string;
+          id?: string | null;
+        }[];
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'metricsCalloutRow';
+      }
+    | {
+        heading?: string | null;
+        source?: ('manual' | 'related') | null;
+        caseStudies?: (number | CaseStudy)[] | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'caseStudyCardList';
+      }
+    | {
+        heading: string;
+        body?: string | null;
+        /**
+         * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+         */
+        ctaKey:
+          | 'book-call'
+          | 'get-audit'
+          | 'scope-app'
+          | 'download-checklist'
+          | 'subscribe'
+          | 'view-work'
+          | 'read-migration-guide';
+        /**
+         * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+         */
+        secondaryCtaKey?:
+          | (
+              | 'book-call'
+              | 'get-audit'
+              | 'scope-app'
+              | 'download-checklist'
+              | 'subscribe'
+              | 'view-work'
+              | 'read-migration-guide'
+            )
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'ctaBand';
+      }
+    | {
+        heading?: string | null;
+        /**
+         * bp:4.9/4.11 — feeds FAQPage JSON-LD at render (P3).
+         */
+        faqs: {
+          question: string;
+          answer: {
+            root: {
+              type: string;
+              children: {
+                type: any;
+                version: number;
+                [k: string]: unknown;
+              }[];
+              direction: ('ltr' | 'rtl') | null;
+              format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+              indent: number;
+              version: number;
+            };
+            [k: string]: unknown;
+          };
+          id?: string | null;
+        }[];
+        /**
+         * Emit FAQPage structured data when true.
+         */
+        emitSchema?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'faqAccordion';
+      }
+    | {
+        source: 'clients' | 'partner-badges' | 'oss';
+        heading?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'trustStrip';
+      }
+    | {
+        heading?: string | null;
+        tiers: {
+          name: string;
+          priceFrom: string;
+          features?:
+            | {
+                feature?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          /**
+           * Must resolve against cta-config.primaryCtas keys (ch. 5.2.1, 5.11).
+           */
+          ctaKey:
+            | 'book-call'
+            | 'get-audit'
+            | 'scope-app'
+            | 'download-checklist'
+            | 'subscribe'
+            | 'view-work'
+            | 'read-migration-guide';
+          id?: string | null;
+        }[];
+        /**
+         * Citation / benchmark footnote slot.
+         */
+        footnote?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'pricingTable';
+      }
+    | {
+        embedKind: 'cal-inline' | 'cal-popup' | 'video';
+        url: string;
+        /**
+         * From cta-config.bookingEventTypes; cal kinds only.
+         */
+        eventTypeKey?: ('discovery-30' | 'audit-scoping') | null;
+        /**
+         * Video poster only.
+         */
+        poster?: (number | null) | Media;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'embed';
+      }
+    | {
+        testimonial: number | Testimonial;
+        layout?: ('quote' | 'card') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'testimonial';
+      }
+    | {
+        heading?: string | null;
+        columns?:
+          | {
+              label: string;
+              id?: string | null;
+            }[]
+          | null;
+        rows: {
+          criterion: string;
+          cells: {
+            value: string;
+            id?: string | null;
+          }[];
+          id?: string | null;
+        }[];
+        /**
+         * Mandatory citation slot for quantitative claims (5.11).
+         */
+        footnote?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'comparisonTable';
+      }
+  )[];
+  journeyPosition?:
+    ('problem-aware' | 'solution-evaluating' | 'proof-seeking' | 'researching' | 'price-checking' | 'utility') | null;
+  /**
+   * Lowercase-hyphen URL segment; auto-generated from title on create (ch. 3.4.1).
+   */
+  slug: string;
+  /**
+   * Standard set (5.1.1) — meta tags and OG image.
+   */
+  seo?: {
+    /**
+     * ≤60 chars; falls back to seo-defaults titleTemplate.
+     */
+    metaTitle?: string | null;
+    /**
+     * ≤160 chars; falls back to seo-defaults.
+     */
+    metaDescription?: string | null;
+    /**
+     * 1200×630 OG image; falls back to site-settings.defaultOgImage.
+     */
+    ogImage?: (number | null) | Media;
+    /**
+     * Exclude from search indexes when checked.
+     */
+    noindex?: boolean | null;
+  };
+  /**
+   * Set once on first publish by hook; exposed for schema dateModified (5.1.1).
+   */
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "form-submissions".
+ */
+export interface FormSubmission {
+  id: number;
+  form: number | Form;
+  submissionData?:
+    | {
+        field: string;
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -192,6 +2796,74 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'authors';
+        value: number | Author;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: number | Category;
+      } | null)
+    | ({
+        relationTo: 'tags';
+        value: number | Tag;
+      } | null)
+    | ({
+        relationTo: 'testimonials';
+        value: number | Testimonial;
+      } | null)
+    | ({
+        relationTo: 'clients';
+        value: number | Client;
+      } | null)
+    | ({
+        relationTo: 'services';
+        value: number | Service;
+      } | null)
+    | ({
+        relationTo: 'platform-hubs';
+        value: number | PlatformHub;
+      } | null)
+    | ({
+        relationTo: 'migration-pages';
+        value: number | MigrationPage;
+      } | null)
+    | ({
+        relationTo: 'solutions';
+        value: number | Solution;
+      } | null)
+    | ({
+        relationTo: 'markets';
+        value: number | Market;
+      } | null)
+    | ({
+        relationTo: 'case-studies';
+        value: number | CaseStudy;
+      } | null)
+    | ({
+        relationTo: 'open-source-projects';
+        value: number | OpenSourceProject;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: number | Post;
+      } | null)
+    | ({
+        relationTo: 'lead-magnets';
+        value: number | LeadMagnet;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'forms';
+        value: number | Form;
+      } | null)
+    | ({
+        relationTo: 'form-submissions';
+        value: number | FormSubmission;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -240,6 +2912,7 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  roles?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -263,6 +2936,9 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  caption?: T;
+  credit?: T;
+  kind?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -274,6 +2950,1672 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+  sizes?:
+    | T
+    | {
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        hero?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        og?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "authors_select".
+ */
+export interface AuthorsSelect<T extends boolean = true> {
+  name?: T;
+  role?: T;
+  bio?: T;
+  headshot?: T;
+  socialUrl?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags_select".
+ */
+export interface TagsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials_select".
+ */
+export interface TestimonialsSelect<T extends boolean = true> {
+  quote?: T;
+  authorName?: T;
+  authorRole?: T;
+  company?: T;
+  headshot?: T;
+  platform?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "clients_select".
+ */
+export interface ClientsSelect<T extends boolean = true> {
+  name?: T;
+  logo?: T;
+  kind?: T;
+  badgeUrl?: T;
+  url?: T;
+  displayOrder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services_select".
+ */
+export interface ServicesSelect<T extends boolean = true> {
+  title?: T;
+  servicePillar?: T;
+  serviceCategory?: T;
+  parentService?: T;
+  shortPitch?: T;
+  icon?: T;
+  engagementModels?:
+    | T
+    | {
+        name?: T;
+        priceFrom?: T;
+        typicalDuration?: T;
+        id?: T;
+      };
+  proofPoints?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  relatedCaseStudies?: T;
+  layout?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              eyebrow?: T;
+              headline?: T;
+              subhead?: T;
+              ctaKey?: T;
+              media?: T;
+              variant?: T;
+              id?: T;
+              blockName?: T;
+            };
+        richTextSection?:
+          | T
+          | {
+              content?: T;
+              maxWidth?: T;
+              id?: T;
+              blockName?: T;
+            };
+        featureGrid?:
+          | T
+          | {
+              heading?: T;
+              items?:
+                | T
+                | {
+                    icon?: T;
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        pillarCards?:
+          | T
+          | {
+              heading?: T;
+              cards?:
+                | T
+                | {
+                    title?: T;
+                    proofLine?: T;
+                    link?: T;
+                    icon?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        metricsCalloutRow?:
+          | T
+          | {
+              metrics?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    context?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        caseStudyCardList?:
+          | T
+          | {
+              heading?: T;
+              source?: T;
+              caseStudies?: T;
+              id?: T;
+              blockName?: T;
+            };
+        ctaBand?:
+          | T
+          | {
+              heading?: T;
+              body?: T;
+              ctaKey?: T;
+              secondaryCtaKey?: T;
+              id?: T;
+              blockName?: T;
+            };
+        faqAccordion?:
+          | T
+          | {
+              heading?: T;
+              faqs?:
+                | T
+                | {
+                    question?: T;
+                    answer?: T;
+                    id?: T;
+                  };
+              emitSchema?: T;
+              id?: T;
+              blockName?: T;
+            };
+        trustStrip?:
+          | T
+          | {
+              source?: T;
+              heading?: T;
+              id?: T;
+              blockName?: T;
+            };
+        pricingTable?:
+          | T
+          | {
+              heading?: T;
+              tiers?:
+                | T
+                | {
+                    name?: T;
+                    priceFrom?: T;
+                    features?:
+                      | T
+                      | {
+                          feature?: T;
+                          id?: T;
+                        };
+                    ctaKey?: T;
+                    id?: T;
+                  };
+              footnote?: T;
+              id?: T;
+              blockName?: T;
+            };
+        embed?:
+          | T
+          | {
+              embedKind?: T;
+              url?: T;
+              eventTypeKey?: T;
+              poster?: T;
+              id?: T;
+              blockName?: T;
+            };
+        testimonial?:
+          | T
+          | {
+              testimonial?: T;
+              layout?: T;
+              id?: T;
+              blockName?: T;
+            };
+        comparisonTable?:
+          | T
+          | {
+              heading?: T;
+              columns?:
+                | T
+                | {
+                    label?: T;
+                    id?: T;
+                  };
+              rows?:
+                | T
+                | {
+                    criterion?: T;
+                    cells?:
+                      | T
+                      | {
+                          value?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                  };
+              footnote?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  slug?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        ogImage?: T;
+        noindex?: T;
+      };
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "platform-hubs_select".
+ */
+export interface PlatformHubsSelect<T extends boolean = true> {
+  name?: T;
+  tier?: T;
+  positioningLine?: T;
+  economics?:
+    | T
+    | {
+        costLine?: T;
+        licenseNote?: T;
+        source?: T;
+      };
+  eosDate?: T;
+  services?: T;
+  migrationPagesFrom?: T;
+  relatedSolutions?: T;
+  layout?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              eyebrow?: T;
+              headline?: T;
+              subhead?: T;
+              ctaKey?: T;
+              media?: T;
+              variant?: T;
+              id?: T;
+              blockName?: T;
+            };
+        richTextSection?:
+          | T
+          | {
+              content?: T;
+              maxWidth?: T;
+              id?: T;
+              blockName?: T;
+            };
+        featureGrid?:
+          | T
+          | {
+              heading?: T;
+              items?:
+                | T
+                | {
+                    icon?: T;
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        pillarCards?:
+          | T
+          | {
+              heading?: T;
+              cards?:
+                | T
+                | {
+                    title?: T;
+                    proofLine?: T;
+                    link?: T;
+                    icon?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        metricsCalloutRow?:
+          | T
+          | {
+              metrics?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    context?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        caseStudyCardList?:
+          | T
+          | {
+              heading?: T;
+              source?: T;
+              caseStudies?: T;
+              id?: T;
+              blockName?: T;
+            };
+        ctaBand?:
+          | T
+          | {
+              heading?: T;
+              body?: T;
+              ctaKey?: T;
+              secondaryCtaKey?: T;
+              id?: T;
+              blockName?: T;
+            };
+        faqAccordion?:
+          | T
+          | {
+              heading?: T;
+              faqs?:
+                | T
+                | {
+                    question?: T;
+                    answer?: T;
+                    id?: T;
+                  };
+              emitSchema?: T;
+              id?: T;
+              blockName?: T;
+            };
+        trustStrip?:
+          | T
+          | {
+              source?: T;
+              heading?: T;
+              id?: T;
+              blockName?: T;
+            };
+        pricingTable?:
+          | T
+          | {
+              heading?: T;
+              tiers?:
+                | T
+                | {
+                    name?: T;
+                    priceFrom?: T;
+                    features?:
+                      | T
+                      | {
+                          feature?: T;
+                          id?: T;
+                        };
+                    ctaKey?: T;
+                    id?: T;
+                  };
+              footnote?: T;
+              id?: T;
+              blockName?: T;
+            };
+        embed?:
+          | T
+          | {
+              embedKind?: T;
+              url?: T;
+              eventTypeKey?: T;
+              poster?: T;
+              id?: T;
+              blockName?: T;
+            };
+        testimonial?:
+          | T
+          | {
+              testimonial?: T;
+              layout?: T;
+              id?: T;
+              blockName?: T;
+            };
+        comparisonTable?:
+          | T
+          | {
+              heading?: T;
+              columns?:
+                | T
+                | {
+                    label?: T;
+                    id?: T;
+                  };
+              rows?:
+                | T
+                | {
+                    criterion?: T;
+                    cells?:
+                      | T
+                      | {
+                          value?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                  };
+              footnote?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  slug?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        ogImage?: T;
+        noindex?: T;
+      };
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "migration-pages_select".
+ */
+export interface MigrationPagesSelect<T extends boolean = true> {
+  title?: T;
+  sourcePlatform?: T;
+  targetPlatform?: T;
+  hero?:
+    | T
+    | {
+        headline?: T;
+        subhead?: T;
+      };
+  costOfStaying?: T;
+  urgencyAnchor?:
+    | T
+    | {
+        date?: T;
+        label?: T;
+        source?: T;
+      };
+  tcoBlock?:
+    | T
+    | {
+        comparisonRows?:
+          | T
+          | {
+              item?: T;
+              sourceCost?: T;
+              targetCost?: T;
+              note?: T;
+              id?: T;
+            };
+        methodologyNote?: T;
+      };
+  cutoverSteps?:
+    | T
+    | {
+        stepTitle?: T;
+        detail?: T;
+        durationWeeks?: T;
+        id?: T;
+      };
+  rollbackPlan?: T;
+  seoPreservation?:
+    | T
+    | {
+        action?: T;
+        id?: T;
+      };
+  timelineBands?:
+    | T
+    | {
+        band?: T;
+        scope?: T;
+        priceFrom?: T;
+        id?: T;
+      };
+  whenNotToMigrate?: T;
+  faqs?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  gatedAsset?: T;
+  relatedCaseStudies?: T;
+  slug?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        ogImage?: T;
+        noindex?: T;
+      };
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "solutions_select".
+ */
+export interface SolutionsSelect<T extends boolean = true> {
+  title?: T;
+  modelKey?: T;
+  painSummary?: T;
+  capabilityChecklist?:
+    | T
+    | {
+        capability?: T;
+        platformNote?: T;
+        id?: T;
+      };
+  recommendedPlatforms?: T;
+  relatedCaseStudies?: T;
+  layout?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              eyebrow?: T;
+              headline?: T;
+              subhead?: T;
+              ctaKey?: T;
+              media?: T;
+              variant?: T;
+              id?: T;
+              blockName?: T;
+            };
+        richTextSection?:
+          | T
+          | {
+              content?: T;
+              maxWidth?: T;
+              id?: T;
+              blockName?: T;
+            };
+        featureGrid?:
+          | T
+          | {
+              heading?: T;
+              items?:
+                | T
+                | {
+                    icon?: T;
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        pillarCards?:
+          | T
+          | {
+              heading?: T;
+              cards?:
+                | T
+                | {
+                    title?: T;
+                    proofLine?: T;
+                    link?: T;
+                    icon?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        metricsCalloutRow?:
+          | T
+          | {
+              metrics?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    context?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        caseStudyCardList?:
+          | T
+          | {
+              heading?: T;
+              source?: T;
+              caseStudies?: T;
+              id?: T;
+              blockName?: T;
+            };
+        ctaBand?:
+          | T
+          | {
+              heading?: T;
+              body?: T;
+              ctaKey?: T;
+              secondaryCtaKey?: T;
+              id?: T;
+              blockName?: T;
+            };
+        faqAccordion?:
+          | T
+          | {
+              heading?: T;
+              faqs?:
+                | T
+                | {
+                    question?: T;
+                    answer?: T;
+                    id?: T;
+                  };
+              emitSchema?: T;
+              id?: T;
+              blockName?: T;
+            };
+        trustStrip?:
+          | T
+          | {
+              source?: T;
+              heading?: T;
+              id?: T;
+              blockName?: T;
+            };
+        pricingTable?:
+          | T
+          | {
+              heading?: T;
+              tiers?:
+                | T
+                | {
+                    name?: T;
+                    priceFrom?: T;
+                    features?:
+                      | T
+                      | {
+                          feature?: T;
+                          id?: T;
+                        };
+                    ctaKey?: T;
+                    id?: T;
+                  };
+              footnote?: T;
+              id?: T;
+              blockName?: T;
+            };
+        embed?:
+          | T
+          | {
+              embedKind?: T;
+              url?: T;
+              eventTypeKey?: T;
+              poster?: T;
+              id?: T;
+              blockName?: T;
+            };
+        testimonial?:
+          | T
+          | {
+              testimonial?: T;
+              layout?: T;
+              id?: T;
+              blockName?: T;
+            };
+        comparisonTable?:
+          | T
+          | {
+              heading?: T;
+              columns?:
+                | T
+                | {
+                    label?: T;
+                    id?: T;
+                  };
+              rows?:
+                | T
+                | {
+                    criterion?: T;
+                    cells?:
+                      | T
+                      | {
+                          value?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                  };
+              footnote?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  slug?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        ogImage?: T;
+        noindex?: T;
+      };
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "markets_select".
+ */
+export interface MarketsSelect<T extends boolean = true> {
+  name?: T;
+  region?: T;
+  marketContext?: T;
+  engagementLogistics?:
+    | T
+    | {
+        timezoneOverlap?: T;
+        contractingNotes?: T;
+        paymentNotes?: T;
+      };
+  complianceNotes?: T;
+  proofLinks?:
+    | T
+    | {
+        doc?: T;
+        id?: T;
+      };
+  layout?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              eyebrow?: T;
+              headline?: T;
+              subhead?: T;
+              ctaKey?: T;
+              media?: T;
+              variant?: T;
+              id?: T;
+              blockName?: T;
+            };
+        richTextSection?:
+          | T
+          | {
+              content?: T;
+              maxWidth?: T;
+              id?: T;
+              blockName?: T;
+            };
+        featureGrid?:
+          | T
+          | {
+              heading?: T;
+              items?:
+                | T
+                | {
+                    icon?: T;
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        pillarCards?:
+          | T
+          | {
+              heading?: T;
+              cards?:
+                | T
+                | {
+                    title?: T;
+                    proofLine?: T;
+                    link?: T;
+                    icon?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        metricsCalloutRow?:
+          | T
+          | {
+              metrics?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    context?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        caseStudyCardList?:
+          | T
+          | {
+              heading?: T;
+              source?: T;
+              caseStudies?: T;
+              id?: T;
+              blockName?: T;
+            };
+        ctaBand?:
+          | T
+          | {
+              heading?: T;
+              body?: T;
+              ctaKey?: T;
+              secondaryCtaKey?: T;
+              id?: T;
+              blockName?: T;
+            };
+        faqAccordion?:
+          | T
+          | {
+              heading?: T;
+              faqs?:
+                | T
+                | {
+                    question?: T;
+                    answer?: T;
+                    id?: T;
+                  };
+              emitSchema?: T;
+              id?: T;
+              blockName?: T;
+            };
+        trustStrip?:
+          | T
+          | {
+              source?: T;
+              heading?: T;
+              id?: T;
+              blockName?: T;
+            };
+        pricingTable?:
+          | T
+          | {
+              heading?: T;
+              tiers?:
+                | T
+                | {
+                    name?: T;
+                    priceFrom?: T;
+                    features?:
+                      | T
+                      | {
+                          feature?: T;
+                          id?: T;
+                        };
+                    ctaKey?: T;
+                    id?: T;
+                  };
+              footnote?: T;
+              id?: T;
+              blockName?: T;
+            };
+        embed?:
+          | T
+          | {
+              embedKind?: T;
+              url?: T;
+              eventTypeKey?: T;
+              poster?: T;
+              id?: T;
+              blockName?: T;
+            };
+        testimonial?:
+          | T
+          | {
+              testimonial?: T;
+              layout?: T;
+              id?: T;
+              blockName?: T;
+            };
+        comparisonTable?:
+          | T
+          | {
+              heading?: T;
+              columns?:
+                | T
+                | {
+                    label?: T;
+                    id?: T;
+                  };
+              rows?:
+                | T
+                | {
+                    criterion?: T;
+                    cells?:
+                      | T
+                      | {
+                          value?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                  };
+              footnote?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  slug?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        ogImage?: T;
+        noindex?: T;
+      };
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "case-studies_select".
+ */
+export interface CaseStudiesSelect<T extends boolean = true> {
+  outcomeTitle?: T;
+  client?: T;
+  industry?: T;
+  platformFrom?: T;
+  platformTo?: T;
+  services?: T;
+  commerceModels?: T;
+  markets?: T;
+  challenge?: T;
+  approach?: T;
+  solution?: T;
+  results?: T;
+  metrics?:
+    | T
+    | {
+        label?: T;
+        value?: T;
+        context?: T;
+        id?: T;
+      };
+  testimonial?: T;
+  liveUrl?: T;
+  gallery?: T;
+  tags?: T;
+  isPlaceholder?: T;
+  slug?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        ogImage?: T;
+        noindex?: T;
+      };
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "open-source-projects_select".
+ */
+export interface OpenSourceProjectsSelect<T extends boolean = true> {
+  name?: T;
+  repoUrl?: T;
+  description?: T;
+  platform?: T;
+  starsSnapshot?: T;
+  asOf?: T;
+  status?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  excerpt?: T;
+  author?: T;
+  categories?: T;
+  tags?: T;
+  body?: T;
+  relatedService?: T;
+  relatedMigrationPage?: T;
+  readingTimeMin?: T;
+  slug?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        ogImage?: T;
+        noindex?: T;
+      };
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lead-magnets_select".
+ */
+export interface LeadMagnetsSelect<T extends boolean = true> {
+  title?: T;
+  assetFile?: T;
+  layout?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              eyebrow?: T;
+              headline?: T;
+              subhead?: T;
+              ctaKey?: T;
+              media?: T;
+              variant?: T;
+              id?: T;
+              blockName?: T;
+            };
+        richTextSection?:
+          | T
+          | {
+              content?: T;
+              maxWidth?: T;
+              id?: T;
+              blockName?: T;
+            };
+        featureGrid?:
+          | T
+          | {
+              heading?: T;
+              items?:
+                | T
+                | {
+                    icon?: T;
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        pillarCards?:
+          | T
+          | {
+              heading?: T;
+              cards?:
+                | T
+                | {
+                    title?: T;
+                    proofLine?: T;
+                    link?: T;
+                    icon?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        metricsCalloutRow?:
+          | T
+          | {
+              metrics?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    context?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        caseStudyCardList?:
+          | T
+          | {
+              heading?: T;
+              source?: T;
+              caseStudies?: T;
+              id?: T;
+              blockName?: T;
+            };
+        ctaBand?:
+          | T
+          | {
+              heading?: T;
+              body?: T;
+              ctaKey?: T;
+              secondaryCtaKey?: T;
+              id?: T;
+              blockName?: T;
+            };
+        faqAccordion?:
+          | T
+          | {
+              heading?: T;
+              faqs?:
+                | T
+                | {
+                    question?: T;
+                    answer?: T;
+                    id?: T;
+                  };
+              emitSchema?: T;
+              id?: T;
+              blockName?: T;
+            };
+        trustStrip?:
+          | T
+          | {
+              source?: T;
+              heading?: T;
+              id?: T;
+              blockName?: T;
+            };
+        pricingTable?:
+          | T
+          | {
+              heading?: T;
+              tiers?:
+                | T
+                | {
+                    name?: T;
+                    priceFrom?: T;
+                    features?:
+                      | T
+                      | {
+                          feature?: T;
+                          id?: T;
+                        };
+                    ctaKey?: T;
+                    id?: T;
+                  };
+              footnote?: T;
+              id?: T;
+              blockName?: T;
+            };
+        embed?:
+          | T
+          | {
+              embedKind?: T;
+              url?: T;
+              eventTypeKey?: T;
+              poster?: T;
+              id?: T;
+              blockName?: T;
+            };
+        testimonial?:
+          | T
+          | {
+              testimonial?: T;
+              layout?: T;
+              id?: T;
+              blockName?: T;
+            };
+        comparisonTable?:
+          | T
+          | {
+              heading?: T;
+              columns?:
+                | T
+                | {
+                    label?: T;
+                    id?: T;
+                  };
+              rows?:
+                | T
+                | {
+                    criterion?: T;
+                    cells?:
+                      | T
+                      | {
+                          value?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                  };
+              footnote?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  form?: T;
+  migrationPage?: T;
+  listmonkListId?: T;
+  slug?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        ogImage?: T;
+        noindex?: T;
+      };
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  routePath?: T;
+  pageKind?: T;
+  layout?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              eyebrow?: T;
+              headline?: T;
+              subhead?: T;
+              ctaKey?: T;
+              media?: T;
+              variant?: T;
+              id?: T;
+              blockName?: T;
+            };
+        richTextSection?:
+          | T
+          | {
+              content?: T;
+              maxWidth?: T;
+              id?: T;
+              blockName?: T;
+            };
+        featureGrid?:
+          | T
+          | {
+              heading?: T;
+              items?:
+                | T
+                | {
+                    icon?: T;
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        pillarCards?:
+          | T
+          | {
+              heading?: T;
+              cards?:
+                | T
+                | {
+                    title?: T;
+                    proofLine?: T;
+                    link?: T;
+                    icon?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        metricsCalloutRow?:
+          | T
+          | {
+              metrics?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    context?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        caseStudyCardList?:
+          | T
+          | {
+              heading?: T;
+              source?: T;
+              caseStudies?: T;
+              id?: T;
+              blockName?: T;
+            };
+        ctaBand?:
+          | T
+          | {
+              heading?: T;
+              body?: T;
+              ctaKey?: T;
+              secondaryCtaKey?: T;
+              id?: T;
+              blockName?: T;
+            };
+        faqAccordion?:
+          | T
+          | {
+              heading?: T;
+              faqs?:
+                | T
+                | {
+                    question?: T;
+                    answer?: T;
+                    id?: T;
+                  };
+              emitSchema?: T;
+              id?: T;
+              blockName?: T;
+            };
+        trustStrip?:
+          | T
+          | {
+              source?: T;
+              heading?: T;
+              id?: T;
+              blockName?: T;
+            };
+        pricingTable?:
+          | T
+          | {
+              heading?: T;
+              tiers?:
+                | T
+                | {
+                    name?: T;
+                    priceFrom?: T;
+                    features?:
+                      | T
+                      | {
+                          feature?: T;
+                          id?: T;
+                        };
+                    ctaKey?: T;
+                    id?: T;
+                  };
+              footnote?: T;
+              id?: T;
+              blockName?: T;
+            };
+        embed?:
+          | T
+          | {
+              embedKind?: T;
+              url?: T;
+              eventTypeKey?: T;
+              poster?: T;
+              id?: T;
+              blockName?: T;
+            };
+        testimonial?:
+          | T
+          | {
+              testimonial?: T;
+              layout?: T;
+              id?: T;
+              blockName?: T;
+            };
+        comparisonTable?:
+          | T
+          | {
+              heading?: T;
+              columns?:
+                | T
+                | {
+                    label?: T;
+                    id?: T;
+                  };
+              rows?:
+                | T
+                | {
+                    criterion?: T;
+                    cells?:
+                      | T
+                      | {
+                          value?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                  };
+              footnote?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  journeyPosition?: T;
+  slug?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        ogImage?: T;
+        noindex?: T;
+      };
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forms_select".
+ */
+export interface FormsSelect<T extends boolean = true> {
+  title?: T;
+  fields?:
+    | T
+    | {
+        checkbox?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              required?: T;
+              defaultValue?: T;
+              id?: T;
+              blockName?: T;
+            };
+        country?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              required?: T;
+              id?: T;
+              blockName?: T;
+            };
+        email?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              required?: T;
+              id?: T;
+              blockName?: T;
+            };
+        message?:
+          | T
+          | {
+              message?: T;
+              id?: T;
+              blockName?: T;
+            };
+        number?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              defaultValue?: T;
+              required?: T;
+              id?: T;
+              blockName?: T;
+            };
+        select?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              defaultValue?: T;
+              placeholder?: T;
+              options?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              required?: T;
+              id?: T;
+              blockName?: T;
+            };
+        state?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              required?: T;
+              id?: T;
+              blockName?: T;
+            };
+        text?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              defaultValue?: T;
+              required?: T;
+              id?: T;
+              blockName?: T;
+            };
+        textarea?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              defaultValue?: T;
+              required?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  submitButtonLabel?: T;
+  confirmationType?: T;
+  confirmationMessage?: T;
+  redirect?:
+    | T
+    | {
+        url?: T;
+      };
+  emails?:
+    | T
+    | {
+        emailTo?: T;
+        cc?: T;
+        bcc?: T;
+        replyTo?: T;
+        emailFrom?: T;
+        subject?: T;
+        message?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "form-submissions_select".
+ */
+export interface FormSubmissionsSelect<T extends boolean = true> {
+  form?: T;
+  submissionData?:
+    | T
+    | {
+        field?: T;
+        value?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -314,6 +4656,250 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  /**
+   * Used in title templates and Organization schema.
+   */
+  brandName: string;
+  tagline: string;
+  logo: number | Media;
+  logoDark?: (number | null) | Media;
+  socialLinks?:
+    | {
+        platform?: ('linkedin' | 'github' | 'x' | 'youtube') | null;
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  defaultOgImage: number | Media;
+  contactEmail: string;
+  foundingYear?: number | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navigation".
+ */
+export interface Navigation {
+  id: number;
+  /**
+   * Order matches ch. 3.3 exactly.
+   */
+  primaryNav: {
+    label: string;
+    link?: string | null;
+    dropdown?:
+      | {
+          label: string;
+          link: string;
+          id?: string | null;
+        }[]
+      | null;
+    id?: string | null;
+  }[];
+  /**
+   * Services, Platforms, Migrate, Company (3.3.1).
+   */
+  footerColumns: {
+    heading: string;
+    links?:
+      | {
+          label: string;
+          link: string;
+          id?: string | null;
+        }[]
+      | null;
+    id?: string | null;
+  }[];
+  showTrustBadges: boolean;
+  mobileCtaLabel: string;
+  /**
+   * Footer markets strip exact string (addendum D9).
+   */
+  marketsStrip?: string | null;
+  marketsHref?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "seo-defaults".
+ */
+export interface SeoDefault {
+  id: number;
+  titleTemplate: string;
+  defaultMetaDescription: string;
+  siteName: string;
+  twitterHandle?: string | null;
+  robotsPolicy: 'allow-all' | 'custom';
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "redirects".
+ */
+export interface Redirect {
+  id: number;
+  redirects: {
+    from: string;
+    to: string;
+    type?: ('301' | '302') | null;
+    note?: string | null;
+    id?: string | null;
+  }[];
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cta-config".
+ */
+export interface CtaConfig {
+  id: number;
+  primaryCtas: {
+    key: 'book-call' | 'get-audit' | 'scope-app' | 'download-checklist' | 'subscribe' | 'view-work';
+    label: string;
+    href: string;
+    id?: string | null;
+  }[];
+  bookingUrl: string;
+  bookingEventTypes: {
+    key: 'discovery-30' | 'audit-scoping';
+    calSlug: string;
+    durationMin: number;
+    id?: string | null;
+  }[];
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  brandName?: T;
+  tagline?: T;
+  logo?: T;
+  logoDark?: T;
+  socialLinks?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        id?: T;
+      };
+  defaultOgImage?: T;
+  contactEmail?: T;
+  foundingYear?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navigation_select".
+ */
+export interface NavigationSelect<T extends boolean = true> {
+  primaryNav?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+        dropdown?:
+          | T
+          | {
+              label?: T;
+              link?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  footerColumns?:
+    | T
+    | {
+        heading?: T;
+        links?:
+          | T
+          | {
+              label?: T;
+              link?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  showTrustBadges?: T;
+  mobileCtaLabel?: T;
+  marketsStrip?: T;
+  marketsHref?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "seo-defaults_select".
+ */
+export interface SeoDefaultsSelect<T extends boolean = true> {
+  titleTemplate?: T;
+  defaultMetaDescription?: T;
+  siteName?: T;
+  twitterHandle?: T;
+  robotsPolicy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "redirects_select".
+ */
+export interface RedirectsSelect<T extends boolean = true> {
+  redirects?:
+    | T
+    | {
+        from?: T;
+        to?: T;
+        type?: T;
+        note?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cta-config_select".
+ */
+export interface CtaConfigSelect<T extends boolean = true> {
+  primaryCtas?:
+    | T
+    | {
+        key?: T;
+        label?: T;
+        href?: T;
+        id?: T;
+      };
+  bookingUrl?: T;
+  bookingEventTypes?:
+    | T
+    | {
+        key?: T;
+        calSlug?: T;
+        durationMin?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

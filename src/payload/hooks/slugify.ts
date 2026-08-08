@@ -1,0 +1,12 @@
+/** Lowercase-hyphen slugs per ch. 3.4.1. */
+export function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/[\s_]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+}

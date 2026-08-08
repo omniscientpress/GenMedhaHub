@@ -7,7 +7,7 @@ const validEnv: Record<string, string> = {
   PAYLOAD_SECRET: 'test-secret',
   NEXT_PUBLIC_SERVER_URL: 'http://localhost:3000',
   RESEND_API_KEY: 're_test',
-  EMAIL_FROM: 'GenMedha Hub <hello@genmedhahub.com>',
+  EMAIL_FROM: 'GenMedha Hub <hello@genmedha.in>',
   S3_ENDPOINT: 'https://s3.example.com',
   S3_BUCKET: 'bucket',
   S3_ACCESS_KEY_ID: 'key',

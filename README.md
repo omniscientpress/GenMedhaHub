@@ -31,7 +31,7 @@ Useful scripts: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`,
 | local | http://localhost:3000 | sqlite `dev.db` |
 | preview | `https://preview-{branch}.staging.genmedhahub.com` | `X-Robots-Tag: noindex` |
 | staging | https://staging.genmedhahub.com | `X-Robots-Tag: noindex` |
-| production | https://genmedhahub.com | |
+| production | https://genmedha.in | `genmedhahub.com` → 301 permanent redirect |
 
 ## CI (`.github/workflows/ci.yml`)
 
@@ -66,6 +66,12 @@ No new runtime dependency without a short justification comment above its import
 - `sharp` — Payload image processing (Media uploads); pinned to 0.35.0 (also via
   `pnpm.overrides`) because ≤0.34.x carries GHSA-f88m-g3jw-g9cj (libvips)
 - `zod` — env validation schema in `src/lib/env.ts`
+- `class-variance-authority` — typed variant API for Button/Badge CTA states (ch. 6.5)
+- `clsx` + `tailwind-merge` — shadcn/ui `cn()` className composition
+- `lucide-react` — accessible icons for nav, accordion, dialog, form controls
+- `@radix-ui/react-*` — accessible primitives for shadcn/ui (accordion, checkbox, dialog, label, navigation-menu, select, separator, slot)
+- `@payloadcms/storage-s3` — Media uploads to S3-compatible object storage (R2, ch. 5.7)
+- `@payloadcms/plugin-form-builder` — Forms + FormSubmissions collections (ch. 5.6.1)
 
 `pnpm.overrides` also pins `picomatch@^4.0.0 → 4.0.4` (CVE-2026-33671) and
 `brace-expansion@^2.0.0 → 2.1.2` (CVE-2026-13149) — transitive fixes required to
