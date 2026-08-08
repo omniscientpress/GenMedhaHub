@@ -45,6 +45,10 @@ Stage gates — PRs run gates 1–4; `main` runs everything:
 6. Docker build → Trivy (HIGH/CRITICAL block, MEDIUM warn) → push `ghcr.io/omniscientpress/genmedhahub:{sha}` + `:latest` (main only)
 7. Dokploy webhook deploy + post-deploy health poll of `/api/health` (main only, blocking)
 
+**Production deploy:** see [docs/deploy.md](./docs/deploy.md) — the Dokploy webhook alone
+may not rebuild the image; use the UI **Rebuild (no cache)** and verify `buildId` in
+`/api/health`.
+
 ## Environment variables (16, validated at boot by `src/lib/env.ts` via zod)
 
 `DATABASE_URI`, `PAYLOAD_SECRET`, `NEXT_PUBLIC_SERVER_URL`, `RESEND_API_KEY`,
