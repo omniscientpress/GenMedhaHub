@@ -1,3 +1,4 @@
+import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 // @payloadcms/plugin-form-builder: Forms + FormSubmissions collections (ch. 5.6.1).
@@ -17,6 +18,7 @@ import { runHealthChecks } from './lib/health'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const nodeRequire = createRequire(import.meta.url)
 
 const databaseUri = process.env.DATABASE_URI ?? 'file:./dev.db'
 
@@ -30,10 +32,10 @@ function createDatabaseAdapter() {
     })
   }
 
-  // Dev-only SQLite adapter — lazy require so production webpack graphs (postgres
-  // DATABASE_URI at Docker/CI build time) do not bundle libsql into standalone output.
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { sqliteAdapter } = require('@payloadcms/db-sqlite') as typeof import('@payloadcms/db-sqlite')
+  // Dev-only SQLite adapter — lazy load via createRequire so:
+  // 1) production webpack graphs (postgres DATABASE_URI at Docker/CI build) skip libsql
+  // 2) bare require() is illegal in ESM modules that use top-level await
+  const { sqliteAdapter } = nodeRequire('@payloadcms/db-sqlite') as typeof import('@payloadcms/db-sqlite')
   return sqliteAdapter({
     client: { url: databaseUri },
   })
