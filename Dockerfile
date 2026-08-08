@@ -1,7 +1,9 @@
 # syntax=docker/dockerfile:1
 
 # ---- deps: install dependencies with a frozen lockfile ----
-FROM node:22-alpine AS deps
+# Debian/glibc builder: Alpine/musl production builds were serializing Payload's
+# RootProvider children as null, which left /admin blank after hydration.
+FROM node:22-bookworm-slim AS deps
 WORKDIR /app
 RUN corepack enable
 COPY package.json pnpm-lock.yaml ./
@@ -11,7 +13,7 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # ---- builder: compile the standalone Next.js build ----
-FROM node:22-alpine AS builder
+FROM node:22-bookworm-slim AS builder
 WORKDIR /app
 RUN corepack enable
 # Public URL is baked into client bundles at build time.
@@ -27,17 +29,17 @@ COPY . .
 RUN pnpm build
 
 # ---- runner: minimal production image ----
-FROM node:22-alpine AS runner
+FROM node:22-bookworm-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production \
     PORT=3000 \
     HOSTNAME=0.0.0.0
 
-RUN addgroup -S nodejs && adduser -S nextjs -u 1001
-
-# musl compatibility shim for native modules (sharp) on Alpine.
-RUN apk add --no-cache libc6-compat
+RUN groupadd --system nodejs && useradd --system --gid nodejs --uid 1001 nextjs \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends wget ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 
 # Strip npm/corepack from the runtime image: it only runs `node server.js`, and the
 # bundled npm dependency tree (tar, sigstore, brace-expansion) is what Trivy flags
