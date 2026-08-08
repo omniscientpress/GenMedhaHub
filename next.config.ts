@@ -7,6 +7,10 @@ const isStagingOrPreview = serverUrl.includes('staging') || serverUrl.includes('
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  // Standalone trace misses sharp's platform @img/* binaries (Payload Media uploads).
+  outputFileTracingIncludes: {
+    '/**/*': ['./node_modules/sharp/**/*', './node_modules/@img/**/*'],
+  },
   async headers() {
     // Keep staging/preview deployments out of search indexes.
     if (!isStagingOrPreview) return []
