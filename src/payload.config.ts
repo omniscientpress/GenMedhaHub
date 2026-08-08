@@ -4,8 +4,6 @@ import { fileURLToPath } from 'node:url'
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 // @payloadcms/db-postgres: production database adapter (PostgreSQL 16).
 import { postgresAdapter } from '@payloadcms/db-postgres'
-// @payloadcms/db-sqlite: dev/CI-only database adapter (file: URL).
-import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload'
 // @payloadcms/storage-s3: Media uploads to S3-compatible storage (R2, ch. 5.7).
@@ -21,8 +19,25 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const databaseUri = process.env.DATABASE_URI ?? 'file:./dev.db'
-const isPostgres =
-  databaseUri.startsWith('postgres://') || databaseUri.startsWith('postgresql://')
+
+function createDatabaseAdapter() {
+  const isPostgres =
+    databaseUri.startsWith('postgres://') || databaseUri.startsWith('postgresql://')
+
+  if (isPostgres) {
+    return postgresAdapter({
+      pool: { connectionString: databaseUri },
+    })
+  }
+
+  // Dev-only SQLite adapter — lazy require so production webpack graphs (postgres
+  // DATABASE_URI at Docker/CI build time) do not bundle libsql into standalone output.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { sqliteAdapter } = require('@payloadcms/db-sqlite') as typeof import('@payloadcms/db-sqlite')
+  return sqliteAdapter({
+    client: { url: databaseUri },
+  })
+}
 
 /** S3 plugin only when real credentials are set — placeholders keep local `media/` storage. */
 function isRealS3Configured(): boolean {
@@ -58,13 +73,7 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-  db: isPostgres
-    ? postgresAdapter({
-        pool: { connectionString: databaseUri },
-      })
-    : sqliteAdapter({
-        client: { url: databaseUri },
-      }),
+  db: createDatabaseAdapter(),
   sharp,
   plugins: [
     formBuilderPlugin({

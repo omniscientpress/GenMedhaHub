@@ -17,6 +17,9 @@ RUN corepack enable
 # Public URL is baked into client bundles at build time.
 ARG NEXT_PUBLIC_SERVER_URL=http://localhost:3000
 ENV NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL
+# Postgres scheme at build time keeps sqlite/libsql out of the standalone server bundle.
+ARG DATABASE_URI=postgresql://build:build@127.0.0.1:5432/build
+ENV DATABASE_URI=$DATABASE_URI
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 # Env validation is skipped during build (NEXT_PHASE=phase-production-build),

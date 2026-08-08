@@ -51,6 +51,7 @@ jobs:
         run: pnpm build
         env:
           NEXT_PUBLIC_SERVER_URL: https://staging.genmedhahub.com
+          DATABASE_URI: postgresql://build:build@127.0.0.1:5432/build
 
   # Gate 6: docker image + Trivy scan + push to GHCR — main only.
   docker:
@@ -64,6 +65,7 @@ jobs:
         run: |
           docker buildx build --load \
             --build-arg NEXT_PUBLIC_SERVER_URL=https://staging.genmedhahub.com \
+            --build-arg DATABASE_URI=postgresql://build:build@127.0.0.1:5432/build \
             -t ghcr.io/omniscientpress/genmedhahub:${GITHUB_SHA} \
             -t ghcr.io/omniscientpress/genmedhahub:${GITHUB_SHA::7} \
             -t ghcr.io/omniscientpress/genmedhahub:latest .
