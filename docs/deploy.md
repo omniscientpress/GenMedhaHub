@@ -1,41 +1,78 @@
 # Deploying genmedha.in (Dokploy)
 
-The app **code is fine** — health, DB, and homepage work. A blank `/admin` means
-Dokploy is still running an **old Docker image**, not the latest `main` build.
+**Do not start from scratch.** The code on `main` is correct. A blank `/admin/login`
+means Dokploy is still serving an **old Docker image** — not a code or config bug.
 
-## Quick check
+---
+
+## START HERE (5 steps)
+
+### 1. Check what is live right now
 
 ```bash
 curl -s https://genmedha.in/api/health
 ```
 
-You want:
+| What you see | Meaning |
+| --- | --- |
+| No `buildId` field | **Old image** — admin will stay blank |
+| `"buildId":"admin-fix-v6"` | **New image** — admin should work |
 
-```json
-{"status":"ok","db":"connected","buildId":"admin-fix-v6",...}
+Right now production is still on the **old** image (no `buildId`).
+
+### 2. Open Dokploy and force a real rebuild
+
+The deploy **webhook is not enough** — it often returns `"Application deployed successfully"`
+but only **restarts** the old container without rebuilding.
+
+1. Open Dokploy → application **genmedha.in**
+2. **General** tab:
+   - Branch: **`main`**
+   - Build type: **Dockerfile**
+   - Dockerfile: **`Dockerfile`**
+   - Context: **`/`**
+3. **Environment** tab: confirm all 16 variables (especially `NEXT_PUBLIC_SERVER_URL=https://genmedha.in`)
+4. **Advanced → Run Command**: must be **empty**
+5. Click **Deploy** / **Rebuild** — choose **no cache** / clear build cache if offered
+6. Watch **Build logs** until `pnpm build` finishes and the container starts
+
+### 3. Confirm the new image is live
+
+```bash
+curl -s https://genmedha.in/api/health
 ```
 
-If `buildId` is **missing** or not `admin-fix-v6`, the new image is **not** live yet.
-`/admin/login` will stay blank until it is.
+You must see `"buildId":"admin-fix-v6"`. Until you do, `/admin/login` will stay blank.
 
-## Force rebuild in Dokploy (required)
+### 4. Open the admin login page
 
-The deploy webhook often returns success but only **restarts** the old container.
-You must trigger a **full image rebuild**:
+**https://genmedha.in/admin/login** — you should see Email, Password, and Login.
 
-1. Open Dokploy → app **genmedha.in**
-2. **General** → branch **`main`**, Dockerfile path **`Dockerfile`**, context **`/`**
-3. **Environment** → confirm all 16 vars (especially `NEXT_PUBLIC_SERVER_URL=https://genmedha.in`)
-4. **Advanced → Run Command** → must be **empty** (no migrate/seed here)
-5. Click **Deploy** / **Rebuild** (use **no cache** / clear build cache if offered)
-6. Open **Build logs** — wait until you see `pnpm build` finish and the image starts
-7. Confirm health:
+### 5. Log in
 
-   ```bash
-   curl -s https://genmedha.in/api/health | jq .
-   ```
+Use your admin credentials. Change the password after first login.
 
-8. Open **https://genmedha.in/admin/login** — you should see Email / Password / Login
+---
+
+## Your container logs are normal
+
+If Dokploy logs show:
+
+```
+▲ Next.js 16.2.12
+- Local:         http://localhost:3000
+- Network:       http://0.0.0.0:3000
+✓ Ready in 0ms
+[WARN] No email adapter provided...
+```
+
+That is **expected and healthy**:
+
+- `Ready in 0ms` + `0.0.0.0:3000` = production standalone server (`node server.js`)
+- The email warning is fine until you add a real Resend API key
+- These logs do **not** explain a blank admin — only an **old image** does
+
+---
 
 ## Dokploy build settings
 
@@ -44,32 +81,53 @@ You must trigger a **full image rebuild**:
 | Build type | Dockerfile |
 | Dockerfile | `Dockerfile` |
 | Context | `/` |
+| Branch | `main` |
 | Build arg | `NEXT_PUBLIC_SERVER_URL=https://genmedha.in` |
 
-Optional build arg (for traceability):
+Optional build arg (traceability):
 
 ```
 BUILD_ID=admin-fix-v6
 ```
 
-## After deploy — admin login
+---
 
-- URL: **https://genmedha.in/admin/login**
-- If you forgot the password, reset via SSH one-off container (see README) or create a new user with `pnpm seed`
+## Verify admin RSC (optional, technical)
 
-## Do **not** start from scratch
+After deploy, this should print **4** (not 3):
 
-Re-scaffolding with `create-payload-app` would delete your collections, migrations,
-seed data, and domain setup. The fix is already on `main` — you only need a real
-Docker rebuild.
-
-## Container logs (normal)
-
-```
-▲ Next.js 16.2.12
-✓ Ready in 0ms
-[WARN] No email adapter provided...
+```bash
+curl -s https://genmedha.in/admin/login | grep -o 'parallelRouterKey' | wc -l
 ```
 
-These are **expected**. The email warning is fine until you add a real Resend key.
-A blank admin page is **not** a log problem — it is an **old image** problem.
+- **3** = old broken build (blank page)
+- **4** = fixed build (login form renders)
+
+---
+
+## Local dev (to prove code works on your machine)
+
+```bash
+cp .env.example .env.local
+pnpm install
+pnpm dev
+```
+
+Open **http://localhost:3000/admin/login** — login form should appear.
+(If port 3000 is busy, Next.js picks another port — check the terminal output.)
+
+For a production-like local test after `pnpm build`:
+
+```bash
+node .next/standalone/server.js
+```
+
+Do **not** use `pnpm start` — standalone output requires `node server.js` directly.
+
+---
+
+## Do **not** re-scaffold
+
+Running `create-payload-app` again would delete your collections, migrations, seed
+data, and domain setup. Everything is already fixed on `main` — you only need Dokploy
+to build and run the latest image.
