@@ -8,7 +8,9 @@ import path from 'node:path'
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 
 // Next.js / Node built-ins that are not project configuration.
-const ALLOWLIST = new Set(['NEXT_PHASE', 'NEXT_RUNTIME', 'NODE_ENV'])
+// BUILD_ID is stamped by the Dockerfile at image build time (reported by /api/health to
+// verify a deploy actually rebuilt) — deliberately not a boot-validated app setting.
+const ALLOWLIST = new Set(['NEXT_PHASE', 'NEXT_RUNTIME', 'NODE_ENV', 'BUILD_ID'])
 
 function* walk(dir) {
   for (const entry of readdirSync(dir)) {

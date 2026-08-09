@@ -20,7 +20,7 @@ RUN corepack enable
 ARG NEXT_PUBLIC_SERVER_URL=http://localhost:3000
 ENV NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL
 # Bumped when admin/deploy fixes change — visible at /api/health as buildId.
-ARG BUILD_ID=admin-fix-v8
+ARG BUILD_ID=admin-fix-v9
 ENV BUILD_ID=$BUILD_ID
 # Postgres scheme at build time keeps sqlite/libsql out of the standalone server bundle.
 ARG DATABASE_URI=postgresql://build:build@127.0.0.1:5432/build
@@ -35,7 +35,7 @@ RUN pnpm build
 FROM node:22-bookworm-slim AS runner
 WORKDIR /app
 
-ARG BUILD_ID=admin-fix-v8
+ARG BUILD_ID=admin-fix-v9
 
 ENV NODE_ENV=production \
     PORT=3000 \

@@ -1,8 +1,26 @@
 # Deploying genmedha.in (Dokploy)
 
-**Do not start from scratch.** Local admin works. A blank production `/admin/login`
-means Dokploy is serving a **stale Docker image** (or Swarm is killing unhealthy
-replicas).
+**Do not start from scratch.**
+
+## Root cause of the blank production admin (fixed in v9)
+
+The admin panel worked locally but rendered a blank page (HTTP 200) on
+`https://genmedha.in/admin`. Cause:
+
+- `src/app/(payload)/admin/importMap.js` is generated at build time and committed
+- The S3 storage plugin only loads when **real** credentials are set — true in
+  production, false locally (`.env.example` uses placeholders)
+- So the committed map was generated **without** S3 and lacked
+  `@payloadcms/storage-s3/client#S3ClientUploadHandler`
+- In production Payload logged `PayloadComponent not found in importMap`, the client
+  config failed to serialize, and the admin page slot came back `null` → blank page
+
+Reproduced and verified locally: with the entry missing the admin renders blank
+(3 `parallelRouterKey`); with it present the login/create-first-user form renders
+(4 `parallelRouterKey`).
+
+`pnpm generate:importmap` now forces S3 on so the committed map is always a superset,
+and `tests/importmap.test.ts` fails if the entry disappears again.
 
 ---
 
