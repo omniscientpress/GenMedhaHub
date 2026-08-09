@@ -20,14 +20,14 @@ You need **both**:
 {
   "status": "ok",
   "db": "connected",
-  "buildId": "admin-fix-v7",
-  "deployMarker": "admin-fix-v7-suspense"
+  "buildId": "admin-fix-v8",
+  "deployMarker": "admin-fix-v8-suspense"
 }
 ```
 
 | Field | Meaning |
 | --- | --- |
-| Missing `deployMarker` or not `admin-fix-v7-suspense` | **Stale source** — rebuild from latest `main` with **no cache** |
+| Missing `deployMarker` or not `admin-fix-v8-suspense` | **Stale source** — rebuild from latest `main` with **no cache** |
 | `buildId` only (no matching marker) | Image was tagged/reused without rebuilding app code |
 | `502 Bad Gateway` | Container crash loop / Traefik has no healthy backend |
 
@@ -41,7 +41,7 @@ Webhook “success” often only **restarts** the old container.
 4. **Advanced → Run Command**: **empty**
 5. **Deploy / Rebuild** with **no cache** / clear build cache
 6. Watch **Build logs** — must run `pnpm build` (not just restart)
-7. Confirm health shows `deployMarker: admin-fix-v7-suspense`
+7. Confirm health shows `deployMarker: admin-fix-v8-suspense`
 8. Open **https://genmedha.in/admin/login**
 
 ### 3. If containers flip between `starting` / `unhealthy`
@@ -78,7 +78,7 @@ curl -s https://genmedha.in/admin/login | grep -o 'parallelRouterKey' | wc -l
 | Context | `/` |
 | Build arg | `NEXT_PUBLIC_SERVER_URL=https://genmedha.in` |
 
-Optional: `BUILD_ID=admin-fix-v7`
+Optional: `BUILD_ID=admin-fix-v8`
 
 ---
 
