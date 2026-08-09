@@ -26,6 +26,8 @@ const serverFunction: ServerFunctionClient = async function (args) {
  * Keep the admin page slot inside a Server Component + Suspense boundary before it
  * crosses Payload's client RootProvider. Without this, some production standalone
  * builds serialize RootProvider children as `null` and /admin stays blank.
+ *
+ * deploy-marker: admin-fix-v7-suspense
  */
 function AdminPageSlot({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={null}>{children}</Suspense>
