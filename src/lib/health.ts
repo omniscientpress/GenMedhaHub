@@ -1,12 +1,19 @@
 // Health-check logic for GET /api/health, factored out of the Payload endpoint
 // handler so it is unit-testable without booting Payload (see tests/health.test.ts).
 
+import { DEPLOY_MARKER } from './deploy-marker'
+
 export interface HealthBody {
   status: 'ok' | 'error'
   db: 'connected' | 'error'
   payloadSecret: boolean
   /** Set at Docker build time (BUILD_ID) so deploys are verifiable via /api/health */
   buildId?: string
+  /**
+   * Always present — baked into source (src/lib/deploy-marker.ts).
+   * Use this to confirm Dokploy built the latest git commit, not a cached image.
+   */
+  deployMarker: string
   error?: string
   timestamp: string
 }
@@ -41,6 +48,7 @@ export async function runHealthChecks(options: {
       status: ok ? 'ok' : 'error',
       db,
       payloadSecret,
+      deployMarker: DEPLOY_MARKER,
       ...(buildId ? { buildId } : {}),
       ...(failures.length > 0 ? { error: failures.join('; ') } : {}),
       timestamp: new Date().toISOString(),
