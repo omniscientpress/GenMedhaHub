@@ -12,7 +12,7 @@ describe('runHealthChecks', () => {
     expect(result.body.status).toBe('ok')
     expect(result.body.db).toBe('connected')
     expect(result.body.payloadSecret).toBe(true)
-    expect(result.body.deployMarker).toBe('admin-fix-v8-suspense')
+    expect(result.body.deployMarker).toBe('admin-fix-v9-importmap')
     expect(result.body.timestamp).toBeTypeOf('string')
   })
 
