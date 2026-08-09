@@ -65,7 +65,9 @@ EXPOSE 3000
 
 # NOTE: database migrations are applied at deploy time (Payload `migrate` on boot
 # or a Dokploy job) — intentionally not baked into this image.
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/api/health || exit 1
+# start-period must cover cold boot + first Payload/DB query; too short (15s) caused
+# Swarm to kill healthy containers with "unhealthy container" / exit 143.
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=5 \
+  CMD wget -qO- http://127.0.0.1:3000/api/health | grep -q '"status":"ok"' || exit 1
 
 CMD ["node", "server.js"]
