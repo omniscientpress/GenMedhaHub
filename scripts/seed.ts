@@ -209,7 +209,7 @@ const platformSeeds = [
   { slug: 'shopify', name: 'Shopify', tier: 'hub' },
   { slug: 'adobe-commerce', name: 'Adobe Commerce', tier: 'hub', eosDate: '2026-08-11' },
   { slug: 'woocommerce', name: 'WooCommerce', tier: 'hub' },
-  { slug: 'accs', name: 'Adobe Commerce Cloud Service', tier: 'hub' },
+  { slug: 'adobe-commerce-cloud-service', name: 'Adobe Commerce Cloud Service', tier: 'hub' },
 ] as const
 
 const platformIds: Record<string, string | number> = {}
@@ -244,7 +244,7 @@ const pairSeeds = [
   { slug: 'woocommerce-to-medusa', title: 'Migrate WooCommerce to Medusa', source: 'woocommerce', target: 'medusa' },
   { slug: 'shopify-to-vendure', title: 'Migrate Shopify to Vendure', source: 'shopify', target: 'vendure' },
   { slug: 'magento-to-vendure', title: 'Migrate Magento to Vendure', source: 'adobe-commerce', target: 'vendure' },
-  { slug: 'adobe-commerce-to-accs', title: 'Migrate Adobe Commerce to ACCS', source: 'adobe-commerce', target: 'accs' },
+  { slug: 'adobe-commerce-to-accs', title: 'Migrate Adobe Commerce to ACCS', source: 'adobe-commerce', target: 'adobe-commerce-cloud-service' },
 ]
 
 for (const pair of pairSeeds) {

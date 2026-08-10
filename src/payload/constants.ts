@@ -78,4 +78,5 @@ export const PLATFORM_SLUG_NAMES: Record<string, string> = {
   magento: 'magento',
   woocommerce: 'woocommerce',
   accs: 'accs',
+  'adobe-commerce-cloud-service': 'accs',
 }
