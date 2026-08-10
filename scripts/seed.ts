@@ -248,7 +248,16 @@ const pairSeeds = [
 ]
 
 for (const pair of pairSeeds) {
-  await upsertBySlug(payload, 'migration-pages', pair.slug, {
+  await upsertByWhere(
+    payload,
+    'migration-pages',
+    {
+      and: [
+        { sourcePlatform: { equals: platformIds[pair.source] } },
+        { targetPlatform: { equals: platformIds[pair.target] } },
+      ],
+    },
+    {
     title: pair.title,
     sourcePlatform: platformIds[pair.source],
     targetPlatform: platformIds[pair.target],
@@ -279,7 +288,8 @@ for (const pair of pairSeeds) {
       question: `Pair FAQ ${i + 1}?`,
       answer: richText('Pair-specific answer with sourced claims only.'),
     })),
-  })
+  },
+  )
 }
 
 // --- Solutions (5) ---
