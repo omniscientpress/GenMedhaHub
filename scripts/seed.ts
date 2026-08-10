@@ -322,7 +322,7 @@ const marketSeeds = [
 ] as const
 
 for (const m of marketSeeds) {
-  await upsertBySlug(payload, 'markets', m.slug, {
+  await upsertByWhere(payload, 'markets', { region: { equals: m.region } }, {
     name: m.name,
     region: m.region,
     marketContext: richText(padText(
