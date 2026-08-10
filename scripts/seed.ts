@@ -38,6 +38,7 @@ const { getPayload } = await import('payload')
 const { default: config } = await import('../src/payload.config')
 const {
   richText,
+  richTextFromParagraphs,
   padText,
   heroBlock,
   ctaBandBlock,
@@ -50,12 +51,15 @@ const {
   homeLayout,
   serviceLayout,
   indexLayout,
+  workIndexLayout,
+  insightsIndexLayout,
   aboutLayout,
   pricingLayout,
   contactLayout,
   legalLayout,
   thankYouLayout,
 } = await import('./seed/layouts')
+const { CASE_STUDIES, postBody, padToWords } = await import('./seed/copy')
 const { LAUNCH_CATEGORIES } = await import('../src/payload/constants')
 
 const payload = await getPayload({ config })
@@ -415,28 +419,40 @@ for (const m of marketSeeds) {
   )
 }
 
-// --- Case studies (3 placeholders) ---
+// --- Case studies (P4 launch set) ---
+const legacyCaseTitles = [
+  'Store performance uplift phase 1',
+  'Store performance uplift phase 2',
+  'Store performance uplift phase 3',
+]
 const caseStudyIds: (string | number)[] = []
-for (let i = 1; i <= 3; i++) {
-  const outcomeTitle = `Store performance uplift phase ${i}`
+for (let i = 0; i < CASE_STUDIES.length; i++) {
+  const cs = CASE_STUDIES[i]
   const { id } = await upsertByWhere(
     payload,
     'case-studies',
-    { outcomeTitle: { equals: outcomeTitle } },
+    refreshContent
+      ? {
+          or: [
+            { outcomeTitle: { equals: cs.outcomeTitle } },
+            { outcomeTitle: { equals: legacyCaseTitles[i] } },
+          ],
+        }
+      : { outcomeTitle: { equals: cs.outcomeTitle } },
     {
-    outcomeTitle,
-    client: 'Internal project',
-    industry: 'Commerce engineering',
-    platformTo: platformIds.medusa,
-    services: [serviceIds['ecommerce-builds']],
-    commerceModels: ['dtc'],
-    challenge: richText('Challenge narrative from build journal.'),
-    approach: richText('Approach documented with verifiable steps.'),
-    solution: richText('Solution using Medusa and Next.js stack.'),
-    results: richText('Results with dated metrics only.'),
-    metrics: [{ label: 'Lighthouse Performance', value: '95+', context: 'Mobile score, audit date 2026-07-01' }],
-    isPlaceholder: true,
-  },
+      outcomeTitle: cs.outcomeTitle,
+      client: cs.client,
+      industry: cs.industry,
+      platformTo: platformIds.medusa,
+      services: [serviceIds['ecommerce-builds']],
+      commerceModels: ['dtc'],
+      challenge: richTextFromParagraphs(cs.challenge),
+      approach: richTextFromParagraphs(cs.approach),
+      solution: richTextFromParagraphs(cs.solution),
+      results: richTextFromParagraphs(cs.results),
+      metrics: [...cs.metrics],
+      isPlaceholder: cs.client === 'GenMedha Hub',
+    },
     upsertOpts,
   )
   caseStudyIds.push(id)
@@ -488,17 +504,24 @@ for (const [, name] of [['medusa-plugin', 'GenMedha Medusa Plugin'], ['next-star
   })
 }
 
-// --- Posts (3) ---
+// --- Posts (P4 — ≥800 words each) ---
 for (let i = 1; i <= 3; i++) {
   const title = `Migration economics deep-dive ${i}`
-  await upsertByWhere(payload, 'posts', { title: { equals: title } }, {
-    title,
-    excerpt: 'Founder-voice analysis of migration TCO and EOS risk.',
-    author: authorId,
-    categories: [(await payload.find({ collection: 'categories', limit: 1 })).docs[0]?.id],
-    body: richText('Answer-first article body — expand in content track.'),
-    relatedService: [serviceIds['replatforming-migration']],
-  })
+  await upsertByWhere(
+    payload,
+    'posts',
+    { title: { equals: title } },
+    {
+      title,
+      excerpt:
+        'Founder-voice analysis of migration TCO, EOS risk, and when stay-put beats replatforming — sourced math only.',
+      author: authorId,
+      categories: [(await payload.find({ collection: 'categories', limit: 1, overrideAccess: true })).docs[0]?.id],
+      body: richTextFromParagraphs(padToWords(postBody(i), 820)),
+      relatedService: [serviceIds['replatforming-migration']],
+    },
+    upsertOpts,
+  )
 }
 
 // --- Pages (block-composed routes) ---
@@ -523,11 +546,24 @@ const pageRoutes = [
   { routePath: '/thank-you/newsletter', pageKind: 'thank-you', title: 'Thank You — Newsletter' },
 ] as const
 
+const heroMediaId =
+  siteSettings?.logo && typeof siteSettings.logo === 'object'
+    ? siteSettings.logo.id
+    : typeof siteSettings?.logo === 'number' || typeof siteSettings?.logo === 'string'
+      ? siteSettings.logo
+      : undefined
+
 function layoutForPage(p: (typeof pageRoutes)[number]) {
   switch (p.pageKind) {
     case 'home':
-      return homeLayout(caseStudyIds)
+      return homeLayout(caseStudyIds, heroMediaId)
     case 'index':
+      if (p.routePath === '/work') {
+        return workIndexLayout(caseStudyIds)
+      }
+      if (p.routePath === '/insights') {
+        return insightsIndexLayout()
+      }
       if (p.routePath === '/services') {
         return indexLayout('Services', 'Commerce engineering and Build & Grow — five pillars, no lock-in.', [
           { icon: 'build', title: 'Ecommerce Builds', body: 'Headless storefronts you own.' },

@@ -1,4 +1,6 @@
+import { BRAND, HOME } from './copy'
 import {
+  comparisonTableBlock,
   ctaBandBlock,
   faqAccordionBlock,
   featureGridBlock,
@@ -8,38 +10,30 @@ import {
   richTextSectionBlock,
 } from './helpers'
 
-const TAGLINE =
-  'Own your commerce stack — no GMV tax, no license fees, no lock-in.'
-
-export function homeLayout(caseStudyIds: (string | number)[]) {
+export function homeLayout(caseStudyIds: (string | number)[], heroMediaId?: string | number) {
+  const { comparison } = HOME
   return [
-    heroBlock(
-      'GenMedha Hub',
-      TAGLINE,
-      'Commerce engineering & migration',
-    ),
-    featureGridBlock('Commerce services', [
-      {
-        icon: 'build',
-        title: 'Ecommerce Builds',
-        body: 'Headless storefronts on Medusa and modern stacks — you own the code and the economics.',
-      },
-      {
-        icon: 'migrate',
-        title: 'Replatforming & Migration',
-        body: 'Zero-downtime cutover, SEO preservation, and honest TCO math before you commit.',
-      },
-      {
-        icon: 'support',
-        title: 'Support & Retainers',
-        body: 'Post-launch engineering capacity without agency bloat or ticket-queue black holes.',
-      },
+    heroBlock(HOME.headline, HOME.subhead, HOME.eyebrow, heroMediaId),
+    richTextSectionBlock(HOME.actionLayer),
+    metricsCalloutRowBlock([
+      { label: 'GMV fee (Medusa Cloud)', value: '0%', context: 'Vendor docs Aug 2026 — vs marketplace take rates' },
+      { label: 'Typical migration window', value: '6–16 wks', context: 'Catalog complexity dependent' },
+      { label: 'Discovery sprint', value: '2 wks', context: 'Roadmap you keep either way' },
+      { label: 'Markets served', value: '3', context: 'India · USA · UAE & GCC remote-first' },
     ]),
-    pillarCardsBlock('Build & Grow', [
+    richTextSectionBlock(HOME.outcomesIntro, true),
+    featureGridBlock('If you\'re looking to:', [...HOME.lookingTo]),
+    comparisonTableBlock(
+      comparison.heading,
+      [...comparison.columns],
+      comparison.rows.map((row) => ({ criterion: row.criterion, cells: [...row.cells] })),
+      comparison.footnote,
+    ),
+    pillarCardsBlock('Build & Grow — two pillars, one stack', [
       {
         icon: 'web-app',
         title: 'Web App Development',
-        proofLine: 'Same Next.js/React/TypeScript core as this site — stack coherence you can inspect.',
+        proofLine: 'Same Next.js/React/TypeScript core as this site — inspect our engineering standards live.',
         link: '/services/web-app-development',
       },
       {
@@ -49,21 +43,59 @@ export function homeLayout(caseStudyIds: (string | number)[]) {
         link: '/services/mobile-app-development',
       },
     ]),
-    metricsCalloutRowBlock([
-      { label: 'GMV fee on Medusa Cloud', value: '0%', context: 'Vendor docs, Aug 2026 — vs marketplace take rates' },
-      { label: 'Typical migration band', value: '6–16 wks', context: 'Scope-dependent — discovery call for your catalog' },
-      { label: 'Markets served', value: '3', context: 'India · USA · UAE & GCC — remote-first delivery' },
+    featureGridBlock('Commerce services — five pillars', [
+      {
+        icon: 'build',
+        title: 'Ecommerce Builds',
+        body: 'Headless storefronts on Medusa — you own code, data, and economics.',
+      },
+      {
+        icon: 'migrate',
+        title: 'Replatforming & Migration',
+        body: 'Zero-downtime cutover, SEO preservation, sourced TCO before commit.',
+      },
+      {
+        icon: 'support',
+        title: 'Support & Retainers',
+        body: 'Post-launch capacity without ticket-queue black holes.',
+      },
     ]),
     {
       blockType: 'caseStudyCardList' as const,
-      heading: 'Build in public',
+      heading: 'Featured work',
       source: 'manual' as const,
       caseStudies: caseStudyIds,
     },
+    {
+      blockType: 'pricingTable' as const,
+      heading: 'Engagement models',
+      tiers: [
+        {
+          name: 'Discovery',
+          priceFrom: 'From $5K',
+          features: [{ feature: 'Architecture + TCO' }, { feature: 'Honest go/no-go' }, { feature: '2 weeks' }],
+          ctaKey: 'book-call' as const,
+        },
+        {
+          name: 'Build',
+          priceFrom: 'From $75K',
+          features: [{ feature: 'Headless storefront' }, { feature: 'CMS + CI/CD' }, { feature: 'Launch support' }],
+          ctaKey: 'book-call' as const,
+        },
+        {
+          name: 'Migration',
+          priceFrom: 'From $150K',
+          features: [{ feature: 'Zero-downtime cutover' }, { feature: 'SEO 301 map' }, { feature: 'Rollback plan' }],
+          ctaKey: 'get-audit' as const,
+        },
+      ],
+      footnote: 'Illustrative bands — final SOW after discovery.',
+    },
+    faqAccordionBlock('Frequently asked questions', [...HOME.faqs]),
     ctaBandBlock(
-      'Ready to scope your stack?',
-      'Book a discovery call — we’ll tell you honestly if migration, rebuild, or stay-put is the right move.',
-      'get-audit',
+      `Your ${BRAND.name} discovery call`,
+      'In 45 minutes: highest-ROI path, readiness read, rough architecture, timeline band, and recommended engagement model. Yours whether we work together or not.',
+      'book-call',
     ),
   ]
 }
@@ -75,41 +107,55 @@ export function serviceLayout(
   extraFaqs?: { question: string; answer: string }[],
 ) {
   return [
-    heroBlock(title, shortPitch),
+    heroBlock(title, shortPitch, 'Services'),
     richTextSectionBlock(
-      `We deliver ${title.toLowerCase()} with published-pricing posture and outcome-first milestones. Every engagement starts with a scoped discovery — no bait-and-switch SOWs.`,
+      `${title} at ${BRAND.name} follows a published-pricing, outcome-first model. Every engagement opens with discovery — architecture, TCO where relevant, and named deliverables — before write code. We embed with your team or deliver turnkey.\n\nPrincipal engineers lead implementation. CI, observability, documentation, and handover runbooks are non-negotiable. Post-launch, you choose a retainer or clean handover — no forced dependency.`,
     ),
     featureGridBlock('What you get', [
       {
         icon,
         title: 'Discovery & architecture',
-        body: 'Named deliverables, timeline bands, and stack choices documented before build starts.',
+        body: 'Scoped SOW, timeline band, stack choices, and honest counter-cases documented upfront.',
       },
       {
         icon: 'build',
         title: 'Engineering delivery',
-        body: 'Principal-led implementation with CI, observability, and handover runbooks.',
+        body: 'Medusa, Next.js, Payload — patterns visible in this site and our open-source work.',
       },
       {
         icon: 'support',
         title: 'Launch & transition',
-        body: 'Cutover support, knowledge transfer, and optional retainer path.',
+        body: 'Cutover support, training, optional retainer — no account-manager shell game.',
       },
     ]),
+    comparisonTableBlock(
+      'Why teams choose us for this service',
+      ['Typical agency', 'GenMedha Hub'],
+      [
+        { criterion: 'Pricing', cells: ['Hourly + change orders', 'Published bands + fixed discovery'] },
+        { criterion: 'Stack', cells: ['Vendor-partner preferred', 'Ownership stack you inspect'] },
+        { criterion: 'Counter-cases', cells: ['Rarely documented', 'Stay-put path when data supports it'] },
+      ],
+    ),
     faqAccordionBlock('Common questions', [
       {
-        question: `How long does a typical ${title.toLowerCase()} engagement take?`,
-        answer: 'Timeline bands are published on the pricing page — discovery narrows the range for your scope.',
+        question: `How long does ${title.toLowerCase()} take?`,
+        answer: 'See pricing bands — discovery narrows the range for your catalog, B2B rules, and integrations.',
       },
       {
         question: 'Do you work with our existing team?',
-        answer: 'Yes — we embed with your engineers or deliver turnkey, depending on capacity and preference.',
+        answer: 'Yes — pair programming and shared repos, or turnkey delivery with documented handover.',
+      },
+      {
+        question: 'What stacks do you use?',
+        answer: 'Medusa, Next.js, Payload, PostgreSQL — same core as genmedha.in. Platform hubs document alternatives.',
       },
       ...(extraFaqs ?? []),
     ]),
     ctaBandBlock(
       `Scope ${title.toLowerCase()}`,
-      'Tell us about your stack, timeline, and constraints — we respond with an honest fit assessment.',
+      'Tell us platform, timeline, and team shape — we respond with an honest fit assessment.',
+      'get-audit',
     ),
   ]
 }
@@ -118,32 +164,70 @@ export function indexLayout(
   title: string,
   subhead: string,
   items: { icon: string; title: string; body: string }[],
+  extraRichText?: string,
 ) {
-  return [
+  const blocks = [
     heroBlock(title, subhead),
+    ...(extraRichText ? [richTextSectionBlock(extraRichText)] : []),
     featureGridBlock(`Explore ${title.toLowerCase()}`, items),
     ctaBandBlock(
       'Not sure where to start?',
-      'Book a discovery call — we’ll map your situation to the right service or platform path.',
+      'Book a discovery call — we map your situation to the right path with honest counter-cases.',
     ),
+  ]
+  return blocks
+}
+
+export function workIndexLayout(caseStudyIds: (string | number)[]) {
+  return [
+    heroBlock(
+      'Work',
+      'Outcome-led case studies and build-in-public journals — metrics include context lines and audit dates.',
+      'Proof',
+    ),
+    richTextSectionBlock(
+      'Placeholder studies are marked "Build in public." Client names stay confidential until approved. Every metric on this site carries a context footnote — no vanity numbers.',
+    ),
+    {
+      blockType: 'caseStudyCardList' as const,
+      heading: 'Case studies',
+      source: 'manual' as const,
+      caseStudies: caseStudyIds,
+    },
+    ctaBandBlock('See something similar to your stack?', 'Book a discovery call — we walk through comparable engagements.', 'book-call'),
+  ]
+}
+
+export function insightsIndexLayout() {
+  return [
+    heroBlock(
+      'Insights',
+      'Founder-voice analysis on migration economics, EOS risk, and ownership stacks — answer-first articles.',
+      'Research',
+    ),
+    richTextSectionBlock(
+      'Articles cluster around migration TCO, platform comparison, and Build & Grow stack coherence. Expand in admin or via seed refresh.',
+    ),
+    ctaBandBlock('Want the TCO template we use?', 'Mention "audit" on the contact form or book a call.', 'get-audit'),
   ]
 }
 
 export function aboutLayout() {
   return [
     heroBlock(
-      'About GenMedha Hub',
-      'Remote-first commerce engineering — India, USA, and UAE & GCC. No vanity office claims; verifiable delivery only.',
+      `About ${BRAND.name}`,
+      'Remote-first commerce engineering for India, USA, and UAE & GCC. Verifiable delivery — no vanity office claims.',
       'Company',
     ),
     richTextSectionBlock(
-      'GenMedha Hub helps mid-market and growth-stage brands own their commerce stack. We build on Medusa, Next.js, and Payload — the same stack powering this site — so prospects can inspect our engineering standards directly.',
+      `${BRAND.name} helps mid-market and growth-stage brands own their commerce stack. We build on Medusa, Next.js, and Payload — the same technology powering this site — so prospects audit our standards directly.\n\nWe are the execution layer replatforming consultants forget to include: discovery, build, migration, apps, and retainers under one protocol. Digital marketing stays a client-only value-add — not a public nav pillar.`,
     ),
     metricsCalloutRowBlock([
-      { label: 'Founded', value: '2024', context: 'Omniscient Press entity — see legal pages for contracting' },
-      { label: 'Delivery model', value: 'Remote-first', context: 'Timezone overlap documented per market page' },
+      { label: 'Founded', value: '2024', context: 'Omniscient Press entity' },
+      { label: 'Delivery', value: 'Remote-first', context: 'Markets pages document timezone overlap' },
+      { label: 'Open source', value: '2+ repos', context: 'Commerce tooling on GitHub' },
     ]),
-    ctaBandBlock('Work with us', 'Principal engineers on every engagement — no account-manager telephone game.'),
+    ctaBandBlock('Work with us', 'Principal engineers on every engagement.', 'book-call'),
   ]
 }
 
@@ -152,6 +236,9 @@ export function pricingLayout() {
     heroBlock(
       'Pricing',
       'Published bands and discovery-scoped quotes — no surprise change orders after kickoff.',
+    ),
+    richTextSectionBlock(
+      'Every figure on this page is illustrative until discovery scopes your catalog, B2B rules, integrations, and cutover complexity. We footnote vendor economics at render time where required.',
     ),
     {
       blockType: 'pricingTable' as const,
@@ -176,9 +263,13 @@ export function pricingLayout() {
           ctaKey: 'get-audit' as const,
         },
       ],
-      footnote: 'Illustrative bands — final SOW after discovery. All figures footnoted at render.',
+      footnote: 'Illustrative bands — final SOW after discovery.',
     },
-    ctaBandBlock('Get a scoped quote', 'Every project starts with discovery — we publish the range before you commit.'),
+    faqAccordionBlock('Pricing FAQ', [
+      { question: 'Do you bill hourly?', answer: 'Discovery and builds are scoped fixed-fee bands — not open-ended T&M.' },
+      { question: 'What changes the band?', answer: 'Catalog size, B2B complexity, payment methods, ERP integrations, and cutover window.' },
+    ]),
+    ctaBandBlock('Get a scoped quote', 'Discovery publishes the range before you commit.', 'book-call'),
   ]
 }
 
@@ -186,10 +277,10 @@ export function contactLayout() {
   return [
     heroBlock(
       'Contact',
-      'Tell us about your platform, timeline, and team — we respond within two business days.',
+      `Tell us platform, timeline, and team — we respond within two business days at ${BRAND.email}.`,
     ),
     richTextSectionBlock(
-      'Use the form below or book a discovery call directly. For migration audits, mention your current platform and catalog complexity in the message.',
+      'For migration audits, include current platform, catalog SKU band, and EOS deadlines. For Build & Grow apps, describe users and must-have integrations.',
     ),
     ctaBandBlock('Prefer a call?', 'Pick a slot that works for your timezone.', 'book-call'),
   ]
@@ -199,7 +290,7 @@ export function legalLayout(title: string) {
   return [
     heroBlock(title),
     richTextSectionBlock(
-      'Placeholder legal copy — replace with counsel-approved text before launch. This seed document exists so routes and CMS structure validate end-to-end.',
+      'Placeholder legal copy — replace with counsel-approved text before public launch. This document validates CMS legal routes and block composition.',
     ),
   ]
 }

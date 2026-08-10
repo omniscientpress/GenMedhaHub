@@ -54,12 +54,50 @@ export function padText(base: string, minLength: number): string {
   return out.slice(0, minLength + base.length)
 }
 
-export function heroBlock(headline: string, subhead?: string, eyebrow?: string) {
+/** Multi-paragraph Lexical document (split on blank lines). */
+export function richTextFromParagraphs(text: string) {
+  const paragraphs = text.split(/\n\n+/).filter(Boolean)
+  return {
+    root: {
+      type: 'root',
+      format: '',
+      indent: 0,
+      version: 1,
+      direction: 'ltr',
+      children: paragraphs.map((paragraph) => ({
+        type: 'paragraph',
+        format: '',
+        indent: 0,
+        version: 1,
+        direction: 'ltr',
+        children: [
+          {
+            type: 'text',
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: paragraph.replace(/\n/g, ' '),
+            version: 1,
+          },
+        ],
+      })),
+    },
+  }
+}
+
+export function heroBlock(
+  headline: string,
+  subhead?: string,
+  eyebrow?: string,
+  media?: string | number,
+) {
   return {
     blockType: 'hero' as const,
     headline,
     subhead,
     eyebrow,
+    media,
     variant: 'default' as const,
     ctaKey: 'book-call' as const,
   }
@@ -105,11 +143,29 @@ export function metricsCalloutRowBlock(
   }
 }
 
-export function richTextSectionBlock(text: string) {
+export function richTextSectionBlock(text: string, wide = false) {
   return {
     blockType: 'richTextSection' as const,
-    content: richText(text),
-    maxWidth: 'prose' as const,
+    content: text.includes('\n\n') ? richTextFromParagraphs(text) : richText(text),
+    maxWidth: wide ? ('wide' as const) : ('prose' as const),
+  }
+}
+
+export function comparisonTableBlock(
+  heading: string,
+  columns: string[],
+  rows: { criterion: string; cells: string[] }[],
+  footnote?: string,
+) {
+  return {
+    blockType: 'comparisonTable' as const,
+    heading,
+    columns: columns.map((label) => ({ label })),
+    rows: rows.map((row) => ({
+      criterion: row.criterion,
+      cells: row.cells.map((value) => ({ value })),
+    })),
+    footnote,
   }
 }
 
