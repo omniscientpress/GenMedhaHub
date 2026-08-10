@@ -71,6 +71,7 @@ const homepage = await payload.find({
   collection: 'pages',
   where: { routePath: { equals: '/' } },
   limit: 1,
+  overrideAccess: true,
 })
 if (homepage.totalDocs > 0) {
   console.log('Full seed already applied (homepage page exists). Skipping content.')

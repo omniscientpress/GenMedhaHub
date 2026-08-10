@@ -71,6 +71,7 @@ export async function upsertByWhere<T extends Record<string, unknown>>(
     collection,
     where,
     limit: 1,
+    overrideAccess: true,
   })
   if (existing.docs[0]) {
     return { id: existing.docs[0].id, created: false }
@@ -79,6 +80,7 @@ export async function upsertByWhere<T extends Record<string, unknown>>(
     collection,
     data: { ...data, _status: 'published' },
     draft: false,
+    overrideAccess: true,
   })
   return { id: doc.id, created: true }
 }
@@ -93,6 +95,7 @@ export async function upsertBySlug<T extends Record<string, unknown>>(
     collection,
     where: { slug: { equals: slug } },
     limit: 1,
+    overrideAccess: true,
   })
   if (existing.docs[0]) {
     return { id: existing.docs[0].id, created: false }
@@ -101,6 +104,7 @@ export async function upsertBySlug<T extends Record<string, unknown>>(
     collection,
     data: { ...data, slug, _status: 'published' },
     draft: false,
+    overrideAccess: true,
   })
   return { id: doc.id, created: true }
 }
