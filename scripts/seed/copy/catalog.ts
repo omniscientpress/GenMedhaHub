@@ -524,8 +524,8 @@ export const INDEX_PAGES = {
     subhead: 'Commerce models — B2B, DTC, marketplace, subscriptions, multi-region.',
     intro: `Model pages describe pains, capability checklists, and recommended platforms without pretending one stack fits all.\n\nUse these pages to align stakeholders before platform hub deep-dives.`,
     features: [
-      { icon: 'build', title: 'B2B Commerce', body: '/solutions/b2b' },
-      { icon: 'build', title: 'DTC Commerce', body: '/solutions/dtc' },
+      { icon: 'build', title: 'B2B Commerce', body: '/solutions/b2b-commerce' },
+      { icon: 'build', title: 'DTC Commerce', body: '/solutions/dtc-commerce' },
       { icon: 'support', title: 'Marketplace', body: '/solutions/marketplace' },
       { icon: 'web-app', title: 'Subscriptions', body: '/solutions/subscriptions' },
       { icon: 'migrate', title: 'Multi-region', body: '/solutions/multi-region' },
