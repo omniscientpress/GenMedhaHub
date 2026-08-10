@@ -52,6 +52,7 @@ jobs:
         env:
           NEXT_PUBLIC_SERVER_URL: https://staging.genmedhahub.com
           DATABASE_URI: postgresql://build:build@127.0.0.1:5432/build
+          PAYLOAD_SECRET: ci-build-placeholder-secret-min-32-chars
 
   # Gate 6: docker image + Trivy scan + push to GHCR — main only.
   docker:

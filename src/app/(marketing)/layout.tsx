@@ -6,6 +6,9 @@ import './globals.css'
 const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL ?? 'http://localhost:3000'
 const isStagingOrPreview = serverUrl.includes('staging') || serverUrl.includes('preview-')
 
+/** CMS-backed shell pages need runtime Payload — skip static prerender at build (no DB/secret in CI). */
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   metadataBase: new URL(serverUrl),
   title: 'GenMedha Hub',
