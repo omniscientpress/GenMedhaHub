@@ -300,7 +300,7 @@ for (const [slug, modelKey, title] of [
   ['subscriptions', 'subscriptions', 'Subscriptions'],
   ['multi-region', 'multi-region', 'Multi-region'],
 ] as const) {
-  await upsertBySlug(payload, 'solutions', slug, {
+  await upsertByWhere(payload, 'solutions', { modelKey: { equals: modelKey } }, {
     title,
     modelKey,
     painSummary: `${title} — model-specific pain summary for index cards.`,
@@ -345,8 +345,9 @@ for (const m of marketSeeds) {
 
 // --- Case studies (3 placeholders) ---
 for (let i = 1; i <= 3; i++) {
-  await upsertBySlug(payload, 'case-studies', `build-in-public-${i}`, {
-    outcomeTitle: `Store performance uplift phase ${i}`,
+  const outcomeTitle = `Store performance uplift phase ${i}`
+  await upsertByWhere(payload, 'case-studies', { outcomeTitle: { equals: outcomeTitle } }, {
+    outcomeTitle,
     client: 'Internal project',
     industry: 'Commerce engineering',
     platformTo: platformIds.medusa,
@@ -398,7 +399,7 @@ for (let i = 1; i <= 4; i++) {
 }
 
 for (const [slug, name] of [['medusa-plugin', 'GenMedha Medusa Plugin'], ['next-starter', 'Commerce Starter']] as const) {
-  await upsertBySlug(payload, 'open-source-projects', slug, {
+  await upsertByWhere(payload, 'open-source-projects', { name: { equals: name } }, {
     name,
     repoUrl: 'https://github.com/omniscientpress/GenMedhaHub',
     description: 'Open-source commerce tooling — OSS proof at launch.',
@@ -409,8 +410,9 @@ for (const [slug, name] of [['medusa-plugin', 'GenMedha Medusa Plugin'], ['next-
 
 // --- Posts (3) ---
 for (let i = 1; i <= 3; i++) {
-  await upsertBySlug(payload, 'posts', `migration-cluster-${i}`, {
-    title: `Migration economics deep-dive ${i}`,
+  const title = `Migration economics deep-dive ${i}`
+  await upsertByWhere(payload, 'posts', { title: { equals: title } }, {
+    title,
     excerpt: 'Founder-voice analysis of migration TCO and EOS risk.',
     author: authorId,
     categories: [(await payload.find({ collection: 'categories', limit: 1 })).docs[0]?.id],
