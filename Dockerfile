@@ -58,7 +58,9 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
-RUN chown -R nextjs:nodejs /app
+# Local Payload uploads (when S3/R2 is not configured) land in media/.
+# Swarm may bind-mount a volume here — ownership must be nextjs, not root.
+RUN mkdir -p /app/media && chown -R nextjs:nodejs /app
 USER nextjs
 
 EXPOSE 3000
