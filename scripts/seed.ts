@@ -69,6 +69,7 @@ const {
   MIGRATION_PAIRS,
 } = await import('./seed/copy/catalog')
 const { LAUNCH_CATEGORIES } = await import('../src/payload/constants')
+const { PLATFORM_SLUG_NAMES } = await import('../src/payload/constants')
 
 const payload = await getPayload({ config })
 
@@ -302,6 +303,12 @@ const pairSeeds = [
   { source: 'adobe-commerce', target: 'adobe-commerce-cloud-service' },
 ] as const
 
+function migrationPairSlug(source: string, target: string): string {
+  const sourceSlug = PLATFORM_SLUG_NAMES[source] ?? source
+  const targetSlug = PLATFORM_SLUG_NAMES[target] ?? target
+  return `${sourceSlug}-to-${targetSlug}`
+}
+
 const DEFAULT_CUTOVER = [
   { stepTitle: 'Discovery & architecture', detail: 'Integration map, data audit, and timeline band sign-off.', durationWeeks: '2' },
   { stepTitle: 'Build & sync', detail: 'Target platform configured; catalog sync with validation jobs.', durationWeeks: '3–4' },
@@ -311,8 +318,8 @@ const DEFAULT_CUTOVER = [
 ]
 
 for (const pair of pairSeeds) {
-  const pairKey = `${pair.source}-to-${pair.target}`
-  const copy = MIGRATION_PAIRS[pairKey]
+  const pairKey = migrationPairSlug(pair.source, pair.target)
+  const copy = MIGRATION_PAIRS[`${pair.source}-to-${pair.target}`]
   const isAdobeSource = pair.source === 'adobe-commerce'
   await upsertByWhere(
     payload,
@@ -324,6 +331,7 @@ for (const pair of pairSeeds) {
       ],
     },
     {
+      slug: pairKey,
       title: copy?.title ?? `Migrate ${pair.source} to ${pair.target}`,
       sourcePlatform: platformIds[pair.source],
       targetPlatform: platformIds[pair.target],
