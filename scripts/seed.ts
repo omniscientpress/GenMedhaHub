@@ -34,7 +34,7 @@ if (isPostgres && !allowRemote) {
 
 const { getPayload } = await import('payload')
 const { default: config } = await import('../src/payload.config')
-const { richText, padText, heroBlock, ctaBandBlock, upsertBySlug, upsertByWhere } = await import('./seed/helpers')
+const { richText, padText, heroBlock, ctaBandBlock, upsertBySlug, upsertByWhere, setSeedUser } = await import('./seed/helpers')
 const { LAUNCH_CATEGORIES } = await import('../src/payload/constants')
 
 const payload = await getPayload({ config })
@@ -59,6 +59,19 @@ async function ensureUser(email: string, password: string, roles: ('admin' | 'ed
 
 await ensureUser(adminEmail, adminPassword, ['admin'])
 await ensureUser('editor@genmedha.in', adminPassword, ['editor'])
+
+const adminLookup = await payload.find({
+  collection: 'users',
+  where: { email: { equals: adminEmail } },
+  limit: 1,
+  overrideAccess: true,
+})
+const adminUser = adminLookup.docs[0]
+if (!adminUser) {
+  console.error(`Admin user ${adminEmail} not found after ensureUser.`)
+  process.exit(1)
+}
+setSeedUser(adminUser as { id: string | number; roles?: ('admin' | 'editor')[] })
 
 if (usersOnly) {
   console.log('Users-only seed complete.')

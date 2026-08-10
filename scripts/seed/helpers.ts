@@ -3,6 +3,17 @@ import type { Config } from '../../src/payload-types'
 type CollectionSlug = keyof Config['collections']
 type GlobalSlug = keyof Config['globals']
 
+let seedUser: { id: string | number; roles?: ('admin' | 'editor')[] } | null = null
+
+/** Admin user context so hooks (e.g. preventEditorPublish on pages) allow publish. */
+export function setSeedUser(user: { id: string | number; roles?: ('admin' | 'editor')[] }) {
+  seedUser = user
+}
+
+function createContext() {
+  return seedUser ? { user: seedUser } : {}
+}
+
 /** Minimal Lexical rich-text document for seed placeholders. */
 export function richText(text: string) {
   return {
@@ -81,6 +92,7 @@ export async function upsertByWhere<T extends Record<string, unknown>>(
     data: { ...data, _status: 'published' },
     draft: false,
     overrideAccess: true,
+    ...createContext(),
   })
   return { id: doc.id, created: true }
 }
@@ -105,6 +117,7 @@ export async function upsertBySlug<T extends Record<string, unknown>>(
     data: { ...data, slug, _status: 'published' },
     draft: false,
     overrideAccess: true,
+    ...createContext(),
   })
   return { id: doc.id, created: true }
 }
