@@ -1,4 +1,11 @@
-import { BRAND, HOME } from './copy'
+import { BRAND, HOME, LEGAL } from './copy'
+import {
+  INDEX_PAGES,
+  MARKETS,
+  PLATFORMS,
+  SERVICES,
+  SOLUTIONS,
+} from './copy/catalog'
 import {
   comparisonTableBlock,
   ctaBandBlock,
@@ -100,6 +107,132 @@ export function homeLayout(caseStudyIds: (string | number)[], heroMediaId?: stri
   ]
 }
 
+export function richServiceLayout(slug: string, title: string, icon: string) {
+  const copy = SERVICES[slug]
+  if (!copy) return serviceLayout(title, `${title} — outcome-first delivery.`, icon)
+
+  return [
+    heroBlock(title, copy.shortPitch, 'Services'),
+    richTextSectionBlock(copy.intro),
+    featureGridBlock('What you get', copy.features),
+    ...(copy.metrics.length > 0
+      ? [metricsCalloutRowBlock(copy.metrics)]
+      : []),
+    comparisonTableBlock(
+      'Why teams choose us for this service',
+      ['Typical agency', 'GenMedha Hub'],
+      [
+        { criterion: 'Pricing', cells: ['Hourly + change orders', 'Published bands + fixed discovery'] },
+        { criterion: 'Stack', cells: ['Vendor-partner preferred', 'Ownership stack you inspect'] },
+        { criterion: 'Counter-cases', cells: ['Rarely documented', 'Stay-put path when data supports it'] },
+      ],
+    ),
+    faqAccordionBlock('Common questions', copy.faqs),
+    ctaBandBlock(
+      `Scope ${title.toLowerCase()}`,
+      'Tell us platform, timeline, and team shape — we respond with an honest fit assessment.',
+      'get-audit',
+    ),
+  ]
+}
+
+export function platformLayout(slug: string, name: string) {
+  const copy = PLATFORMS[slug]
+  if (!copy) {
+    return [
+      heroBlock(`${name} platform hub`, name, 'Platforms'),
+      ctaBandBlock('Book a discovery call', 'Platform choice is economics — we model TCO before you commit.'),
+    ]
+  }
+
+  return [
+    heroBlock(name, copy.positioning, 'Platforms'),
+    richTextSectionBlock(copy.intro),
+    featureGridBlock('Platform strengths', copy.features),
+    comparisonTableBlock(
+      'Fit assessment',
+      ['Right fit', 'Wrong fit'],
+      [
+        { criterion: 'When to choose', cells: [copy.rightFit, '—'] },
+        { criterion: 'When to avoid', cells: ['—', copy.wrongFit] },
+      ],
+    ),
+    richTextSectionBlock(`Economics: ${copy.economics}`),
+    faqAccordionBlock(`${name} FAQ`, copy.faqs),
+    ctaBandBlock(
+      `Model ${name} TCO`,
+      'Platform choice is a 3-year finance decision — discovery outputs sourced numbers.',
+      'book-call',
+    ),
+  ]
+}
+
+export function solutionLayout(modelKey: string, title: string) {
+  const copy = SOLUTIONS[modelKey]
+  if (!copy) return indexLayout(title, `${title} — model-specific capabilities.`, [])
+
+  return [
+    heroBlock(copy.title, copy.pain, 'Solutions'),
+    richTextSectionBlock(copy.intro),
+    featureGridBlock('Capabilities', copy.capabilities),
+    comparisonTableBlock(
+      'Platform guidance for this model',
+      ['Medusa', 'Shopify', 'Legacy'],
+      [
+        { criterion: 'Typical fit', cells: ['Primary recipe', 'Early-stage DTC', 'Transition only'] },
+        { criterion: 'Ownership', cells: ['Full code ownership', 'SaaS trade-offs', 'EOS/licensing risk'] },
+        { criterion: 'Our posture', cells: ['Default recommendation', 'Honest stay-put', 'Migration pairs documented'] },
+      ],
+    ),
+    faqAccordionBlock(`${copy.title} FAQ`, copy.faqs),
+    ctaBandBlock(
+      `Scope ${copy.title.toLowerCase()}`,
+      'Book a model workshop in our 2-week discovery sprint.',
+      'book-call',
+    ),
+  ]
+}
+
+export function marketLayout(region: string, name: string) {
+  const copy = MARKETS[region]
+  if (!copy) return indexLayout(`Serving ${name}`, `Remote-first delivery for ${name}.`, [])
+
+  return [
+    heroBlock(
+      `Serving ${name}`,
+      `Remote-first commerce engineering — timezone overlap, contracting, and compliance documented.`,
+      'Markets',
+    ),
+    richTextSectionBlock(copy.context),
+    featureGridBlock(`Working in ${name}`, copy.features),
+    metricsCalloutRowBlock([
+      { label: 'Timezone overlap', value: region === 'india' ? 'IST core' : region === 'usa' ? 'US hours' : 'GST overlap', context: copy.logistics.split('.')[0] ?? copy.logistics },
+      { label: 'Contracting', value: 'MSA-ready', context: copy.logistics.split('.').slice(1).join('.').trim() || copy.logistics },
+      { label: 'Compliance', value: region === 'india' ? 'DPDP 2023' : region === 'usa' ? 'CCPA/state' : 'PDPL', context: copy.compliance.split('.')[0] ?? copy.compliance },
+    ]),
+    richTextSectionBlock(`Compliance & data protection\n\n${copy.compliance}`),
+    ctaBandBlock(
+      `Engage from ${name}`,
+      'Tell us your timezone and contracting preference — we respond within two business days.',
+      'book-call',
+    ),
+  ]
+}
+
+export function richIndexLayout(pageKey: keyof typeof INDEX_PAGES) {
+  const page = INDEX_PAGES[pageKey]
+  return [
+    heroBlock(page.headline, page.subhead),
+    richTextSectionBlock(page.intro),
+    featureGridBlock(`Explore ${page.headline.toLowerCase()}`, [...page.features]),
+    ctaBandBlock(
+      'Not sure where to start?',
+      'Book a discovery call — we map your situation to the right path with honest counter-cases.',
+      'book-call',
+    ),
+  ]
+}
+
 export function serviceLayout(
   title: string,
   shortPitch: string,
@@ -186,7 +319,7 @@ export function workIndexLayout(caseStudyIds: (string | number)[]) {
       'Proof',
     ),
     richTextSectionBlock(
-      'Placeholder studies are marked "Build in public." Client names stay confidential until approved. Every metric on this site carries a context footnote — no vanity numbers.',
+      'Every case study on this site carries footnoted metrics — organic traffic deltas, cutover downtime, and GMV fee context. Client names stay confidential until approved. The "Internal build journal" entry documents this site itself: same Next.js, Payload, and deployment model we ship for clients.\n\nUse these studies to benchmark timeline bands and SEO preservation expectations for your stack.',
     ),
     {
       blockType: 'caseStudyCardList' as const,
@@ -194,6 +327,15 @@ export function workIndexLayout(caseStudyIds: (string | number)[]) {
       source: 'manual' as const,
       caseStudies: caseStudyIds,
     },
+    comparisonTableBlock(
+      'What we document in every engagement',
+      ['Vanity case study', 'GenMedha Hub standard'],
+      [
+        { criterion: 'Metrics', cells: ['"% uplift"', 'Value + context + audit date'] },
+        { criterion: 'Rollback', cells: ['Not mentioned', 'Named triggers + procedure'] },
+        { criterion: 'Counter-cases', cells: ['Omitted', 'When stay-put won'] },
+      ],
+    ),
     ctaBandBlock('See something similar to your stack?', 'Book a discovery call — we walk through comparable engagements.', 'book-call'),
   ]
 }
@@ -206,8 +348,14 @@ export function insightsIndexLayout() {
       'Research',
     ),
     richTextSectionBlock(
-      'Articles cluster around migration TCO, platform comparison, and Build & Grow stack coherence. Expand in admin or via seed refresh.',
+      'Articles cluster around migration TCO, platform comparison, and Build & Grow stack coherence. Each post is 800+ words with sourced vendor numbers only — no invented savings.\n\nStart with the migration economics series if you are evaluating replatform timing, EOS exposure, or Shopify Plus GMV fees.',
     ),
+    featureGridBlock('Topics we cover', [
+      { icon: 'migrate', title: 'Migration TCO', body: '3-year models with footnoted platform fees and SI cost bands.' },
+      { icon: 'build', title: 'Ownership stacks', body: 'Medusa, Next.js, Payload — why we dogfood the same core.' },
+      { icon: 'support', title: 'EOS & risk', body: 'Adobe/Magento deadlines with sourced documentation.' },
+      { icon: 'web-app', title: 'Build & Grow', body: 'Portals and apps on shared React/TypeScript.' },
+    ]),
     ctaBandBlock('Want the TCO template we use?', 'Mention "audit" on the contact form or book a call.', 'get-audit'),
   ]
 }
@@ -220,12 +368,19 @@ export function aboutLayout() {
       'Company',
     ),
     richTextSectionBlock(
-      `${BRAND.name} helps mid-market and growth-stage brands own their commerce stack. We build on Medusa, Next.js, and Payload — the same technology powering this site — so prospects audit our standards directly.\n\nWe are the execution layer replatforming consultants forget to include: discovery, build, migration, apps, and retainers under one protocol. Digital marketing stays a client-only value-add — not a public nav pillar.`,
+      `${BRAND.name} helps mid-market and growth-stage brands own their commerce stack. We build on Medusa, Next.js, and Payload — the same technology powering this site — so prospects audit our standards directly.\n\nWe are the execution layer replatforming consultants forget to include: discovery, build, migration, apps, and retainers under one protocol. Digital marketing stays a client-only value-add — not a public nav pillar.\n\nFounded 2024 under Omniscient Press. Principal engineers lead every engagement — no account-manager shell game.`,
     ),
     metricsCalloutRowBlock([
       { label: 'Founded', value: '2024', context: 'Omniscient Press entity' },
       { label: 'Delivery', value: 'Remote-first', context: 'Markets pages document timezone overlap' },
       { label: 'Open source', value: '2+ repos', context: 'Commerce tooling on GitHub' },
+      { label: 'Stack', value: 'Medusa + Next + Payload', context: 'Same core as genmedha.in' },
+    ]),
+    featureGridBlock('How we work', [
+      { icon: 'build', title: 'Discovery first', body: '2-week sprint with architecture, TCO, and honest go/no-go.' },
+      { icon: 'migrate', title: 'Migration discipline', body: 'Rollback plans, SEO maps, and parallel runs — non-negotiable.' },
+      { icon: 'support', title: 'Post-launch', body: 'Retainer or clean handover — your choice.' },
+      { icon: 'web-app', title: 'Build & Grow', body: 'Web and mobile apps on shared React/TypeScript.' },
     ]),
     ctaBandBlock('Work with us', 'Principal engineers on every engagement.', 'book-call'),
   ]
@@ -280,18 +435,29 @@ export function contactLayout() {
       `Tell us platform, timeline, and team — we respond within two business days at ${BRAND.email}.`,
     ),
     richTextSectionBlock(
-      'For migration audits, include current platform, catalog SKU band, and EOS deadlines. For Build & Grow apps, describe users and must-have integrations.',
+      'For migration audits, include current platform, catalog SKU band, and EOS deadlines. For Build & Grow apps, describe users and must-have integrations.\n\nIndia · USA · UAE & GCC — remote-first with timezone overlap documented on market pages. No physical-office claims; contracting via Omniscient Press with USD/INR options.',
     ),
+    featureGridBlock('What to include', [
+      { icon: 'migrate', title: 'Migration inquiries', body: 'Source platform, revenue band, SEO dependency, and target go-live window.' },
+      { icon: 'build', title: 'New builds', body: 'Catalog size, B2B rules, payment methods, and existing ERP.' },
+      { icon: 'web-app', title: 'Build & Grow', body: 'User roles, auth model, and integrations.' },
+      { icon: 'support', title: 'Retainers', body: 'Current stack, incident history, and desired SLA tier.' },
+    ]),
     ctaBandBlock('Prefer a call?', 'Pick a slot that works for your timezone.', 'book-call'),
   ]
 }
 
 export function legalLayout(title: string) {
+  const key = title.toLowerCase().includes('privacy')
+    ? 'privacy'
+    : title.toLowerCase().includes('cookie')
+      ? 'cookies'
+      : 'terms'
+  const doc = LEGAL[key]
   return [
-    heroBlock(title),
-    richTextSectionBlock(
-      'Placeholder legal copy — replace with counsel-approved text before public launch. This document validates CMS legal routes and block composition.',
-    ),
+    heroBlock(doc.title, `Last updated August 2026 — ${BRAND.name} / Omniscient Press.`),
+    richTextSectionBlock(doc.body),
+    ctaBandBlock('Questions?', `Email ${BRAND.email} for privacy or legal inquiries.`),
   ]
 }
 

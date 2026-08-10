@@ -170,3 +170,46 @@ export function padToWords(text: string, minWords: number): string {
   }
   return out
 }
+
+export const LEGAL = {
+  privacy: {
+    title: 'Privacy Policy',
+    body: `${BRAND.name} ("we", "us") is operated by Omniscient Press. This policy describes how we collect, use, and protect personal data when you visit genmedha.in, use our contact forms, book discovery calls, or engage our services.
+
+We collect information you provide directly: name, email, company, project details, and scheduling preferences. We also collect standard web analytics (page views, referrer, device type) via privacy-respecting analytics configured in site settings.
+
+We use your data to respond to inquiries, deliver contracted services, improve our website, and comply with legal obligations. We do not sell personal data. We share data with subprocessors only as needed for hosting (Dokploy/VPS), email delivery, calendar booking (Cal.com), and payment processing — each under appropriate data processing terms.
+
+For India engagements, we process data in accordance with the Digital Personal Data Protection Act 2023. For US and GCC clients, we apply CCPA/state privacy requirements and UAE/Saudi PDPL summaries as documented in market pages and MSAs.
+
+You may request access, correction, or deletion of your data by emailing ${BRAND.email}. We retain inquiry data for up to 24 months unless a longer period is required for an active contract.
+
+This policy may be updated; material changes will be noted on this page with a revised effective date. Last updated: August 2026.`,
+  },
+  terms: {
+    title: 'Terms of Service',
+    body: `These Terms of Service govern your use of ${BRAND.name} at genmedha.in and any discovery calls or proposals we provide. By using this site you agree to these terms.
+
+The website content is for general information — it does not constitute a binding offer until a signed Statement of Work (SOW) or Master Services Agreement (MSA) is executed. Published pricing bands are illustrative; final fees are scoped in discovery.
+
+You may not scrape, reverse-engineer, or misuse this site. We grant you a limited license to view content for evaluation purposes. All site content, trademarks, and code remain our property or our licensors' unless otherwise stated in an OSS license.
+
+Services are delivered under separate MSAs. Liability is limited to fees paid under the applicable SOW in the twelve months preceding a claim, except where prohibited by law. We do not warrant uninterrupted site availability.
+
+Disputes are governed by the jurisdiction specified in your MSA; for website-only interactions without a contract, courts in India apply unless otherwise agreed in writing.
+
+Contact ${BRAND.email} with questions about these terms. Last updated: August 2026.`,
+  },
+  cookies: {
+    title: 'Cookie Policy',
+    body: `${BRAND.name} uses cookies and similar technologies to operate genmedha.in.
+
+Essential cookies enable session management, security, and CMS admin authentication. Analytics cookies (if enabled) help us understand traffic patterns in aggregate — we configure analytics to minimize personal data collection.
+
+Third-party embeds (e.g. Cal.com booking widgets) may set their own cookies subject to their policies. We load embeds only on pages where booking is offered.
+
+You can control cookies through your browser settings. Disabling essential cookies may affect site functionality. For cookie-related requests, email ${BRAND.email}.
+
+Last updated: August 2026.`,
+  },
+} as const
