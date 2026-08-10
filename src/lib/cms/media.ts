@@ -10,3 +10,15 @@ export function mediaUrl(media: Media | null | undefined): string | null {
   const base = process.env.NEXT_PUBLIC_SERVER_URL ?? ''
   return base ? `${base.replace(/\/$/, '')}${media.url}` : media.url
 }
+
+/** Prefer logoDisplay (216×62) or logo (@2x) size when available. */
+export function logoMediaUrl(media: Media | null | undefined): string | null {
+  if (!media) return null
+  const sized = media.sizes?.logoDisplay?.url ?? media.sizes?.logo?.url
+  if (sized) {
+    if (sized.startsWith('http')) return sized
+    const base = process.env.NEXT_PUBLIC_SERVER_URL ?? ''
+    return base ? `${base.replace(/\/$/, '')}${sized}` : sized
+  }
+  return mediaUrl(media)
+}

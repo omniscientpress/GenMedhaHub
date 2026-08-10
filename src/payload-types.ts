@@ -217,6 +217,22 @@ export interface Media {
   focalX?: number | null;
   focalY?: number | null;
   sizes?: {
+    logo?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    logoDisplay?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
     card?: {
       url?: string | null;
       width?: number | null;
@@ -2953,6 +2969,26 @@ export interface MediaSelect<T extends boolean = true> {
   sizes?:
     | T
     | {
+        logo?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        logoDisplay?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
         card?:
           | T
           | {
@@ -4668,7 +4704,13 @@ export interface SiteSetting {
    */
   brandName: string;
   tagline: string;
+  /**
+   * Recommended 216×62 px (or SVG). Displayed in the site header at that size.
+   */
   logo: number | Media;
+  /**
+   * Optional dark-mode variant — same 216×62 px target as logo.
+   */
   logoDark?: (number | null) | Media;
   socialLinks?:
     | {

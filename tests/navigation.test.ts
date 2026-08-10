@@ -8,6 +8,7 @@ describe('resolveShellContent', () => {
     const shell = resolveShellContent(null, null)
     expect(shell.primaryNav).toEqual(primaryNav)
     expect(shell.brandName).toBe('GenMedha Hub')
+    expect(shell.logoUrl).toBeNull()
   })
 
   it('maps CMS navigation into shell props', () => {

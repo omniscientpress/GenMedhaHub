@@ -14,7 +14,12 @@ export const Media: CollectionConfig = {
   upload: {
     staticDir: 'media',
     focalPoint: true,
+    displayPreview: true,
+    adminThumbnail: 'logo',
     imageSizes: [
+      /** Site header / Site Settings logo slot (ch. 4.2) — 216×62 display, 432×124 @2x. */
+      { name: 'logo', width: 432, height: 124, position: 'centre' },
+      { name: 'logoDisplay', width: 216, height: 62, position: 'centre' },
       { name: 'card', width: 800 },
       { name: 'hero', width: 1920 },
       { name: 'og', width: 1200, height: 630, position: 'centre' },

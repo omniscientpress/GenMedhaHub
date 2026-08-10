@@ -16,8 +16,25 @@ export const SiteSettings: GlobalConfig = {
       admin: { description: 'Used in title templates and Organization schema.' },
     },
     { name: 'tagline', type: 'text', required: true, maxLength: 90 },
-    { name: 'logo', type: 'upload', relationTo: 'media', required: true },
-    { name: 'logoDark', type: 'upload', relationTo: 'media' },
+    {
+      name: 'logo',
+      type: 'upload',
+      relationTo: 'media',
+      required: true,
+      displayPreview: true,
+      admin: {
+        description: 'Recommended 216×62 px (or SVG). Displayed in the site header at that size.',
+      },
+    },
+    {
+      name: 'logoDark',
+      type: 'upload',
+      relationTo: 'media',
+      displayPreview: true,
+      admin: {
+        description: 'Optional dark-mode variant — same 216×62 px target as logo.',
+      },
+    },
     {
       name: 'socialLinks',
       type: 'array',

@@ -143,7 +143,8 @@ function MobileNavSection({ item, onNavigate }: { item: NavItem; onNavigate: () 
 
 export function SiteHeader({ shell }: { shell: ShellContent }) {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const { brandName, primaryNav, headerCtaHref, headerCtaLabel, mobileCtaHref, mobileCtaLabel } = shell
+  const { brandName, logoUrl, logoAlt, primaryNav, headerCtaHref, headerCtaLabel, mobileCtaHref, mobileCtaLabel } =
+    shell
 
   return (
     <header className="border-b bg-background/95 sticky top-0 z-40 backdrop-blur-sm" role="banner">
@@ -151,9 +152,20 @@ export function SiteHeader({ shell }: { shell: ShellContent }) {
         <div className="flex h-[var(--header-height)] items-center justify-between gap-4">
           <Link
             href="/"
-            className="text-foreground text-lg font-bold tracking-tight underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            className="text-foreground inline-flex items-center underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
-            {brandName}
+            {logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- CMS logo; 216×62 slot (ch. 4.2)
+              <img
+                src={logoUrl}
+                alt={logoAlt}
+                width={216}
+                height={62}
+                className="h-[62px] w-auto max-w-[216px] object-contain object-left"
+              />
+            ) : (
+              <span className="text-lg font-bold tracking-tight">{brandName}</span>
+            )}
           </Link>
 
           {/* Desktop nav — ch. 3.3 order, dropdowns on Services/Platforms/Migrate/Solutions */}

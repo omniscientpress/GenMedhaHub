@@ -1,9 +1,13 @@
 import type { FooterColumn, NavGroup, NavItem, NavLink } from '@/config/navigation'
 import { footerColumns as fallbackFooter, primaryNav as fallbackNav } from '@/config/navigation'
+import { isPopulatedMedia, logoMediaUrl } from '@/lib/cms/media'
 import type { Navigation, SiteSetting } from '@/payload-types'
 
 export interface ShellContent {
   brandName: string
+  logoUrl: string | null
+  logoDarkUrl: string | null
+  logoAlt: string
   primaryNav: NavItem[]
   footerColumns: FooterColumn[]
   showTrustBadges: boolean
@@ -47,9 +51,14 @@ export function resolveShellContent(
   ctaHeader?: { label: string; href: string },
 ): ShellContent {
   const bookCall = ctaHeader ?? { label: 'Book a call', href: '/contact' }
+  const logo = isPopulatedMedia(siteSettings?.logo) ? siteSettings.logo : null
+  const logoDark = isPopulatedMedia(siteSettings?.logoDark) ? siteSettings.logoDark : null
 
   return {
     brandName: siteSettings?.brandName ?? 'GenMedha Hub',
+    logoUrl: logoMediaUrl(logo),
+    logoDarkUrl: logoMediaUrl(logoDark),
+    logoAlt: logo?.alt ?? siteSettings?.brandName ?? 'GenMedha Hub',
     primaryNav: navigation ? cmsPrimaryNav(navigation) : fallbackNav,
     footerColumns: navigation ? cmsFooterColumns(navigation) : fallbackFooter,
     showTrustBadges: navigation?.showTrustBadges ?? false,
