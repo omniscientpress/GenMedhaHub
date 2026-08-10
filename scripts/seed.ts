@@ -341,7 +341,6 @@ for (const pair of pairSeeds) {
       answer: richText('Pair-specific answer with sourced claims only.'),
     })),
   },
-    upsertOpts,
   )
 }
 
