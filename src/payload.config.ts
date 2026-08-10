@@ -50,6 +50,8 @@ function isRealS3Configured(): boolean {
   if (!endpoint || !bucket || !accessKey || !secretKey) return false
   if (accessKey === 'placeholder' || secretKey === 'placeholder') return false
   if (endpoint.includes('example.com')) return false
+  // Dokploy/.env.example template values — must not enable S3 with fake creds.
+  if (/YOUR_|PASTE_|placeholder/i.test(`${endpoint}${accessKey}${secretKey}`)) return false
   return true
 }
 
