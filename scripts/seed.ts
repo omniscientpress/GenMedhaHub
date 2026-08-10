@@ -442,8 +442,7 @@ const pageRoutes = [
 ] as const
 
 for (const p of pageRoutes) {
-  const slug = p.routePath === '/' ? 'home' : p.routePath.replace(/^\//, '').replace(/\//g, '-')
-  await upsertBySlug(payload, 'pages', slug, {
+  await upsertByWhere(payload, 'pages', { routePath: { equals: p.routePath } }, {
     title: p.title,
     routePath: p.routePath,
     pageKind: p.pageKind,
