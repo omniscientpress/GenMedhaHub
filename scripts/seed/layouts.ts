@@ -115,7 +115,7 @@ export function richServiceLayout(slug: string, title: string, icon: string) {
     heroBlock(title, copy.shortPitch, 'Services'),
     richTextSectionBlock(copy.intro),
     featureGridBlock('What you get', copy.features),
-    ...(copy.metrics.length > 0
+    ...(copy.metrics.length >= 2
       ? [metricsCalloutRowBlock(copy.metrics)]
       : []),
     comparisonTableBlock(
