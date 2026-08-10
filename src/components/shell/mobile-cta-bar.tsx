@@ -4,11 +4,11 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { ctaConfig } from '@/config/site'
+import type { ShellContent } from '@/lib/cms/navigation'
 import { cn } from '@/lib/utils'
 
 /** Sticky mobile footer CTA — fires cta_click analytics event on tap (ch. 4.2). */
-export function MobileCtaBar() {
+export function MobileCtaBar({ shell }: { shell: ShellContent }) {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -23,8 +23,8 @@ export function MobileCtaBar() {
   function handleClick() {
     if (typeof window !== 'undefined' && 'umami' in window) {
       ;(window as Window & { umami?: { track: (event: string, data?: Record<string, string>) => void } }).umami?.track(
-        ctaConfig.mobileEventName,
-        ctaConfig.mobileEventPayload,
+        'cta_click',
+        { action: 'book-call' },
       )
     }
   }
@@ -37,10 +37,10 @@ export function MobileCtaBar() {
       )}
       style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
       role="region"
-      aria-label="Book a call"
+      aria-label={shell.mobileCtaLabel}
     >
       <Button variant="cta-primary" className="w-full" asChild onClick={handleClick}>
-        <Link href={ctaConfig.mobileHref}>{ctaConfig.mobileLabel}</Link>
+        <Link href={shell.mobileCtaHref}>{shell.mobileCtaLabel}</Link>
       </Button>
     </div>
   )

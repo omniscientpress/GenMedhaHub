@@ -1,11 +1,7 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 
-import { BlockRenderer } from '@/components/blocks/block-renderer'
-import { Breadcrumbs } from '@/components/shell/breadcrumbs'
-import { SiteShell } from '@/components/shell/site-shell'
 import { getServiceBySlug } from '@/lib/cms/fetch'
-import { buildPageMetadata } from '@/lib/cms/seo'
+import { metadataForLayoutDocument, renderLayoutDocument } from '@/lib/cms/layout-route'
 
 export const revalidate = 300
 
@@ -16,16 +12,12 @@ interface ServicePageProps {
 export async function generateMetadata({ params }: ServicePageProps): Promise<Metadata> {
   const { slug } = await params
   const service = await getServiceBySlug(slug)
-  if (!service) {
-    return { title: 'Service not found' }
-  }
-
-  return buildPageMetadata({
-    title: service.seo?.metaTitle?.trim() || service.title,
-    description: service.seo?.metaDescription?.trim() || service.shortPitch,
-    ogImage: service.seo?.ogImage,
-    noindex: service.seo?.noindex,
-    path: `/services/${service.slug}`,
+  return metadataForLayoutDocument({
+    document: service,
+    path: `/services/${slug}`,
+    getTitle: (doc) => doc.title,
+    getDescription: (doc) => doc.shortPitch,
+    getSeo: (doc) => doc.seo,
   })
 }
 
@@ -33,19 +25,16 @@ export default async function ServicePage({ params }: ServicePageProps) {
   const { slug } = await params
   const service = await getServiceBySlug(slug)
 
-  if (!service || service._status !== 'published') {
-    notFound()
-  }
-
-  const breadcrumbs = [
-    { label: 'Home', href: '/' },
-    { label: 'Services', href: '/services' },
-    { label: service.title, href: `/services/${service.slug}` },
-  ]
-
-  return (
-    <SiteShell breadcrumbs={<Breadcrumbs segments={breadcrumbs} />}>
-      <BlockRenderer blocks={service.layout} />
-    </SiteShell>
-  )
+  return renderLayoutDocument({
+    document: service,
+    path: `/services/${slug}`,
+    breadcrumbs: [
+      { label: 'Home', href: '/' },
+      { label: 'Services', href: '/services' },
+      { label: service?.title ?? slug, href: `/services/${slug}` },
+    ],
+    getTitle: (doc) => doc.title,
+    getDescription: (doc) => doc.shortPitch,
+    getBlockContext: (doc) => ({ relatedCaseStudies: doc.relatedCaseStudies }),
+  })
 }
