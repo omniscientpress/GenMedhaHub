@@ -1,7 +1,8 @@
 // Full ch. 5.10.1 seed — idempotent on a fresh database.
-// Usage: pnpm seed <admin-email> <admin-password> [--allow-remote] [--users-only]
+// Usage: pnpm seed <admin-email> <admin-password> [--allow-remote] [--users-only] [--refresh-content]
 //
 // Creates admin + editor users, all globals, and one of every page type.
+// --refresh-content  Re-apply layout/copy on existing CMS documents (safe for production).
 
 for (const file of ['.env.local', '.env']) {
   try {
@@ -14,10 +15,11 @@ for (const file of ['.env.local', '.env']) {
 const args = process.argv.slice(2).filter((a) => !a.startsWith('--'))
 const allowRemote = process.argv.includes('--allow-remote')
 const usersOnly = process.argv.includes('--users-only')
+const refreshContent = process.argv.includes('--refresh-content')
 const [adminEmail, adminPassword] = args
 
 if (!adminEmail || !adminPassword) {
-  console.error('Usage: pnpm seed <admin-email> <admin-password> [--allow-remote] [--users-only]')
+  console.error('Usage: pnpm seed <admin-email> <admin-password> [--allow-remote] [--users-only] [--refresh-content]')
   process.exit(1)
 }
 
@@ -34,7 +36,26 @@ if (isPostgres && !allowRemote) {
 
 const { getPayload } = await import('payload')
 const { default: config } = await import('../src/payload.config')
-const { richText, padText, heroBlock, ctaBandBlock, upsertBySlug } = await import('./seed/helpers')
+const {
+  richText,
+  padText,
+  heroBlock,
+  ctaBandBlock,
+  faqAccordionBlock,
+  upsertBySlug,
+  upsertByWhere,
+  setSeedUser,
+} = await import('./seed/helpers')
+const {
+  homeLayout,
+  serviceLayout,
+  indexLayout,
+  aboutLayout,
+  pricingLayout,
+  contactLayout,
+  legalLayout,
+  thankYouLayout,
+} = await import('./seed/layouts')
 const { LAUNCH_CATEGORIES } = await import('../src/payload/constants')
 
 const payload = await getPayload({ config })
@@ -60,28 +81,56 @@ async function ensureUser(email: string, password: string, roles: ('admin' | 'ed
 await ensureUser(adminEmail, adminPassword, ['admin'])
 await ensureUser('editor@genmedha.in', adminPassword, ['editor'])
 
+const adminLookup = await payload.find({
+  collection: 'users',
+  where: { email: { equals: adminEmail } },
+  limit: 1,
+  overrideAccess: true,
+})
+const adminUser = adminLookup.docs[0]
+if (!adminUser) {
+  console.error(`Admin user ${adminEmail} not found after ensureUser.`)
+  process.exit(1)
+}
+setSeedUser(adminUser as { id: string | number; roles?: ('admin' | 'editor')[] })
+
 if (usersOnly) {
   console.log('Users-only seed complete.')
   process.exit(0)
 }
 
-// Skip full seed if site-settings already has brandName
-const siteSettings = await payload.findGlobal({ slug: 'site-settings' }).catch(() => null)
-if (siteSettings?.brandName) {
-  console.log('Full seed already applied (site-settings populated). Skipping content.')
+// Skip full seed once homepage CMS document exists (brandName alone is not enough —
+// operators may set logo/OG in Site Settings before running seed).
+const homepage = await payload.find({
+  collection: 'pages',
+  where: { routePath: { equals: '/' } },
+  limit: 1,
+  overrideAccess: true,
+})
+if (homepage.totalDocs > 0 && !refreshContent) {
+  console.log('Full seed already applied (homepage page exists). Skipping content.')
+  console.log('Pass --refresh-content to re-apply layout and copy on existing documents.')
   process.exit(0)
 }
 
-console.log('Running full ch. 5.10.1 seed...')
+const upsertOpts = { refresh: refreshContent }
+const siteSettings = await payload.findGlobal({ slug: 'site-settings' }).catch(() => null)
+
+console.log(refreshContent ? 'Refreshing CMS content (ch. 5.10.1)...' : 'Running full ch. 5.10.1 seed...')
 
 // --- Globals ---
 await payload.updateGlobal({
   slug: 'site-settings',
   data: {
-    brandName: 'GenMedha Hub',
-    tagline: 'Own your commerce stack — no GMV tax, no license fees, no lock-in.',
-    contactEmail: 'hello@genmedha.in',
-    foundingYear: 2024,
+    brandName: siteSettings?.brandName ?? 'GenMedha Hub',
+    tagline:
+      siteSettings?.tagline ??
+      'Own your commerce stack — no GMV tax, no license fees, no lock-in.',
+    contactEmail: siteSettings?.contactEmail ?? 'hello@genmedha.in',
+    foundingYear: siteSettings?.foundingYear ?? 2024,
+    // Preserve operator-uploaded logo + OG image (required before seed on production).
+    ...(siteSettings?.logo ? { logo: siteSettings.logo } : {}),
+    ...(siteSettings?.defaultOgImage ? { defaultOgImage: siteSettings.defaultOgImage } : {}),
   },
 })
 
@@ -128,10 +177,7 @@ await payload.updateGlobal({
   },
 })
 
-await payload.updateGlobal({
-  slug: 'redirects',
-  data: { redirects: [] },
-})
+// Redirects global requires ≥1 row — leave operator-managed; do not seed empty.
 
 await payload.updateGlobal({
   slug: 'cta-config',
@@ -177,18 +223,28 @@ const serviceSeeds = [
 
 const serviceIds: Record<string, string | number> = {}
 for (const s of serviceSeeds) {
-  const { id } = await upsertBySlug(payload, 'services', s.slug, {
-    title: s.title,
-    servicePillar: s.pillar,
-    serviceCategory: s.category,
-    shortPitch: `${s.title} — outcome-first delivery with published-pricing posture.`,
-    icon: s.icon,
-    engagementModels: [{ name: 'Discovery', priceFrom: 'From $5K', typicalDuration: '2 weeks' }],
-    proofPoints: s.pillar === 'build-grow'
-      ? [{ text: 'Same Next.js/React/TypeScript core as this site — stack coherence proof (D1/D2).' }]
-      : [],
-    layout: [heroBlock(s.title), ctaBandBlock('Book a discovery call')],
-  })
+  const { id } = await upsertBySlug(
+    payload,
+    'services',
+    s.slug,
+    {
+      title: s.title,
+      servicePillar: s.pillar,
+      serviceCategory: s.category,
+      shortPitch: `${s.title} — outcome-first delivery with published-pricing posture.`,
+      icon: s.icon,
+      engagementModels: [{ name: 'Discovery', priceFrom: 'From $5K', typicalDuration: '2 weeks' }],
+      proofPoints: s.pillar === 'build-grow'
+        ? [{ text: 'Same Next.js/React/TypeScript core as this site — stack coherence proof (D1/D2).' }]
+        : [],
+      layout: serviceLayout(
+        s.title,
+        `${s.title} — outcome-first delivery with published-pricing posture.`,
+        s.icon,
+      ),
+    },
+    upsertOpts,
+  )
   serviceIds[s.slug] = id
 }
 
@@ -199,31 +255,37 @@ const platformSeeds = [
   { slug: 'shopify', name: 'Shopify', tier: 'hub' },
   { slug: 'adobe-commerce', name: 'Adobe Commerce', tier: 'hub', eosDate: '2026-08-11' },
   { slug: 'woocommerce', name: 'WooCommerce', tier: 'hub' },
-  { slug: 'accs', name: 'Adobe Commerce Cloud Service', tier: 'hub' },
+  { slug: 'adobe-commerce-cloud-service', name: 'Adobe Commerce Cloud Service', tier: 'hub' },
 ] as const
 
 const platformIds: Record<string, string | number> = {}
 for (const p of platformSeeds) {
-  const { id } = await upsertBySlug(payload, 'platform-hubs', p.slug, {
-    name: p.name,
-    tier: p.tier,
-    positioningLine: `${p.name} — named platform guidance with sourced economics.`,
-    economics: {
-      costLine: p.slug === 'medusa' ? 'Medusa Cloud $29/$99/$299/mo, 0% GMV fee' : 'See footnote for partner estimates',
-      licenseNote: 'License and hosting economics vary by deployment model.',
-      source: 'Vendor documentation and partner estimates — GenMedha Hub sets final numbers.',
+  const { id } = await upsertBySlug(
+    payload,
+    'platform-hubs',
+    p.slug,
+    {
+      name: p.name,
+      tier: p.tier,
+      positioningLine: `${p.name} — named platform guidance with sourced economics.`,
+      economics: {
+        costLine: p.slug === 'medusa' ? 'Medusa Cloud $29/$99/$299/mo, 0% GMV fee' : 'See footnote for partner estimates',
+        licenseNote: 'License and hosting economics vary by deployment model.',
+        source: 'Vendor documentation and partner estimates — GenMedha Hub sets final numbers.',
+      },
+      eosDate: 'eosDate' in p ? p.eosDate : undefined,
+      services: [serviceIds['ecommerce-builds']],
+      layout: [
+        heroBlock(`${p.name} platform hub`, p.name, 'Platforms'),
+        faqAccordionBlock('FAQ', [
+          { question: `When is ${p.name} the right fit?`, answer: 'Fit depends on revenue band, B2B complexity, and ownership goals.' },
+          { question: `When is ${p.name} wrong?`, answer: 'Honest counter-cases are documented on every hub page.' },
+        ]),
+        ctaBandBlock('Book a discovery call', 'Platform choice is economics — we model TCO before you commit.'),
+      ],
     },
-    eosDate: 'eosDate' in p ? p.eosDate : undefined,
-    services: [serviceIds['ecommerce-builds']],
-    layout: [
-      heroBlock(`${p.name} platform hub`, p.name),
-      { blockType: 'faqAccordion', heading: 'FAQ', faqs: [
-        { question: `When is ${p.name} the right fit?`, answer: richText('Fit depends on revenue band, B2B complexity, and ownership goals.') },
-        { question: `When is ${p.name} wrong?`, answer: richText('Honest counter-cases are documented on every hub page.') },
-      ], emitSchema: true },
-      ctaBandBlock('Book a discovery call'),
-    ],
-  })
+    upsertOpts,
+  )
   platformIds[p.slug] = id
 }
 
@@ -234,11 +296,20 @@ const pairSeeds = [
   { slug: 'woocommerce-to-medusa', title: 'Migrate WooCommerce to Medusa', source: 'woocommerce', target: 'medusa' },
   { slug: 'shopify-to-vendure', title: 'Migrate Shopify to Vendure', source: 'shopify', target: 'vendure' },
   { slug: 'magento-to-vendure', title: 'Migrate Magento to Vendure', source: 'adobe-commerce', target: 'vendure' },
-  { slug: 'adobe-commerce-to-accs', title: 'Migrate Adobe Commerce to ACCS', source: 'adobe-commerce', target: 'accs' },
+  { slug: 'adobe-commerce-to-accs', title: 'Migrate Adobe Commerce to ACCS', source: 'adobe-commerce', target: 'adobe-commerce-cloud-service' },
 ]
 
 for (const pair of pairSeeds) {
-  await upsertBySlug(payload, 'migration-pages', pair.slug, {
+  await upsertByWhere(
+    payload,
+    'migration-pages',
+    {
+      and: [
+        { sourcePlatform: { equals: platformIds[pair.source] } },
+        { targetPlatform: { equals: platformIds[pair.target] } },
+      ],
+    },
+    {
     title: pair.title,
     sourcePlatform: platformIds[pair.source],
     targetPlatform: platformIds[pair.target],
@@ -269,29 +340,40 @@ for (const pair of pairSeeds) {
       question: `Pair FAQ ${i + 1}?`,
       answer: richText('Pair-specific answer with sourced claims only.'),
     })),
-  })
+  },
+  )
 }
 
 // --- Solutions (5) ---
-for (const [slug, modelKey, title] of [
+for (const [, modelKey, title] of [
   ['b2b', 'b2b', 'B2B Commerce'],
   ['dtc', 'dtc', 'DTC Commerce'],
   ['marketplace', 'marketplace', 'Marketplace'],
   ['subscriptions', 'subscriptions', 'Subscriptions'],
   ['multi-region', 'multi-region', 'Multi-region'],
 ] as const) {
-  await upsertBySlug(payload, 'solutions', slug, {
-    title,
-    modelKey,
-    painSummary: `${title} — model-specific pain summary for index cards.`,
-    capabilityChecklist: [
-      { capability: 'Core commerce flows', platformNote: 'Medusa recipe exists' },
-      { capability: 'Operational tooling', platformNote: 'Platform-dependent' },
-      { capability: 'Scale path', platformNote: 'Ownership economics considered' },
-    ],
-    recommendedPlatforms: [platformIds.medusa],
-    layout: [heroBlock(title), ctaBandBlock('Book a discovery call')],
-  })
+  await upsertByWhere(
+    payload,
+    'solutions',
+    { modelKey: { equals: modelKey } },
+    {
+      title,
+      modelKey,
+      painSummary: `${title} — model-specific pain summary for index cards.`,
+      capabilityChecklist: [
+        { capability: 'Core commerce flows', platformNote: 'Medusa recipe exists' },
+        { capability: 'Operational tooling', platformNote: 'Platform-dependent' },
+        { capability: 'Scale path', platformNote: 'Ownership economics considered' },
+      ],
+      recommendedPlatforms: [platformIds.medusa],
+      layout: indexLayout(title, `${title} — model-specific capabilities and platform fit.`, [
+        { icon: 'build', title: 'Core flows', body: 'Catalog, cart, checkout patterns for this commerce model.' },
+        { icon: 'migrate', title: 'Platform fit', body: 'Honest guidance on Medusa, Shopify, and legacy platforms.' },
+        { icon: 'support', title: 'Scale path', body: 'Ownership economics and multi-region considerations.' },
+      ]),
+    },
+    upsertOpts,
+  )
 }
 
 // --- Markets (3 substantive) ---
@@ -302,7 +384,7 @@ const marketSeeds = [
 ] as const
 
 for (const m of marketSeeds) {
-  await upsertBySlug(payload, 'markets', m.slug, {
+  await upsertByWhere(payload, 'markets', { region: { equals: m.region } }, {
     name: m.name,
     region: m.region,
     marketContext: richText(padText(
@@ -319,14 +401,30 @@ for (const m of marketSeeds) {
         ? 'India DPDP Act 2023 — data protection summary cross-referencing privacy register (D7).'
         : 'UAE PDPL and Saudi PDPL for GCC engagements — cross-referencing privacy register (D7).',
     ),
-    layout: [heroBlock(`Serving ${m.name}`), ctaBandBlock('Book a discovery call')],
-  })
+    layout: indexLayout(
+      `Serving ${m.name}`,
+      `Remote-first delivery for ${m.name} — timezone overlap, contracting, and compliance documented.`,
+      [
+        { icon: 'support', title: 'Timezone overlap', body: m.region === 'india' ? 'IST overlap with EU mornings and US evenings.' : 'US business hours overlap with IST evenings.' },
+        { icon: 'build', title: 'Contracting', body: 'USD/EUR via Omniscient Press entity — jurisdiction in MSA.' },
+        { icon: 'migrate', title: 'Compliance', body: m.region === 'india' ? 'India DPDP Act 2023 summary available.' : 'UAE PDPL and Saudi PDPL for GCC engagements.' },
+      ],
+    ),
+  },
+    upsertOpts,
+  )
 }
 
 // --- Case studies (3 placeholders) ---
+const caseStudyIds: (string | number)[] = []
 for (let i = 1; i <= 3; i++) {
-  await upsertBySlug(payload, 'case-studies', `build-in-public-${i}`, {
-    outcomeTitle: `Store performance uplift phase ${i}`,
+  const outcomeTitle = `Store performance uplift phase ${i}`
+  const { id } = await upsertByWhere(
+    payload,
+    'case-studies',
+    { outcomeTitle: { equals: outcomeTitle } },
+    {
+    outcomeTitle,
     client: 'Internal project',
     industry: 'Commerce engineering',
     platformTo: platformIds.medusa,
@@ -338,26 +436,39 @@ for (let i = 1; i <= 3; i++) {
     results: richText('Results with dated metrics only.'),
     metrics: [{ label: 'Lighthouse Performance', value: '95+', context: 'Mobile score, audit date 2026-07-01' }],
     isPlaceholder: true,
-  })
+  },
+    upsertOpts,
+  )
+  caseStudyIds.push(id)
 }
 
 // --- Testimonials, clients, OSS ---
-await upsertBySlug(payload, 'testimonials', 'placeholder-1', {
-  quote: 'Placeholder testimonial — replace with verified client quote before publish.',
-  authorName: 'CTO',
-  authorRole: 'Chief Technology Officer',
-  company: 'Confidential',
-})
-await upsertBySlug(payload, 'testimonials', 'placeholder-2', {
-  quote: 'Second placeholder — engineering-led delivery with clear outcomes.',
-  authorName: 'VP Engineering',
-  authorRole: 'VP Engineering',
-  company: 'Confidential',
-})
+await upsertByWhere(
+  payload,
+  'testimonials',
+  { authorName: { equals: 'CTO' }, company: { equals: 'Confidential' } },
+  {
+    quote: 'Placeholder testimonial — replace with verified client quote before publish.',
+    authorName: 'CTO',
+    authorRole: 'Chief Technology Officer',
+    company: 'Confidential',
+  },
+)
+await upsertByWhere(
+  payload,
+  'testimonials',
+  { authorName: { equals: 'VP Engineering' }, company: { equals: 'Confidential' } },
+  {
+    quote: 'Second placeholder — engineering-led delivery with clear outcomes.',
+    authorName: 'VP Engineering',
+    authorRole: 'VP Engineering',
+    company: 'Confidential',
+  },
+)
 
 for (let i = 1; i <= 4; i++) {
   try {
-    await upsertBySlug(payload, 'clients', `client-${i}`, {
+    await upsertByWhere(payload, 'clients', { name: { equals: `Client ${i}` } }, {
       name: `Client ${i}`,
       kind: 'client',
       displayOrder: i,
@@ -367,8 +478,8 @@ for (let i = 1; i <= 4; i++) {
   }
 }
 
-for (const [slug, name] of [['medusa-plugin', 'GenMedha Medusa Plugin'], ['next-starter', 'Commerce Starter']] as const) {
-  await upsertBySlug(payload, 'open-source-projects', slug, {
+for (const [, name] of [['medusa-plugin', 'GenMedha Medusa Plugin'], ['next-starter', 'Commerce Starter']] as const) {
+  await upsertByWhere(payload, 'open-source-projects', { name: { equals: name } }, {
     name,
     repoUrl: 'https://github.com/omniscientpress/GenMedhaHub',
     description: 'Open-source commerce tooling — OSS proof at launch.',
@@ -379,8 +490,9 @@ for (const [slug, name] of [['medusa-plugin', 'GenMedha Medusa Plugin'], ['next-
 
 // --- Posts (3) ---
 for (let i = 1; i <= 3; i++) {
-  await upsertBySlug(payload, 'posts', `migration-cluster-${i}`, {
-    title: `Migration economics deep-dive ${i}`,
+  const title = `Migration economics deep-dive ${i}`
+  await upsertByWhere(payload, 'posts', { title: { equals: title } }, {
+    title,
     excerpt: 'Founder-voice analysis of migration TCO and EOS risk.',
     author: authorId,
     categories: [(await payload.find({ collection: 'categories', limit: 1 })).docs[0]?.id],
@@ -411,18 +523,67 @@ const pageRoutes = [
   { routePath: '/thank-you/newsletter', pageKind: 'thank-you', title: 'Thank You — Newsletter' },
 ] as const
 
-for (const p of pageRoutes) {
-  const slug = p.routePath === '/' ? 'home' : p.routePath.replace(/^\//, '').replace(/\//g, '-')
-  await upsertBySlug(payload, 'pages', slug, {
-    title: p.title,
-    routePath: p.routePath,
-    pageKind: p.pageKind,
-    layout: [heroBlock(p.title), ctaBandBlock('Book a discovery call')],
-    seo: p.pageKind === 'thank-you' ? { noindex: true } : { noindex: false },
-  })
+function layoutForPage(p: (typeof pageRoutes)[number]) {
+  switch (p.pageKind) {
+    case 'home':
+      return homeLayout(caseStudyIds)
+    case 'index':
+      if (p.routePath === '/services') {
+        return indexLayout('Services', 'Commerce engineering and Build & Grow — five pillars, no lock-in.', [
+          { icon: 'build', title: 'Ecommerce Builds', body: 'Headless storefronts you own.' },
+          { icon: 'migrate', title: 'Replatforming', body: 'Migration with SEO and rollback plans.' },
+          { icon: 'web-app', title: 'Web Apps', body: 'Product engineering on Next.js/React.' },
+        ])
+      }
+      if (p.routePath === '/platforms') {
+        return indexLayout('Platforms', 'Named platform hubs with sourced economics — Medusa flagship.', [
+          { icon: 'build', title: 'Medusa', body: '0% GMV fee — flagship ownership stack.' },
+          { icon: 'migrate', title: 'Adobe Commerce', body: 'EOS-aware guidance and ACCS paths.' },
+          { icon: 'support', title: 'Shopify / Woo', body: 'Honest fit and migration counter-cases.' },
+        ])
+      }
+      if (p.routePath === '/migrate') {
+        return indexLayout('Migrate', 'Pair-specific migration pages with TCO, cutover, and SEO preservation.', [
+          { icon: 'migrate', title: 'Magento → Medusa', body: 'Mid-market replatforming with rollback.' },
+          { icon: 'migrate', title: 'Shopify → Medusa', body: 'Ownership economics for growing DTC.' },
+          { icon: 'support', title: 'When not to migrate', body: 'Hyvä rebuild or version upgrade may win.' },
+        ])
+      }
+      return indexLayout(p.title, `Browse ${p.title.toLowerCase()} — CMS-driven index from Payload.`, [
+        { icon: 'build', title: p.title, body: 'Placeholder index cards — enrich in admin.' },
+        { icon: 'support', title: 'Proof', body: 'Case studies and insights linked from nav.' },
+        { icon: 'web-app', title: 'Contact', body: 'Book a discovery call to scope your path.' },
+      ])
+    case 'about':
+      return aboutLayout()
+    case 'pricing':
+      return pricingLayout()
+    case 'contact':
+      return contactLayout()
+    case 'legal':
+      return legalLayout(p.title)
+    case 'thank-you':
+      return thankYouLayout(p.title)
+  }
 }
 
-console.log('Full seed complete.')
+for (const p of pageRoutes) {
+  await upsertByWhere(
+    payload,
+    'pages',
+    { routePath: { equals: p.routePath } },
+    {
+      title: p.title,
+      routePath: p.routePath,
+      pageKind: p.pageKind,
+      layout: layoutForPage(p),
+      seo: p.pageKind === 'thank-you' ? { noindex: true } : { noindex: false },
+    },
+    upsertOpts,
+  )
+}
+
+console.log(refreshContent ? 'Content refresh complete.' : 'Full seed complete.')
 process.exit(0)
 
 export {}
