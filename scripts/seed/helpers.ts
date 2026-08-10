@@ -54,30 +54,86 @@ export function padText(base: string, minLength: number): string {
   return out.slice(0, minLength + base.length)
 }
 
-export function heroBlock(headline: string, subhead?: string) {
+export function heroBlock(headline: string, subhead?: string, eyebrow?: string) {
   return {
     blockType: 'hero' as const,
     headline,
     subhead,
+    eyebrow,
     variant: 'default' as const,
     ctaKey: 'book-call' as const,
   }
 }
 
-export function ctaBandBlock(heading: string) {
+export function ctaBandBlock(heading: string, body?: string, ctaKey: 'book-call' | 'get-audit' | 'scope-app' | 'view-work' = 'book-call') {
   return {
     blockType: 'ctaBand' as const,
     heading,
-    ctaKey: 'book-call' as const,
+    body,
+    ctaKey,
   }
 }
+
+export function featureGridBlock(
+  heading: string,
+  items: { icon: string; title: string; body: string }[],
+) {
+  return {
+    blockType: 'featureGrid' as const,
+    heading,
+    items: items.map((item) => ({ ...item, icon: item.icon as 'build' })),
+  }
+}
+
+export function pillarCardsBlock(
+  heading: string,
+  cards: { icon: string; title: string; proofLine: string; link: string }[],
+) {
+  return {
+    blockType: 'pillarCards' as const,
+    heading,
+    cards: cards.map((card) => ({ ...card, icon: card.icon as 'web-app' })),
+  }
+}
+
+export function metricsCalloutRowBlock(
+  metrics: { label: string; value: string; context: string }[],
+) {
+  return {
+    blockType: 'metricsCalloutRow' as const,
+    metrics,
+  }
+}
+
+export function richTextSectionBlock(text: string) {
+  return {
+    blockType: 'richTextSection' as const,
+    content: richText(text),
+    maxWidth: 'prose' as const,
+  }
+}
+
+export function faqAccordionBlock(
+  heading: string,
+  faqs: { question: string; answer: string }[],
+) {
+  return {
+    blockType: 'faqAccordion' as const,
+    heading,
+    faqs: faqs.map((faq) => ({ question: faq.question, answer: richText(faq.answer) })),
+    emitSchema: true,
+  }
+}
+
+type UpsertOptions = { refresh?: boolean }
 
 export async function upsertByWhere<T extends Record<string, unknown>>(
   payload: import('payload').Payload,
   collection: CollectionSlug,
   where: import('payload').Where,
   data: T,
-): Promise<{ id: string | number; created: boolean }> {
+  options?: UpsertOptions,
+): Promise<{ id: string | number; created: boolean; updated: boolean }> {
   const existing = await payload.find({
     collection,
     where,
@@ -85,7 +141,17 @@ export async function upsertByWhere<T extends Record<string, unknown>>(
     overrideAccess: true,
   })
   if (existing.docs[0]) {
-    return { id: existing.docs[0].id, created: false }
+    if (options?.refresh) {
+      await payload.update({
+        collection,
+        id: existing.docs[0].id,
+        data: { ...data, _status: 'published' },
+        overrideAccess: true,
+        ...createContext(),
+      })
+      return { id: existing.docs[0].id, created: false, updated: true }
+    }
+    return { id: existing.docs[0].id, created: false, updated: false }
   }
   const doc = await payload.create({
     collection,
@@ -94,7 +160,7 @@ export async function upsertByWhere<T extends Record<string, unknown>>(
     overrideAccess: true,
     ...createContext(),
   })
-  return { id: doc.id, created: true }
+  return { id: doc.id, created: true, updated: false }
 }
 
 export async function upsertBySlug<T extends Record<string, unknown>>(
@@ -102,7 +168,8 @@ export async function upsertBySlug<T extends Record<string, unknown>>(
   collection: CollectionSlug,
   slug: string,
   data: T,
-): Promise<{ id: string | number; created: boolean }> {
+  options?: UpsertOptions,
+): Promise<{ id: string | number; created: boolean; updated: boolean }> {
   const existing = await payload.find({
     collection,
     where: { slug: { equals: slug } },
@@ -110,7 +177,17 @@ export async function upsertBySlug<T extends Record<string, unknown>>(
     overrideAccess: true,
   })
   if (existing.docs[0]) {
-    return { id: existing.docs[0].id, created: false }
+    if (options?.refresh) {
+      await payload.update({
+        collection,
+        id: existing.docs[0].id,
+        data: { ...data, _status: 'published' },
+        overrideAccess: true,
+        ...createContext(),
+      })
+      return { id: existing.docs[0].id, created: false, updated: true }
+    }
+    return { id: existing.docs[0].id, created: false, updated: false }
   }
   const doc = await payload.create({
     collection,
@@ -119,7 +196,7 @@ export async function upsertBySlug<T extends Record<string, unknown>>(
     overrideAccess: true,
     ...createContext(),
   })
-  return { id: doc.id, created: true }
+  return { id: doc.id, created: true, updated: false }
 }
 
 export async function upsertGlobal(

@@ -1,7 +1,8 @@
 // Full ch. 5.10.1 seed — idempotent on a fresh database.
-// Usage: pnpm seed <admin-email> <admin-password> [--allow-remote] [--users-only]
+// Usage: pnpm seed <admin-email> <admin-password> [--allow-remote] [--users-only] [--refresh-content]
 //
 // Creates admin + editor users, all globals, and one of every page type.
+// --refresh-content  Re-apply layout/copy on existing CMS documents (safe for production).
 
 for (const file of ['.env.local', '.env']) {
   try {
@@ -14,10 +15,11 @@ for (const file of ['.env.local', '.env']) {
 const args = process.argv.slice(2).filter((a) => !a.startsWith('--'))
 const allowRemote = process.argv.includes('--allow-remote')
 const usersOnly = process.argv.includes('--users-only')
+const refreshContent = process.argv.includes('--refresh-content')
 const [adminEmail, adminPassword] = args
 
 if (!adminEmail || !adminPassword) {
-  console.error('Usage: pnpm seed <admin-email> <admin-password> [--allow-remote] [--users-only]')
+  console.error('Usage: pnpm seed <admin-email> <admin-password> [--allow-remote] [--users-only] [--refresh-content]')
   process.exit(1)
 }
 
@@ -34,7 +36,26 @@ if (isPostgres && !allowRemote) {
 
 const { getPayload } = await import('payload')
 const { default: config } = await import('../src/payload.config')
-const { richText, padText, heroBlock, ctaBandBlock, upsertBySlug, upsertByWhere, setSeedUser } = await import('./seed/helpers')
+const {
+  richText,
+  padText,
+  heroBlock,
+  ctaBandBlock,
+  faqAccordionBlock,
+  upsertBySlug,
+  upsertByWhere,
+  setSeedUser,
+} = await import('./seed/helpers')
+const {
+  homeLayout,
+  serviceLayout,
+  indexLayout,
+  aboutLayout,
+  pricingLayout,
+  contactLayout,
+  legalLayout,
+  thankYouLayout,
+} = await import('./seed/layouts')
 const { LAUNCH_CATEGORIES } = await import('../src/payload/constants')
 
 const payload = await getPayload({ config })
@@ -86,14 +107,16 @@ const homepage = await payload.find({
   limit: 1,
   overrideAccess: true,
 })
-if (homepage.totalDocs > 0) {
+if (homepage.totalDocs > 0 && !refreshContent) {
   console.log('Full seed already applied (homepage page exists). Skipping content.')
+  console.log('Pass --refresh-content to re-apply layout and copy on existing documents.')
   process.exit(0)
 }
 
+const upsertOpts = { refresh: refreshContent }
 const siteSettings = await payload.findGlobal({ slug: 'site-settings' }).catch(() => null)
 
-console.log('Running full ch. 5.10.1 seed...')
+console.log(refreshContent ? 'Refreshing CMS content (ch. 5.10.1)...' : 'Running full ch. 5.10.1 seed...')
 
 // --- Globals ---
 await payload.updateGlobal({
@@ -200,18 +223,28 @@ const serviceSeeds = [
 
 const serviceIds: Record<string, string | number> = {}
 for (const s of serviceSeeds) {
-  const { id } = await upsertBySlug(payload, 'services', s.slug, {
-    title: s.title,
-    servicePillar: s.pillar,
-    serviceCategory: s.category,
-    shortPitch: `${s.title} — outcome-first delivery with published-pricing posture.`,
-    icon: s.icon,
-    engagementModels: [{ name: 'Discovery', priceFrom: 'From $5K', typicalDuration: '2 weeks' }],
-    proofPoints: s.pillar === 'build-grow'
-      ? [{ text: 'Same Next.js/React/TypeScript core as this site — stack coherence proof (D1/D2).' }]
-      : [],
-    layout: [heroBlock(s.title), ctaBandBlock('Book a discovery call')],
-  })
+  const { id } = await upsertBySlug(
+    payload,
+    'services',
+    s.slug,
+    {
+      title: s.title,
+      servicePillar: s.pillar,
+      serviceCategory: s.category,
+      shortPitch: `${s.title} — outcome-first delivery with published-pricing posture.`,
+      icon: s.icon,
+      engagementModels: [{ name: 'Discovery', priceFrom: 'From $5K', typicalDuration: '2 weeks' }],
+      proofPoints: s.pillar === 'build-grow'
+        ? [{ text: 'Same Next.js/React/TypeScript core as this site — stack coherence proof (D1/D2).' }]
+        : [],
+      layout: serviceLayout(
+        s.title,
+        `${s.title} — outcome-first delivery with published-pricing posture.`,
+        s.icon,
+      ),
+    },
+    upsertOpts,
+  )
   serviceIds[s.slug] = id
 }
 
@@ -227,26 +260,32 @@ const platformSeeds = [
 
 const platformIds: Record<string, string | number> = {}
 for (const p of platformSeeds) {
-  const { id } = await upsertBySlug(payload, 'platform-hubs', p.slug, {
-    name: p.name,
-    tier: p.tier,
-    positioningLine: `${p.name} — named platform guidance with sourced economics.`,
-    economics: {
-      costLine: p.slug === 'medusa' ? 'Medusa Cloud $29/$99/$299/mo, 0% GMV fee' : 'See footnote for partner estimates',
-      licenseNote: 'License and hosting economics vary by deployment model.',
-      source: 'Vendor documentation and partner estimates — GenMedha Hub sets final numbers.',
+  const { id } = await upsertBySlug(
+    payload,
+    'platform-hubs',
+    p.slug,
+    {
+      name: p.name,
+      tier: p.tier,
+      positioningLine: `${p.name} — named platform guidance with sourced economics.`,
+      economics: {
+        costLine: p.slug === 'medusa' ? 'Medusa Cloud $29/$99/$299/mo, 0% GMV fee' : 'See footnote for partner estimates',
+        licenseNote: 'License and hosting economics vary by deployment model.',
+        source: 'Vendor documentation and partner estimates — GenMedha Hub sets final numbers.',
+      },
+      eosDate: 'eosDate' in p ? p.eosDate : undefined,
+      services: [serviceIds['ecommerce-builds']],
+      layout: [
+        heroBlock(`${p.name} platform hub`, p.name, 'Platforms'),
+        faqAccordionBlock('FAQ', [
+          { question: `When is ${p.name} the right fit?`, answer: 'Fit depends on revenue band, B2B complexity, and ownership goals.' },
+          { question: `When is ${p.name} wrong?`, answer: 'Honest counter-cases are documented on every hub page.' },
+        ]),
+        ctaBandBlock('Book a discovery call', 'Platform choice is economics — we model TCO before you commit.'),
+      ],
     },
-    eosDate: 'eosDate' in p ? p.eosDate : undefined,
-    services: [serviceIds['ecommerce-builds']],
-    layout: [
-      heroBlock(`${p.name} platform hub`, p.name),
-      { blockType: 'faqAccordion', heading: 'FAQ', faqs: [
-        { question: `When is ${p.name} the right fit?`, answer: richText('Fit depends on revenue band, B2B complexity, and ownership goals.') },
-        { question: `When is ${p.name} wrong?`, answer: richText('Honest counter-cases are documented on every hub page.') },
-      ], emitSchema: true },
-      ctaBandBlock('Book a discovery call'),
-    ],
-  })
+    upsertOpts,
+  )
   platformIds[p.slug] = id
 }
 
@@ -302,6 +341,7 @@ for (const pair of pairSeeds) {
       answer: richText('Pair-specific answer with sourced claims only.'),
     })),
   },
+    upsertOpts,
   )
 }
 
@@ -313,18 +353,28 @@ for (const [, modelKey, title] of [
   ['subscriptions', 'subscriptions', 'Subscriptions'],
   ['multi-region', 'multi-region', 'Multi-region'],
 ] as const) {
-  await upsertByWhere(payload, 'solutions', { modelKey: { equals: modelKey } }, {
-    title,
-    modelKey,
-    painSummary: `${title} — model-specific pain summary for index cards.`,
-    capabilityChecklist: [
-      { capability: 'Core commerce flows', platformNote: 'Medusa recipe exists' },
-      { capability: 'Operational tooling', platformNote: 'Platform-dependent' },
-      { capability: 'Scale path', platformNote: 'Ownership economics considered' },
-    ],
-    recommendedPlatforms: [platformIds.medusa],
-    layout: [heroBlock(title), ctaBandBlock('Book a discovery call')],
-  })
+  await upsertByWhere(
+    payload,
+    'solutions',
+    { modelKey: { equals: modelKey } },
+    {
+      title,
+      modelKey,
+      painSummary: `${title} — model-specific pain summary for index cards.`,
+      capabilityChecklist: [
+        { capability: 'Core commerce flows', platformNote: 'Medusa recipe exists' },
+        { capability: 'Operational tooling', platformNote: 'Platform-dependent' },
+        { capability: 'Scale path', platformNote: 'Ownership economics considered' },
+      ],
+      recommendedPlatforms: [platformIds.medusa],
+      layout: indexLayout(title, `${title} — model-specific capabilities and platform fit.`, [
+        { icon: 'build', title: 'Core flows', body: 'Catalog, cart, checkout patterns for this commerce model.' },
+        { icon: 'migrate', title: 'Platform fit', body: 'Honest guidance on Medusa, Shopify, and legacy platforms.' },
+        { icon: 'support', title: 'Scale path', body: 'Ownership economics and multi-region considerations.' },
+      ]),
+    },
+    upsertOpts,
+  )
 }
 
 // --- Markets (3 substantive) ---
@@ -352,14 +402,29 @@ for (const m of marketSeeds) {
         ? 'India DPDP Act 2023 — data protection summary cross-referencing privacy register (D7).'
         : 'UAE PDPL and Saudi PDPL for GCC engagements — cross-referencing privacy register (D7).',
     ),
-    layout: [heroBlock(`Serving ${m.name}`), ctaBandBlock('Book a discovery call')],
-  })
+    layout: indexLayout(
+      `Serving ${m.name}`,
+      `Remote-first delivery for ${m.name} — timezone overlap, contracting, and compliance documented.`,
+      [
+        { icon: 'support', title: 'Timezone overlap', body: m.region === 'india' ? 'IST overlap with EU mornings and US evenings.' : 'US business hours overlap with IST evenings.' },
+        { icon: 'build', title: 'Contracting', body: 'USD/EUR via Omniscient Press entity — jurisdiction in MSA.' },
+        { icon: 'migrate', title: 'Compliance', body: m.region === 'india' ? 'India DPDP Act 2023 summary available.' : 'UAE PDPL and Saudi PDPL for GCC engagements.' },
+      ],
+    ),
+  },
+    upsertOpts,
+  )
 }
 
 // --- Case studies (3 placeholders) ---
+const caseStudyIds: (string | number)[] = []
 for (let i = 1; i <= 3; i++) {
   const outcomeTitle = `Store performance uplift phase ${i}`
-  await upsertByWhere(payload, 'case-studies', { outcomeTitle: { equals: outcomeTitle } }, {
+  const { id } = await upsertByWhere(
+    payload,
+    'case-studies',
+    { outcomeTitle: { equals: outcomeTitle } },
+    {
     outcomeTitle,
     client: 'Internal project',
     industry: 'Commerce engineering',
@@ -372,7 +437,10 @@ for (let i = 1; i <= 3; i++) {
     results: richText('Results with dated metrics only.'),
     metrics: [{ label: 'Lighthouse Performance', value: '95+', context: 'Mobile score, audit date 2026-07-01' }],
     isPlaceholder: true,
-  })
+  },
+    upsertOpts,
+  )
+  caseStudyIds.push(id)
 }
 
 // --- Testimonials, clients, OSS ---
@@ -456,17 +524,67 @@ const pageRoutes = [
   { routePath: '/thank-you/newsletter', pageKind: 'thank-you', title: 'Thank You — Newsletter' },
 ] as const
 
-for (const p of pageRoutes) {
-  await upsertByWhere(payload, 'pages', { routePath: { equals: p.routePath } }, {
-    title: p.title,
-    routePath: p.routePath,
-    pageKind: p.pageKind,
-    layout: [heroBlock(p.title), ctaBandBlock('Book a discovery call')],
-    seo: p.pageKind === 'thank-you' ? { noindex: true } : { noindex: false },
-  })
+function layoutForPage(p: (typeof pageRoutes)[number]) {
+  switch (p.pageKind) {
+    case 'home':
+      return homeLayout(caseStudyIds)
+    case 'index':
+      if (p.routePath === '/services') {
+        return indexLayout('Services', 'Commerce engineering and Build & Grow — five pillars, no lock-in.', [
+          { icon: 'build', title: 'Ecommerce Builds', body: 'Headless storefronts you own.' },
+          { icon: 'migrate', title: 'Replatforming', body: 'Migration with SEO and rollback plans.' },
+          { icon: 'web-app', title: 'Web Apps', body: 'Product engineering on Next.js/React.' },
+        ])
+      }
+      if (p.routePath === '/platforms') {
+        return indexLayout('Platforms', 'Named platform hubs with sourced economics — Medusa flagship.', [
+          { icon: 'build', title: 'Medusa', body: '0% GMV fee — flagship ownership stack.' },
+          { icon: 'migrate', title: 'Adobe Commerce', body: 'EOS-aware guidance and ACCS paths.' },
+          { icon: 'support', title: 'Shopify / Woo', body: 'Honest fit and migration counter-cases.' },
+        ])
+      }
+      if (p.routePath === '/migrate') {
+        return indexLayout('Migrate', 'Pair-specific migration pages with TCO, cutover, and SEO preservation.', [
+          { icon: 'migrate', title: 'Magento → Medusa', body: 'Mid-market replatforming with rollback.' },
+          { icon: 'migrate', title: 'Shopify → Medusa', body: 'Ownership economics for growing DTC.' },
+          { icon: 'support', title: 'When not to migrate', body: 'Hyvä rebuild or version upgrade may win.' },
+        ])
+      }
+      return indexLayout(p.title, `Browse ${p.title.toLowerCase()} — CMS-driven index from Payload.`, [
+        { icon: 'build', title: p.title, body: 'Placeholder index cards — enrich in admin.' },
+        { icon: 'support', title: 'Proof', body: 'Case studies and insights linked from nav.' },
+        { icon: 'web-app', title: 'Contact', body: 'Book a discovery call to scope your path.' },
+      ])
+    case 'about':
+      return aboutLayout()
+    case 'pricing':
+      return pricingLayout()
+    case 'contact':
+      return contactLayout()
+    case 'legal':
+      return legalLayout(p.title)
+    case 'thank-you':
+      return thankYouLayout(p.title)
+  }
 }
 
-console.log('Full seed complete.')
+for (const p of pageRoutes) {
+  await upsertByWhere(
+    payload,
+    'pages',
+    { routePath: { equals: p.routePath } },
+    {
+      title: p.title,
+      routePath: p.routePath,
+      pageKind: p.pageKind,
+      layout: layoutForPage(p),
+      seo: p.pageKind === 'thank-you' ? { noindex: true } : { noindex: false },
+    },
+    upsertOpts,
+  )
+}
+
+console.log(refreshContent ? 'Content refresh complete.' : 'Full seed complete.')
 process.exit(0)
 
 export {}
