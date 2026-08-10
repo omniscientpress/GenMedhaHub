@@ -293,7 +293,7 @@ for (const pair of pairSeeds) {
 }
 
 // --- Solutions (5) ---
-for (const [slug, modelKey, title] of [
+for (const [, modelKey, title] of [
   ['b2b', 'b2b', 'B2B Commerce'],
   ['dtc', 'dtc', 'DTC Commerce'],
   ['marketplace', 'marketplace', 'Marketplace'],
@@ -398,7 +398,7 @@ for (let i = 1; i <= 4; i++) {
   }
 }
 
-for (const [slug, name] of [['medusa-plugin', 'GenMedha Medusa Plugin'], ['next-starter', 'Commerce Starter']] as const) {
+for (const [, name] of [['medusa-plugin', 'GenMedha Medusa Plugin'], ['next-starter', 'Commerce Starter']] as const) {
   await upsertByWhere(payload, 'open-source-projects', { name: { equals: name } }, {
     name,
     repoUrl: 'https://github.com/omniscientpress/GenMedhaHub',
