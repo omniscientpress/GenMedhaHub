@@ -140,10 +140,7 @@ await payload.updateGlobal({
   },
 })
 
-await payload.updateGlobal({
-  slug: 'redirects',
-  data: { redirects: [] },
-})
+// Redirects global requires ≥1 row — leave operator-managed; do not seed empty.
 
 await payload.updateGlobal({
   slug: 'cta-config',
