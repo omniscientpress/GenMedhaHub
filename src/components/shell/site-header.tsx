@@ -28,8 +28,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { isNavGroup, primaryNav, type NavGroup, type NavItem } from '@/config/navigation'
-import { ctaConfig, siteConfig } from '@/config/site'
+import { isNavGroup, type NavGroup, type NavItem } from '@/config/navigation'
+import type { ShellContent } from '@/lib/cms/navigation'
 import { cn } from '@/lib/utils'
 
 function NavDropdownContent({ item }: { item: NavGroup }) {
@@ -141,8 +141,9 @@ function MobileNavSection({ item, onNavigate }: { item: NavItem; onNavigate: () 
   )
 }
 
-export function SiteHeader() {
+export function SiteHeader({ shell }: { shell: ShellContent }) {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { brandName, primaryNav, headerCtaHref, headerCtaLabel, mobileCtaHref, mobileCtaLabel } = shell
 
   return (
     <header className="border-b bg-background/95 sticky top-0 z-40 backdrop-blur-sm" role="banner">
@@ -152,7 +153,7 @@ export function SiteHeader() {
             href="/"
             className="text-foreground text-lg font-bold tracking-tight underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
-            {siteConfig.name}
+            {brandName}
           </Link>
 
           {/* Desktop nav — ch. 3.3 order, dropdowns on Services/Platforms/Migrate/Solutions */}
@@ -181,7 +182,7 @@ export function SiteHeader() {
 
           <div className="flex items-center gap-2">
             <Button variant="cta-primary" className="hidden sm:inline-flex" asChild>
-              <Link href={ctaConfig.headerHref}>{ctaConfig.headerLabel}</Link>
+              <Link href={headerCtaHref}>{headerCtaLabel}</Link>
             </Button>
 
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -192,7 +193,7 @@ export function SiteHeader() {
               </SheetTrigger>
               <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-sm">
                 <SheetHeader>
-                  <SheetTitle>{siteConfig.name}</SheetTitle>
+                  <SheetTitle>{brandName}</SheetTitle>
                 </SheetHeader>
                 <nav aria-label="Mobile primary navigation" className="mt-4 space-y-1">
                   {primaryNav.map((item) => (
@@ -205,8 +206,8 @@ export function SiteHeader() {
                 </nav>
                 <div className="mt-6">
                   <Button variant="cta-primary" className="w-full" asChild>
-                    <Link href={ctaConfig.mobileHref} onClick={() => setMobileOpen(false)}>
-                      {ctaConfig.mobileLabel}
+                    <Link href={mobileCtaHref} onClick={() => setMobileOpen(false)}>
+                      {mobileCtaLabel}
                     </Link>
                   </Button>
                 </div>

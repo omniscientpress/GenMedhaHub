@@ -14,7 +14,7 @@ const labelMap: Record<string, string> = {
   catalog: 'Catalog',
 }
 
-export default function DevCatalogPage() {
+export default async function DevCatalogPage() {
   const segments = segmentsFromPath('/dev/catalog', labelMap)
 
   return (

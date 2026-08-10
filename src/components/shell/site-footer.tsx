@@ -1,11 +1,12 @@
 import Link from 'next/link'
 
 import { Container } from '@/components/layout/container'
-import { footerColumns } from '@/config/navigation'
-import { ctaConfig, siteConfig } from '@/config/site'
+import type { ShellContent } from '@/lib/cms/navigation'
 import { cn } from '@/lib/utils'
 
-export function SiteFooter() {
+export function SiteFooter({ shell }: { shell: ShellContent }) {
+  const { brandName, footerColumns, marketsHref, marketsStrip, showTrustBadges, headerCtaHref, headerCtaLabel } =
+    shell
   return (
     <footer className="border-t bg-muted/20" role="contentinfo">
       <Container className="py-12">
@@ -58,15 +59,15 @@ export function SiteFooter() {
         <div className="border-border mt-10 border-t pt-6">
           <p className="text-center text-sm">
             <Link
-              href={siteConfig.marketsHref}
+              href={marketsHref}
               className="text-primary font-medium underline-offset-2 hover:underline"
             >
-              {siteConfig.marketsStrip}
+              {marketsStrip}
             </Link>
           </p>
         </div>
 
-        {siteConfig.showTrustBadges ? (
+        {showTrustBadges ? (
           <div className="mt-6 flex justify-center gap-4" aria-label="Trust badges">
             {/* Trust strip renders partner badges once earned (ch. 4.2) */}
           </div>
@@ -74,7 +75,7 @@ export function SiteFooter() {
 
         <div className="text-muted-foreground mt-8 flex flex-col items-center justify-between gap-2 text-sm sm:flex-row">
           <p>
-            © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
+            © {new Date().getFullYear()} {brandName}. All rights reserved.
           </p>
           <div className="flex gap-4">
             <Link href="/legal/privacy" className="hover:text-foreground underline-offset-2 hover:underline">
@@ -83,8 +84,8 @@ export function SiteFooter() {
             <Link href="/legal/cookies" className="hover:text-foreground underline-offset-2 hover:underline">
               Cookies
             </Link>
-            <Link href="/contact" className="hover:text-foreground underline-offset-2 hover:underline">
-              {ctaConfig.headerLabel}
+            <Link href={headerCtaHref} className="hover:text-foreground underline-offset-2 hover:underline">
+              {headerCtaLabel}
             </Link>
           </div>
         </div>
