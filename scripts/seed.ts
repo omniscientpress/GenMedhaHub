@@ -65,12 +65,19 @@ if (usersOnly) {
   process.exit(0)
 }
 
-// Skip full seed if site-settings already has brandName
-const siteSettings = await payload.findGlobal({ slug: 'site-settings' }).catch(() => null)
-if (siteSettings?.brandName) {
-  console.log('Full seed already applied (site-settings populated). Skipping content.')
+// Skip full seed once homepage CMS document exists (brandName alone is not enough —
+// operators may set logo/OG in Site Settings before running seed).
+const homepage = await payload.find({
+  collection: 'pages',
+  where: { routePath: { equals: '/' } },
+  limit: 1,
+})
+if (homepage.totalDocs > 0) {
+  console.log('Full seed already applied (homepage page exists). Skipping content.')
   process.exit(0)
 }
+
+const siteSettings = await payload.findGlobal({ slug: 'site-settings' }).catch(() => null)
 
 console.log('Running full ch. 5.10.1 seed...')
 
@@ -78,10 +85,15 @@ console.log('Running full ch. 5.10.1 seed...')
 await payload.updateGlobal({
   slug: 'site-settings',
   data: {
-    brandName: 'GenMedha Hub',
-    tagline: 'Own your commerce stack — no GMV tax, no license fees, no lock-in.',
-    contactEmail: 'hello@genmedha.in',
-    foundingYear: 2024,
+    brandName: siteSettings?.brandName ?? 'GenMedha Hub',
+    tagline:
+      siteSettings?.tagline ??
+      'Own your commerce stack — no GMV tax, no license fees, no lock-in.',
+    contactEmail: siteSettings?.contactEmail ?? 'hello@genmedha.in',
+    foundingYear: siteSettings?.foundingYear ?? 2024,
+    // Preserve operator-uploaded logo + OG image (required before seed on production).
+    ...(siteSettings?.logo ? { logo: siteSettings.logo } : {}),
+    ...(siteSettings?.defaultOgImage ? { defaultOgImage: siteSettings.defaultOgImage } : {}),
   },
 })
 
