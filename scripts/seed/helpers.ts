@@ -61,6 +61,28 @@ export function ctaBandBlock(heading: string) {
   }
 }
 
+export async function upsertByWhere<T extends Record<string, unknown>>(
+  payload: import('payload').Payload,
+  collection: CollectionSlug,
+  where: import('payload').Where,
+  data: T,
+): Promise<{ id: string | number; created: boolean }> {
+  const existing = await payload.find({
+    collection,
+    where,
+    limit: 1,
+  })
+  if (existing.docs[0]) {
+    return { id: existing.docs[0].id, created: false }
+  }
+  const doc = await payload.create({
+    collection,
+    data: { ...data, _status: 'published' },
+    draft: false,
+  })
+  return { id: doc.id, created: true }
+}
+
 export async function upsertBySlug<T extends Record<string, unknown>>(
   payload: import('payload').Payload,
   collection: CollectionSlug,

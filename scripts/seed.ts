@@ -34,7 +34,7 @@ if (isPostgres && !allowRemote) {
 
 const { getPayload } = await import('payload')
 const { default: config } = await import('../src/payload.config')
-const { richText, padText, heroBlock, ctaBandBlock, upsertBySlug } = await import('./seed/helpers')
+const { richText, padText, heroBlock, ctaBandBlock, upsertBySlug, upsertByWhere } = await import('./seed/helpers')
 const { LAUNCH_CATEGORIES } = await import('../src/payload/constants')
 
 const payload = await getPayload({ config })
@@ -351,22 +351,32 @@ for (let i = 1; i <= 3; i++) {
 }
 
 // --- Testimonials, clients, OSS ---
-await upsertBySlug(payload, 'testimonials', 'placeholder-1', {
-  quote: 'Placeholder testimonial — replace with verified client quote before publish.',
-  authorName: 'CTO',
-  authorRole: 'Chief Technology Officer',
-  company: 'Confidential',
-})
-await upsertBySlug(payload, 'testimonials', 'placeholder-2', {
-  quote: 'Second placeholder — engineering-led delivery with clear outcomes.',
-  authorName: 'VP Engineering',
-  authorRole: 'VP Engineering',
-  company: 'Confidential',
-})
+await upsertByWhere(
+  payload,
+  'testimonials',
+  { authorName: { equals: 'CTO' }, company: { equals: 'Confidential' } },
+  {
+    quote: 'Placeholder testimonial — replace with verified client quote before publish.',
+    authorName: 'CTO',
+    authorRole: 'Chief Technology Officer',
+    company: 'Confidential',
+  },
+)
+await upsertByWhere(
+  payload,
+  'testimonials',
+  { authorName: { equals: 'VP Engineering' }, company: { equals: 'Confidential' } },
+  {
+    quote: 'Second placeholder — engineering-led delivery with clear outcomes.',
+    authorName: 'VP Engineering',
+    authorRole: 'VP Engineering',
+    company: 'Confidential',
+  },
+)
 
 for (let i = 1; i <= 4; i++) {
   try {
-    await upsertBySlug(payload, 'clients', `client-${i}`, {
+    await upsertByWhere(payload, 'clients', { name: { equals: `Client ${i}` } }, {
       name: `Client ${i}`,
       kind: 'client',
       displayOrder: i,
