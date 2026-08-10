@@ -119,6 +119,30 @@ Expected. Blank admin is an **image / routing** problem, not this log line.
 
 ---
 
+## Media upload fails ("Failed to save 1 files")
+
+If admin shows a generic upload error with no detail, check container logs:
+
+```bash
+docker logs <container> --tail 50 | grep -i EACCES
+```
+
+**Cause:** the `genmedha-media` volume at `/app/media` was owned by `root`, but the app
+runs as `nextjs` (uid 1001).
+
+**Fix (one-time on VPS):**
+
+```bash
+CID=$(docker ps --filter name=genmedhahub-genmedhahubstaging -q | head -1)
+docker exec -u root $CID chown -R nextjs:nodejs /app/media
+```
+
+Until Cloudflare R2 credentials are set in Dokploy, uploads use this local volume.
+After R2 is configured with real keys (not `PASTE_` / `YOUR_` placeholders), media
+goes to object storage instead.
+
+---
+
 ## Do **not** re-scaffold
 
 `create-payload-app` would wipe collections, migrations, and domain setup.
