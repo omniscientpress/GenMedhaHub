@@ -173,10 +173,21 @@ export function faqAccordionBlock(
   heading: string,
   faqs: { question: string; answer: string }[],
 ) {
+  const padded =
+    faqs.length >= 2
+      ? faqs
+      : [
+          ...faqs,
+          {
+            question: 'How do we start?',
+            answer:
+              'Book a discovery call — we respond within two business days with an honest fit assessment.',
+          },
+        ]
   return {
     blockType: 'faqAccordion' as const,
     heading,
-    faqs: faqs.map((faq) => ({ question: faq.question, answer: richText(faq.answer) })),
+    faqs: padded.map((faq) => ({ question: faq.question, answer: richText(faq.answer) })),
     emitSchema: true,
   }
 }
