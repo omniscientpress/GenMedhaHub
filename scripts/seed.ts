@@ -61,8 +61,6 @@ const {
   thankYouLayout,
 } = await import('./seed/layouts')
 const { CASE_STUDIES, postBody, padToWords } = await import('./seed/copy')
-const { SEED_CLIENTS, SEED_TESTIMONIALS } = await import('./seed/copy/social-proof')
-const { clientLogoSvg, avatarSvg, ensureSeedImage } = await import('./seed/media')
 const {
   SERVICES,
   PLATFORMS,
@@ -173,7 +171,11 @@ await payload.updateGlobal({
       ]},
       { heading: 'Platforms', links: [{ label: 'Medusa', link: '/platforms/medusa' }] },
       { heading: 'Migrate', links: [{ label: 'Magento to Medusa', link: '/migrate/adobe-commerce-to-medusa' }] },
-      { heading: 'Company', links: [{ label: 'About', link: '/company' }, { label: 'Contact', link: '/contact' }] },
+      { heading: 'Company', links: [
+        { label: 'About', link: '/company' },
+        { label: 'Contact', link: '/contact' },
+        { label: 'GenMedha AI (genmedha.com)', link: 'https://genmedha.com' },
+      ]},
     ],
     showTrustBadges: false,
     mobileCtaLabel: 'Book a call',
@@ -487,93 +489,36 @@ for (let i = 0; i < CASE_STUDIES.length; i++) {
   caseStudyIds.push(id)
 }
 
-// --- Testimonials, clients, OSS ---
-const testimonialIds: (string | number)[] = []
-for (const t of SEED_TESTIMONIALS) {
-  const headshotId = await ensureSeedImage(payload, {
-    filename: `seed-headshot-${t.key}.png`,
-    alt: `${t.authorName} headshot placeholder`,
-    svg: avatarSvg(t.initials, t.avatarColor),
-    user: adminUser as { id: string | number; roles?: ('admin' | 'editor')[] },
-  })
-  const platformId = t.platformSlug ? platformIds[t.platformSlug] : undefined
-  const { id } = await upsertByWhere(
-    payload,
-    'testimonials',
-    { authorName: { equals: t.authorName }, company: { equals: t.company } },
-    {
-      quote: t.quote,
-      authorName: t.authorName,
-      authorRole: t.authorRole,
-      company: t.company,
-      headshot: headshotId,
-      ...(platformId ? { platform: platformId } : {}),
-    },
-    upsertOpts,
-  )
-  testimonialIds.push(id)
-}
-
-// Remove legacy placeholder testimonials
-for (const legacy of [
-  { authorName: 'CTO', company: 'Confidential' },
-  { authorName: 'VP Engineering', company: 'Confidential' },
-] as const) {
-  const stale = await payload.find({
+// --- Testimonials & clients: intentionally not seeded (ch. addendum, Aug 2026 founder decision) ---
+// No fictional social proof — remove any placeholder testimonials/client logos/headshots left
+// from earlier seed runs. Real testimonials and Google Reviews will be added via admin later.
+if (refreshContent) {
+  const staleTestimonials = await payload.find({
     collection: 'testimonials',
-    where: {
-      and: [
-        { authorName: { equals: legacy.authorName } },
-        { company: { equals: legacy.company } },
-      ],
-    },
-    limit: 1,
+    limit: 100,
     overrideAccess: true,
   })
-  if (stale.docs[0]) {
-    await payload.delete({
-      collection: 'testimonials',
-      id: stale.docs[0].id,
-      overrideAccess: true,
-    })
+  for (const doc of staleTestimonials.docs) {
+    await payload.delete({ collection: 'testimonials', id: doc.id, overrideAccess: true })
   }
-}
 
-for (const client of SEED_CLIENTS) {
-  const logoId = await ensureSeedImage(payload, {
-    filename: `seed-client-${client.slug}.png`,
-    alt: `${client.name} logo placeholder`,
-    svg: clientLogoSvg(client.wordmark, client.color),
-    user: adminUser as { id: string | number; roles?: ('admin' | 'editor')[] },
-  })
-  await upsertByWhere(
-    payload,
-    'clients',
-    { name: { equals: client.name } },
-    {
-      name: client.name,
-      logo: logoId,
-      kind: 'client',
-      displayOrder: client.displayOrder,
-    },
-    upsertOpts,
-  )
-}
-
-// Remove legacy Client 1..4 placeholders without logos
-for (let i = 1; i <= 4; i++) {
-  const stale = await payload.find({
+  const staleClients = await payload.find({
     collection: 'clients',
-    where: { name: { equals: `Client ${i}` } },
-    limit: 1,
+    limit: 100,
     overrideAccess: true,
   })
-  if (stale.docs[0]) {
-    await payload.delete({
-      collection: 'clients',
-      id: stale.docs[0].id,
-      overrideAccess: true,
-    })
+  for (const doc of staleClients.docs) {
+    await payload.delete({ collection: 'clients', id: doc.id, overrideAccess: true })
+  }
+
+  const staleSeedMedia = await payload.find({
+    collection: 'media',
+    where: { filename: { contains: 'seed-' } },
+    limit: 100,
+    overrideAccess: true,
+  })
+  for (const doc of staleSeedMedia.docs) {
+    await payload.delete({ collection: 'media', id: doc.id, overrideAccess: true })
   }
 }
 
@@ -639,7 +584,7 @@ const heroMediaId =
 function layoutForPage(p: (typeof pageRoutes)[number]) {
   switch (p.pageKind) {
     case 'home':
-      return homeLayout(caseStudyIds, heroMediaId, testimonialIds)
+      return homeLayout(caseStudyIds, heroMediaId)
     case 'index':
       if (p.routePath === '/work') {
         return workIndexLayout(caseStudyIds)

@@ -75,7 +75,8 @@ export function SiteFooter({ shell }: { shell: ShellContent }) {
 
         <div className="text-muted-foreground mt-8 flex flex-col items-center justify-between gap-2 text-sm sm:flex-row">
           <p>
-            © {new Date().getFullYear()} {brandName}. All rights reserved.
+            © {new Date().getFullYear()} {brandName} — a brand of GenMedha Solutions Private
+            Limited. All rights reserved.
           </p>
           <div className="flex gap-4">
             <Link href="/legal/privacy" className="hover:text-foreground underline-offset-2 hover:underline">
