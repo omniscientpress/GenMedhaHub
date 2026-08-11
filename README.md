@@ -1,7 +1,8 @@
 # GenMedha Hub
 
-Agency website platform — Phase 0 baseline: delivery machinery only (no design tokens,
-collections, or marketing routes yet).
+Agency website platform for **GenMedha Hub** — ecommerce-first digital engineering studio.
+
+**Plan & scope:** [docs/project-scope.md](./docs/project-scope.md) · **Phase prompts:** [docs/phase-prompts.md](./docs/phase-prompts.md) · **Full blueprint:** [docs/plan/](./docs/plan/)
 
 ## Stack pins
 
