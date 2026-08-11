@@ -38,25 +38,38 @@ const { getPayload } = await import('payload')
 const { default: config } = await import('../src/payload.config')
 const {
   richText,
+  richTextFromParagraphs,
   padText,
-  heroBlock,
-  ctaBandBlock,
-  faqAccordionBlock,
   upsertBySlug,
   upsertByWhere,
   setSeedUser,
 } = await import('./seed/helpers')
 const {
   homeLayout,
-  serviceLayout,
+  richServiceLayout,
+  platformLayout,
+  solutionLayout,
+  marketLayout,
+  richIndexLayout,
   indexLayout,
+  workIndexLayout,
+  insightsIndexLayout,
   aboutLayout,
   pricingLayout,
   contactLayout,
   legalLayout,
   thankYouLayout,
 } = await import('./seed/layouts')
+const { CASE_STUDIES, postBody, padToWords } = await import('./seed/copy')
+const {
+  SERVICES,
+  PLATFORMS,
+  SOLUTIONS,
+  MARKETS,
+  MIGRATION_PAIRS,
+} = await import('./seed/copy/catalog')
 const { LAUNCH_CATEGORIES } = await import('../src/payload/constants')
+const { PLATFORM_SLUG_NAMES } = await import('../src/payload/constants')
 
 const payload = await getPayload({ config })
 
@@ -143,7 +156,7 @@ await payload.updateGlobal({
         { label: 'Web App Development', link: '/services/web-app-development' },
       ]},
       { label: 'Platforms', link: '/platforms', dropdown: [{ label: 'Medusa', link: '/platforms/medusa' }] },
-      { label: 'Migrate', link: '/migrate', dropdown: [{ label: 'Magento to Medusa', link: '/migrate/magento-to-medusa' }] },
+      { label: 'Migrate', link: '/migrate', dropdown: [{ label: 'Magento to Medusa', link: '/migrate/adobe-commerce-to-medusa' }] },
       { label: 'Solutions', link: '/solutions', dropdown: [{ label: 'B2B Commerce', link: '/solutions/b2b' }] },
       { label: 'Work', link: '/work' },
       { label: 'Markets', link: '/markets' },
@@ -157,7 +170,7 @@ await payload.updateGlobal({
         { label: 'Web App Development', link: '/services/web-app-development' },
       ]},
       { heading: 'Platforms', links: [{ label: 'Medusa', link: '/platforms/medusa' }] },
-      { heading: 'Migrate', links: [{ label: 'Magento to Medusa', link: '/migrate/magento-to-medusa' }] },
+      { heading: 'Migrate', links: [{ label: 'Magento to Medusa', link: '/migrate/adobe-commerce-to-medusa' }] },
       { heading: 'Company', links: [{ label: 'About', link: '/company' }, { label: 'Contact', link: '/contact' }] },
     ],
     showTrustBadges: false,
@@ -223,6 +236,7 @@ const serviceSeeds = [
 
 const serviceIds: Record<string, string | number> = {}
 for (const s of serviceSeeds) {
+  const copy = SERVICES[s.slug]
   const { id } = await upsertBySlug(
     payload,
     'services',
@@ -231,17 +245,13 @@ for (const s of serviceSeeds) {
       title: s.title,
       servicePillar: s.pillar,
       serviceCategory: s.category,
-      shortPitch: `${s.title} — outcome-first delivery with published-pricing posture.`,
+      shortPitch: copy?.shortPitch ?? `${s.title} — outcome-first delivery with published-pricing posture.`,
       icon: s.icon,
       engagementModels: [{ name: 'Discovery', priceFrom: 'From $5K', typicalDuration: '2 weeks' }],
       proofPoints: s.pillar === 'build-grow'
         ? [{ text: 'Same Next.js/React/TypeScript core as this site — stack coherence proof (D1/D2).' }]
         : [],
-      layout: serviceLayout(
-        s.title,
-        `${s.title} — outcome-first delivery with published-pricing posture.`,
-        s.icon,
-      ),
+      layout: richServiceLayout(s.slug, s.title, s.icon),
     },
     upsertOpts,
   )
@@ -260,6 +270,7 @@ const platformSeeds = [
 
 const platformIds: Record<string, string | number> = {}
 for (const p of platformSeeds) {
+  const copy = PLATFORMS[p.slug]
   const { id } = await upsertBySlug(
     payload,
     'platform-hubs',
@@ -267,22 +278,15 @@ for (const p of platformSeeds) {
     {
       name: p.name,
       tier: p.tier,
-      positioningLine: `${p.name} — named platform guidance with sourced economics.`,
+      positioningLine: copy?.positioning ?? `${p.name} — named platform guidance with sourced economics.`,
       economics: {
-        costLine: p.slug === 'medusa' ? 'Medusa Cloud $29/$99/$299/mo, 0% GMV fee' : 'See footnote for partner estimates',
-        licenseNote: 'License and hosting economics vary by deployment model.',
+        costLine: copy?.economics.split('.')[0] ?? (p.slug === 'medusa' ? 'Medusa Cloud $29/$99/$299/mo, 0% GMV fee' : 'See footnote for partner estimates'),
+        licenseNote: copy?.economics ?? 'License and hosting economics vary by deployment model.',
         source: 'Vendor documentation and partner estimates — GenMedha Hub sets final numbers.',
       },
       eosDate: 'eosDate' in p ? p.eosDate : undefined,
       services: [serviceIds['ecommerce-builds']],
-      layout: [
-        heroBlock(`${p.name} platform hub`, p.name, 'Platforms'),
-        faqAccordionBlock('FAQ', [
-          { question: `When is ${p.name} the right fit?`, answer: 'Fit depends on revenue band, B2B complexity, and ownership goals.' },
-          { question: `When is ${p.name} wrong?`, answer: 'Honest counter-cases are documented on every hub page.' },
-        ]),
-        ctaBandBlock('Book a discovery call', 'Platform choice is economics — we model TCO before you commit.'),
-      ],
+      layout: platformLayout(p.slug, p.name),
     },
     upsertOpts,
   )
@@ -291,15 +295,32 @@ for (const p of platformSeeds) {
 
 // --- Migration pairs (6) ---
 const pairSeeds = [
-  { slug: 'magento-to-medusa', title: 'Migrate Magento to Medusa', source: 'adobe-commerce', target: 'medusa' },
-  { slug: 'shopify-to-medusa', title: 'Migrate Shopify to Medusa', source: 'shopify', target: 'medusa' },
-  { slug: 'woocommerce-to-medusa', title: 'Migrate WooCommerce to Medusa', source: 'woocommerce', target: 'medusa' },
-  { slug: 'shopify-to-vendure', title: 'Migrate Shopify to Vendure', source: 'shopify', target: 'vendure' },
-  { slug: 'magento-to-vendure', title: 'Migrate Magento to Vendure', source: 'adobe-commerce', target: 'vendure' },
-  { slug: 'adobe-commerce-to-accs', title: 'Migrate Adobe Commerce to ACCS', source: 'adobe-commerce', target: 'adobe-commerce-cloud-service' },
+  { source: 'adobe-commerce', target: 'medusa' },
+  { source: 'shopify', target: 'medusa' },
+  { source: 'woocommerce', target: 'medusa' },
+  { source: 'shopify', target: 'vendure' },
+  { source: 'adobe-commerce', target: 'vendure' },
+  { source: 'adobe-commerce', target: 'adobe-commerce-cloud-service' },
+] as const
+
+function migrationPairSlug(source: string, target: string): string {
+  const sourceSlug = PLATFORM_SLUG_NAMES[source] ?? source
+  const targetSlug = PLATFORM_SLUG_NAMES[target] ?? target
+  return `${sourceSlug}-to-${targetSlug}`
+}
+
+const DEFAULT_CUTOVER = [
+  { stepTitle: 'Discovery & architecture', detail: 'Integration map, data audit, and timeline band sign-off.', durationWeeks: '2' },
+  { stepTitle: 'Build & sync', detail: 'Target platform configured; catalog sync with validation jobs.', durationWeeks: '3–4' },
+  { stepTitle: 'Storefront parity', detail: 'Checkout, payments, and fulfillment smoke tests.', durationWeeks: '2–3' },
+  { stepTitle: 'Parallel run', detail: 'Both stacks live; SEO and order reconciliation.', durationWeeks: '2' },
+  { stepTitle: 'Cutover & monitor', detail: 'DNS switch, 301 map, 90-day monitoring.', durationWeeks: '1+' },
 ]
 
 for (const pair of pairSeeds) {
+  const pairKey = migrationPairSlug(pair.source, pair.target)
+  const copy = MIGRATION_PAIRS[`${pair.source}-to-${pair.target}`]
+  const isAdobeSource = pair.source === 'adobe-commerce'
   await upsertByWhere(
     payload,
     'migration-pages',
@@ -310,37 +331,54 @@ for (const pair of pairSeeds) {
       ],
     },
     {
-    title: pair.title,
-    sourcePlatform: platformIds[pair.source],
-    targetPlatform: platformIds[pair.target],
-    hero: { headline: pair.title, subhead: 'Zero-downtime migration with SEO preservation and rollback plan.' },
-    costOfStaying: richText('GMV fees, license costs, and EOS exposure quantified with sourced math only.'),
-    urgencyAnchor: { date: '2026-08-11', label: 'Magento 2.4.5/2.4.6 security support ends', source: 'Adobe/Magento EOS documentation' },
-    tcoBlock: {
-      comparisonRows: [{ item: 'Platform fees (3yr)', sourceCost: '$120K', targetCost: '$36K', note: 'Illustrative — footnoted at render' }],
-      methodologyNote: 'TCO methodology documented; every figure carries a citation footnote.',
+      slug: pairKey,
+      title: copy?.title ?? `Migrate ${pair.source} to ${pair.target}`,
+      sourcePlatform: platformIds[pair.source],
+      targetPlatform: platformIds[pair.target],
+      hero: {
+        headline: copy?.title ?? `Migrate to ${pair.target}`,
+        subhead: copy?.subhead ?? 'Zero-downtime migration with SEO preservation and rollback plan.',
+      },
+      costOfStaying: richText(copy?.costOfStaying ?? 'Platform fees and operational risk quantified with sourced math only.'),
+      urgencyAnchor: {
+        date: '2026-08-11',
+        label: isAdobeSource
+          ? 'Magento 2.4.5/2.4.6 security support ends'
+          : 'Evaluate TCO annually — GMV fees compound with growth',
+        source: isAdobeSource ? 'Adobe/Magento EOS documentation' : 'GenMedha Hub TCO methodology',
+      },
+      tcoBlock: {
+        comparisonRows: [{
+          item: 'Platform fees (3yr)',
+          sourceCost: '$120K',
+          targetCost: '$36K',
+          note: copy?.tcoNote ?? 'Illustrative — footnoted at render',
+        }],
+        methodologyNote: 'TCO methodology documented; every figure carries a citation footnote.',
+      },
+      cutoverSteps: copy?.cutoverSteps ?? DEFAULT_CUTOVER,
+      rollbackPlan: richText(copy?.rollbackPlan ?? 'Named rollback triggers and procedure — rehearsed before cutover.'),
+      seoPreservation: [
+        { action: 'Full crawl export pre-migration' },
+        { action: '301 map with canonical validation' },
+        { action: 'Post-launch monitoring for 90 days' },
+      ],
+      timelineBands: [
+        { band: '6–8 weeks', scope: 'Simple catalog', priceFrom: 'From $75K' },
+        { band: '12–16 weeks', scope: 'Mid-market B2B', priceFrom: 'From $150K' },
+      ],
+      whenNotToMigrate: richText(copy?.whenNotToMigrate ?? 'Hyvä rebuild, version upgrades, or stay-put may be the honest answer.'),
+      faqs: (copy?.faqs ?? []).map((faq) => ({
+        question: faq.question,
+        answer: richText(faq.answer),
+      })).concat(
+        Array.from({ length: Math.max(0, 4 - (copy?.faqs.length ?? 0)) }, (_, i) => ({
+          question: `Migration FAQ ${i + 1}?`,
+          answer: richText('Pair-specific answer with sourced claims only.'),
+        })),
+      ),
     },
-    cutoverSteps: Array.from({ length: 5 }, (_, i) => ({
-      stepTitle: `Cutover step ${i + 1}`,
-      detail: 'Named step in zero-downtime sequence.',
-      durationWeeks: '1',
-    })),
-    rollbackPlan: richText('Named rollback triggers and procedure — non-negotiable for de-risking.'),
-    seoPreservation: [
-      { action: 'Full crawl export pre-migration' },
-      { action: '301 map with canonical validation' },
-      { action: 'Post-launch monitoring for 90 days' },
-    ],
-    timelineBands: [
-      { band: '6–8 weeks', scope: 'Simple catalog', priceFrom: 'From $75K' },
-      { band: '12–16 weeks', scope: 'Mid-market B2B', priceFrom: 'From $150K' },
-    ],
-    whenNotToMigrate: richText('Hyvä rebuild in 4–8 weeks, version upgrades, or ACCS for Adobe-native shops may be the honest answer.'),
-    faqs: Array.from({ length: 4 }, (_, i) => ({
-      question: `Pair FAQ ${i + 1}?`,
-      answer: richText('Pair-specific answer with sourced claims only.'),
-    })),
-  },
+    upsertOpts,
   )
 }
 
@@ -352,6 +390,7 @@ for (const [, modelKey, title] of [
   ['subscriptions', 'subscriptions', 'Subscriptions'],
   ['multi-region', 'multi-region', 'Multi-region'],
 ] as const) {
+  const copy = SOLUTIONS[modelKey]
   await upsertByWhere(
     payload,
     'solutions',
@@ -359,18 +398,17 @@ for (const [, modelKey, title] of [
     {
       title,
       modelKey,
-      painSummary: `${title} — model-specific pain summary for index cards.`,
-      capabilityChecklist: [
+      painSummary: copy?.pain ?? `${title} — model-specific pain summary.`,
+      capabilityChecklist: copy?.capabilities.map((c) => ({
+        capability: c.title,
+        platformNote: c.body,
+      })) ?? [
         { capability: 'Core commerce flows', platformNote: 'Medusa recipe exists' },
         { capability: 'Operational tooling', platformNote: 'Platform-dependent' },
         { capability: 'Scale path', platformNote: 'Ownership economics considered' },
       ],
       recommendedPlatforms: [platformIds.medusa],
-      layout: indexLayout(title, `${title} — model-specific capabilities and platform fit.`, [
-        { icon: 'build', title: 'Core flows', body: 'Catalog, cart, checkout patterns for this commerce model.' },
-        { icon: 'migrate', title: 'Platform fit', body: 'Honest guidance on Medusa, Shopify, and legacy platforms.' },
-        { icon: 'support', title: 'Scale path', body: 'Ownership economics and multi-region considerations.' },
-      ]),
+      layout: solutionLayout(modelKey, title),
     },
     upsertOpts,
   )
@@ -384,59 +422,64 @@ const marketSeeds = [
 ] as const
 
 for (const m of marketSeeds) {
+  const copy = MARKETS[m.region]
   await upsertByWhere(payload, 'markets', { region: { equals: m.region } }, {
     name: m.name,
     region: m.region,
-    marketContext: richText(padText(
-      `${m.name} market context: demand landscape, buyer behavior, and sector notes. Logistical facts only — no physical-office claims (D5). Remote-first delivery with timezone overlap and contracting clarity.`,
+    marketContext: richTextFromParagraphs(copy?.context ?? padText(
+      `${m.name} market context: demand landscape, buyer behavior, and sector notes.`,
       400,
     )),
     engagementLogistics: {
-      timezoneOverlap: m.region === 'india' ? 'IST = UTC+5:30; 4–6 h overlap with CET mornings' : 'US business hours overlap with IST evenings',
-      contractingNotes: 'USD/EUR contracting via Omniscient Press entity; jurisdiction documented in MSA.',
-      paymentNotes: 'USD wire, Wise, and local options where applicable.',
+      timezoneOverlap: copy?.logistics.split('.')[0] ?? (m.region === 'india' ? 'IST = UTC+5:30; 4–6 h overlap with CET mornings' : 'US business hours overlap with IST evenings'),
+      contractingNotes: copy?.logistics ?? 'USD/EUR contracting via Omniscient Press entity; jurisdiction documented in MSA.',
+      paymentNotes: copy?.context.includes('INR') ? 'INR/USD via Omniscient Press; international wire where required.' : 'USD wire, Wise, and local options where applicable.',
     },
-    complianceNotes: richText(
+    complianceNotes: richTextFromParagraphs(copy?.compliance ?? (
       m.region === 'india'
         ? 'India DPDP Act 2023 — data protection summary cross-referencing privacy register (D7).'
-        : 'UAE PDPL and Saudi PDPL for GCC engagements — cross-referencing privacy register (D7).',
-    ),
-    layout: indexLayout(
-      `Serving ${m.name}`,
-      `Remote-first delivery for ${m.name} — timezone overlap, contracting, and compliance documented.`,
-      [
-        { icon: 'support', title: 'Timezone overlap', body: m.region === 'india' ? 'IST overlap with EU mornings and US evenings.' : 'US business hours overlap with IST evenings.' },
-        { icon: 'build', title: 'Contracting', body: 'USD/EUR via Omniscient Press entity — jurisdiction in MSA.' },
-        { icon: 'migrate', title: 'Compliance', body: m.region === 'india' ? 'India DPDP Act 2023 summary available.' : 'UAE PDPL and Saudi PDPL for GCC engagements.' },
-      ],
-    ),
+        : 'UAE PDPL and Saudi PDPL for GCC engagements — cross-referencing privacy register (D7).'
+    )),
+    layout: marketLayout(m.region, m.name),
   },
     upsertOpts,
   )
 }
 
-// --- Case studies (3 placeholders) ---
+// --- Case studies (P4 launch set) ---
+const legacyCaseTitles = [
+  'Store performance uplift phase 1',
+  'Store performance uplift phase 2',
+  'Store performance uplift phase 3',
+]
 const caseStudyIds: (string | number)[] = []
-for (let i = 1; i <= 3; i++) {
-  const outcomeTitle = `Store performance uplift phase ${i}`
+for (let i = 0; i < CASE_STUDIES.length; i++) {
+  const cs = CASE_STUDIES[i]
   const { id } = await upsertByWhere(
     payload,
     'case-studies',
-    { outcomeTitle: { equals: outcomeTitle } },
+    refreshContent
+      ? {
+          or: [
+            { outcomeTitle: { equals: cs.outcomeTitle } },
+            { outcomeTitle: { equals: legacyCaseTitles[i] } },
+          ],
+        }
+      : { outcomeTitle: { equals: cs.outcomeTitle } },
     {
-    outcomeTitle,
-    client: 'Internal project',
-    industry: 'Commerce engineering',
-    platformTo: platformIds.medusa,
-    services: [serviceIds['ecommerce-builds']],
-    commerceModels: ['dtc'],
-    challenge: richText('Challenge narrative from build journal.'),
-    approach: richText('Approach documented with verifiable steps.'),
-    solution: richText('Solution using Medusa and Next.js stack.'),
-    results: richText('Results with dated metrics only.'),
-    metrics: [{ label: 'Lighthouse Performance', value: '95+', context: 'Mobile score, audit date 2026-07-01' }],
-    isPlaceholder: true,
-  },
+      outcomeTitle: cs.outcomeTitle,
+      client: cs.client,
+      industry: cs.industry,
+      platformTo: platformIds.medusa,
+      services: [serviceIds['ecommerce-builds']],
+      commerceModels: ['dtc'],
+      challenge: richTextFromParagraphs(cs.challenge),
+      approach: richTextFromParagraphs(cs.approach),
+      solution: richTextFromParagraphs(cs.solution),
+      results: richTextFromParagraphs(cs.results),
+      metrics: [...cs.metrics],
+      isPlaceholder: cs.client === 'GenMedha Hub',
+    },
     upsertOpts,
   )
   caseStudyIds.push(id)
@@ -488,17 +531,24 @@ for (const [, name] of [['medusa-plugin', 'GenMedha Medusa Plugin'], ['next-star
   })
 }
 
-// --- Posts (3) ---
+// --- Posts (P4 — ≥800 words each) ---
 for (let i = 1; i <= 3; i++) {
   const title = `Migration economics deep-dive ${i}`
-  await upsertByWhere(payload, 'posts', { title: { equals: title } }, {
-    title,
-    excerpt: 'Founder-voice analysis of migration TCO and EOS risk.',
-    author: authorId,
-    categories: [(await payload.find({ collection: 'categories', limit: 1 })).docs[0]?.id],
-    body: richText('Answer-first article body — expand in content track.'),
-    relatedService: [serviceIds['replatforming-migration']],
-  })
+  await upsertByWhere(
+    payload,
+    'posts',
+    { title: { equals: title } },
+    {
+      title,
+      excerpt:
+        'Founder-voice analysis of migration TCO, EOS risk, and when stay-put beats replatforming — sourced math only.',
+      author: authorId,
+      categories: [(await payload.find({ collection: 'categories', limit: 1, overrideAccess: true })).docs[0]?.id],
+      body: richTextFromParagraphs(padToWords(postBody(i), 820)),
+      relatedService: [serviceIds['replatforming-migration']],
+    },
+    upsertOpts,
+  )
 }
 
 // --- Pages (block-composed routes) ---
@@ -523,34 +573,44 @@ const pageRoutes = [
   { routePath: '/thank-you/newsletter', pageKind: 'thank-you', title: 'Thank You — Newsletter' },
 ] as const
 
+const heroMediaId =
+  siteSettings?.logo && typeof siteSettings.logo === 'object'
+    ? siteSettings.logo.id
+    : typeof siteSettings?.logo === 'number' || typeof siteSettings?.logo === 'string'
+      ? siteSettings.logo
+      : undefined
+
 function layoutForPage(p: (typeof pageRoutes)[number]) {
   switch (p.pageKind) {
     case 'home':
-      return homeLayout(caseStudyIds)
+      return homeLayout(caseStudyIds, heroMediaId)
     case 'index':
+      if (p.routePath === '/work') {
+        return workIndexLayout(caseStudyIds)
+      }
+      if (p.routePath === '/insights') {
+        return insightsIndexLayout()
+      }
       if (p.routePath === '/services') {
-        return indexLayout('Services', 'Commerce engineering and Build & Grow — five pillars, no lock-in.', [
-          { icon: 'build', title: 'Ecommerce Builds', body: 'Headless storefronts you own.' },
-          { icon: 'migrate', title: 'Replatforming', body: 'Migration with SEO and rollback plans.' },
-          { icon: 'web-app', title: 'Web Apps', body: 'Product engineering on Next.js/React.' },
-        ])
+        return richIndexLayout('services')
       }
       if (p.routePath === '/platforms') {
-        return indexLayout('Platforms', 'Named platform hubs with sourced economics — Medusa flagship.', [
-          { icon: 'build', title: 'Medusa', body: '0% GMV fee — flagship ownership stack.' },
-          { icon: 'migrate', title: 'Adobe Commerce', body: 'EOS-aware guidance and ACCS paths.' },
-          { icon: 'support', title: 'Shopify / Woo', body: 'Honest fit and migration counter-cases.' },
-        ])
+        return richIndexLayout('platforms')
       }
       if (p.routePath === '/migrate') {
-        return indexLayout('Migrate', 'Pair-specific migration pages with TCO, cutover, and SEO preservation.', [
-          { icon: 'migrate', title: 'Magento → Medusa', body: 'Mid-market replatforming with rollback.' },
-          { icon: 'migrate', title: 'Shopify → Medusa', body: 'Ownership economics for growing DTC.' },
-          { icon: 'support', title: 'When not to migrate', body: 'Hyvä rebuild or version upgrade may win.' },
-        ])
+        return richIndexLayout('migrate')
       }
-      return indexLayout(p.title, `Browse ${p.title.toLowerCase()} — CMS-driven index from Payload.`, [
-        { icon: 'build', title: p.title, body: 'Placeholder index cards — enrich in admin.' },
+      if (p.routePath === '/solutions') {
+        return richIndexLayout('solutions')
+      }
+      if (p.routePath === '/markets') {
+        return richIndexLayout('markets')
+      }
+      if (p.routePath === '/resources') {
+        return richIndexLayout('resources')
+      }
+      return indexLayout('Index', 'Browse content — CMS-driven index from Payload.', [
+        { icon: 'build', title: 'Explore', body: 'Explore related content from navigation.' },
         { icon: 'support', title: 'Proof', body: 'Case studies and insights linked from nav.' },
         { icon: 'web-app', title: 'Contact', body: 'Book a discovery call to scope your path.' },
       ])
