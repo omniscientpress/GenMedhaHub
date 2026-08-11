@@ -15,13 +15,20 @@ import {
   metricsCalloutRowBlock,
   pillarCardsBlock,
   richTextSectionBlock,
+  trustStripBlock,
+  testimonialBlock,
 } from './helpers'
 
-export function homeLayout(caseStudyIds: (string | number)[], heroMediaId?: string | number) {
+export function homeLayout(
+  caseStudyIds: (string | number)[],
+  heroMediaId?: string | number,
+  testimonialIds: (string | number)[] = [],
+) {
   const { comparison } = HOME
   return [
     heroBlock(HOME.headline, HOME.subhead, HOME.eyebrow, heroMediaId),
     richTextSectionBlock(HOME.actionLayer),
+    trustStripBlock('clients', 'Teams we have shipped for'),
     metricsCalloutRowBlock([
       { label: 'GMV fee (Medusa Cloud)', value: '0%', context: 'Vendor docs Aug 2026 — vs marketplace take rates' },
       { label: 'Typical migration window', value: '6–16 wks', context: 'Catalog complexity dependent' },
@@ -73,6 +80,8 @@ export function homeLayout(caseStudyIds: (string | number)[], heroMediaId?: stri
       source: 'manual' as const,
       caseStudies: caseStudyIds,
     },
+    ...(testimonialIds[0] ? [testimonialBlock(testimonialIds[0], 'quote')] : []),
+    ...(testimonialIds[1] ? [testimonialBlock(testimonialIds[1], 'card')] : []),
     {
       blockType: 'pricingTable' as const,
       heading: 'Engagement models',

@@ -192,6 +192,25 @@ export function faqAccordionBlock(
   }
 }
 
+export function trustStripBlock(
+  source: 'clients' | 'partner-badges' | 'oss' = 'clients',
+  heading?: string,
+) {
+  return {
+    blockType: 'trustStrip' as const,
+    source,
+    heading,
+  }
+}
+
+export function testimonialBlock(testimonialId: string | number, layout: 'quote' | 'card' = 'quote') {
+  return {
+    blockType: 'testimonial' as const,
+    testimonial: testimonialId,
+    layout,
+  }
+}
+
 type UpsertOptions = { refresh?: boolean }
 
 export async function upsertByWhere<T extends Record<string, unknown>>(
