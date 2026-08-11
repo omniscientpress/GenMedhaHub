@@ -1,4 +1,4 @@
-import { BRAND, HOME, LEGAL } from './copy'
+import { BRAND, COMPANY, HOME, LEGAL } from './copy'
 import {
   INDEX_PAGES,
   MARKETS,
@@ -15,20 +15,40 @@ import {
   metricsCalloutRowBlock,
   pillarCardsBlock,
   richTextSectionBlock,
-  trustStripBlock,
-  testimonialBlock,
 } from './helpers'
 
-export function homeLayout(
-  caseStudyIds: (string | number)[],
-  heroMediaId?: string | number,
-  testimonialIds: (string | number)[] = [],
-) {
+/** Dual-currency engagement bands — India is the primary market; USD shown for US/UK/UAE/GCC prospects.
+ *  INR figures are rounded, illustrative reference points (approximate FX) — final currency and
+ *  quote are confirmed in the proposal, never invented as precise conversions. */
+export const PRICING_FOOTNOTE =
+  'Illustrative bands — INR shown for India-based engagements, USD for international. Approximate reference exchange rate; final currency and quote confirmed in your proposal after discovery.'
+
+export const ENGAGEMENT_TIERS = [
+  {
+    name: 'Discovery',
+    priceFrom: 'From ₹4,00,000 / $5,000',
+    features: [{ feature: 'Architecture + TCO' }, { feature: 'Honest go/no-go' }, { feature: '2 weeks' }],
+    ctaKey: 'book-call' as const,
+  },
+  {
+    name: 'Build',
+    priceFrom: 'From ₹60,00,000 / $75,000',
+    features: [{ feature: 'Headless storefront' }, { feature: 'CMS + CI/CD' }, { feature: 'Launch support' }],
+    ctaKey: 'book-call' as const,
+  },
+  {
+    name: 'Migration',
+    priceFrom: 'From ₹1,20,00,000 / $150,000',
+    features: [{ feature: 'Zero-downtime cutover' }, { feature: 'SEO 301 map' }, { feature: 'Rollback plan' }],
+    ctaKey: 'get-audit' as const,
+  },
+]
+
+export function homeLayout(caseStudyIds: (string | number)[], heroMediaId?: string | number) {
   const { comparison } = HOME
   return [
     heroBlock(HOME.headline, HOME.subhead, HOME.eyebrow, heroMediaId),
     richTextSectionBlock(HOME.actionLayer),
-    trustStripBlock('clients', 'Teams we have shipped for'),
     metricsCalloutRowBlock([
       { label: 'GMV fee (Medusa Cloud)', value: '0%', context: 'Vendor docs Aug 2026 — vs marketplace take rates' },
       { label: 'Typical migration window', value: '6–16 wks', context: 'Catalog complexity dependent' },
@@ -80,32 +100,11 @@ export function homeLayout(
       source: 'manual' as const,
       caseStudies: caseStudyIds,
     },
-    ...(testimonialIds[0] ? [testimonialBlock(testimonialIds[0], 'quote')] : []),
-    ...(testimonialIds[1] ? [testimonialBlock(testimonialIds[1], 'card')] : []),
     {
       blockType: 'pricingTable' as const,
       heading: 'Engagement models',
-      tiers: [
-        {
-          name: 'Discovery',
-          priceFrom: 'From $5K',
-          features: [{ feature: 'Architecture + TCO' }, { feature: 'Honest go/no-go' }, { feature: '2 weeks' }],
-          ctaKey: 'book-call' as const,
-        },
-        {
-          name: 'Build',
-          priceFrom: 'From $75K',
-          features: [{ feature: 'Headless storefront' }, { feature: 'CMS + CI/CD' }, { feature: 'Launch support' }],
-          ctaKey: 'book-call' as const,
-        },
-        {
-          name: 'Migration',
-          priceFrom: 'From $150K',
-          features: [{ feature: 'Zero-downtime cutover' }, { feature: 'SEO 301 map' }, { feature: 'Rollback plan' }],
-          ctaKey: 'get-audit' as const,
-        },
-      ],
-      footnote: 'Illustrative bands — final SOW after discovery.',
+      tiers: ENGAGEMENT_TIERS,
+      footnote: PRICING_FOOTNOTE,
     },
     faqAccordionBlock('Frequently asked questions', [...HOME.faqs]),
     ctaBandBlock(
@@ -377,12 +376,12 @@ export function aboutLayout() {
       'Company',
     ),
     richTextSectionBlock(
-      `${BRAND.name} helps mid-market and growth-stage brands own their commerce stack. We build on Medusa, Next.js, and Payload — the same technology powering this site — so prospects audit our standards directly.\n\nWe are the execution layer replatforming consultants forget to include: discovery, build, migration, apps, and retainers under one protocol. Digital marketing stays a client-only value-add — not a public nav pillar.\n\nFounded 2024 under Omniscient Press. Principal engineers lead every engagement — no account-manager shell game.`,
+      `${BRAND.name} helps mid-market and growth-stage brands own their commerce stack. We build on Medusa, Next.js, and Payload — the same technology powering this site — so prospects audit our standards directly.\n\nWe are the execution layer replatforming consultants forget to include: discovery, build, migration, apps, and retainers under one protocol.\n\n${BRAND.name} is a brand of ${COMPANY.legalName}, an Indian private limited company. Our sister site, ${BRAND.sisterSite.url.replace('https://', '')}, covers ${BRAND.sisterSite.focus} — a separate line of work from the commerce engineering and Build & Grow services on this site.`,
     ),
     metricsCalloutRowBlock([
-      { label: 'Founded', value: '2024', context: 'Omniscient Press entity' },
+      { label: 'Legal entity', value: COMPANY.legalName, context: 'Registered private limited company, India' },
       { label: 'Delivery', value: 'Remote-first', context: 'Markets pages document timezone overlap' },
-      { label: 'Open source', value: '2+ repos', context: 'Commerce tooling on GitHub' },
+      { label: 'Offices', value: '2 (India)', context: 'Vijayawada (registered) and Hyderabad' },
       { label: 'Stack', value: 'Medusa + Next + Payload', context: 'Same core as genmedha.in' },
     ]),
     featureGridBlock('How we work', [
@@ -391,6 +390,9 @@ export function aboutLayout() {
       { icon: 'support', title: 'Post-launch', body: 'Retainer or clean handover — your choice.' },
       { icon: 'web-app', title: 'Build & Grow', body: 'Web and mobile apps on shared React/TypeScript.' },
     ]),
+    richTextSectionBlock(
+      `Our offices\n\n${COMPANY.offices.map((o) => `${o.label}: ${o.address}`).join('\n\n')}`,
+    ),
     ctaBandBlock('Work with us', 'Principal engineers on every engagement.', 'book-call'),
   ]
 }
@@ -407,31 +409,13 @@ export function pricingLayout() {
     {
       blockType: 'pricingTable' as const,
       heading: 'Engagement bands',
-      tiers: [
-        {
-          name: 'Discovery',
-          priceFrom: 'From $5K',
-          features: [{ feature: 'Architecture review' }, { feature: 'TCO model' }, { feature: 'Go/no-go recommendation' }],
-          ctaKey: 'book-call' as const,
-        },
-        {
-          name: 'Build',
-          priceFrom: 'From $75K',
-          features: [{ feature: 'Headless storefront' }, { feature: 'CMS integration' }, { feature: 'Launch support' }],
-          ctaKey: 'book-call' as const,
-        },
-        {
-          name: 'Migration',
-          priceFrom: 'From $150K',
-          features: [{ feature: 'Zero-downtime cutover' }, { feature: 'SEO preservation' }, { feature: 'Rollback plan' }],
-          ctaKey: 'get-audit' as const,
-        },
-      ],
-      footnote: 'Illustrative bands — final SOW after discovery.',
+      tiers: ENGAGEMENT_TIERS,
+      footnote: PRICING_FOOTNOTE,
     },
     faqAccordionBlock('Pricing FAQ', [
       { question: 'Do you bill hourly?', answer: 'Discovery and builds are scoped fixed-fee bands — not open-ended T&M.' },
       { question: 'What changes the band?', answer: 'Catalog size, B2B complexity, payment methods, ERP integrations, and cutover window.' },
+      { question: 'Do you invoice in INR or USD?', answer: 'Both — INR for India-based clients, USD for international clients. GST applies to INR invoices as per Indian law.' },
     ]),
     ctaBandBlock('Get a scoped quote', 'Discovery publishes the range before you commit.', 'book-call'),
   ]
@@ -444,7 +428,7 @@ export function contactLayout() {
       `Tell us platform, timeline, and team — we respond within two business days at ${BRAND.email}.`,
     ),
     richTextSectionBlock(
-      'For migration audits, include current platform, catalog SKU band, and EOS deadlines. For Build & Grow apps, describe users and must-have integrations.\n\nIndia · USA · UAE & GCC — remote-first with timezone overlap documented on market pages. No physical-office claims; contracting via Omniscient Press with USD/INR options.',
+      `For migration audits, include current platform, catalog SKU band, and EOS deadlines. For Build & Grow apps, describe users and must-have integrations.\n\nIndia · USA · UK · UAE & GCC — remote-first delivery with timezone overlap documented on market pages. ${BRAND.name} is a brand of ${COMPANY.legalName}. Invoicing available in INR or USD.`,
     ),
     featureGridBlock('What to include', [
       { icon: 'migrate', title: 'Migration inquiries', body: 'Source platform, revenue band, SEO dependency, and target go-live window.' },
@@ -452,6 +436,9 @@ export function contactLayout() {
       { icon: 'web-app', title: 'Build & Grow', body: 'User roles, auth model, and integrations.' },
       { icon: 'support', title: 'Retainers', body: 'Current stack, incident history, and desired SLA tier.' },
     ]),
+    richTextSectionBlock(
+      `Our offices\n\n${COMPANY.offices.map((o) => `${o.label}: ${o.address}`).join('\n\n')}\n\nGrievance Officer: ${COMPANY.grievanceOfficer.name}, ${COMPANY.grievanceOfficer.role} — ${COMPANY.grievanceOfficer.phone}`,
+    ),
     ctaBandBlock('Prefer a call?', 'Pick a slot that works for your timezone.', 'book-call'),
   ]
 }
@@ -464,7 +451,7 @@ export function legalLayout(title: string) {
       : 'terms'
   const doc = LEGAL[key]
   return [
-    heroBlock(doc.title, `Last updated August 2026 — ${BRAND.name} / Omniscient Press.`),
+    heroBlock(doc.title, `Last updated August 2026 — ${BRAND.name}, a brand of ${COMPANY.legalName}.`),
     richTextSectionBlock(doc.body),
     ctaBandBlock('Questions?', `Email ${BRAND.email} for privacy or legal inquiries.`),
   ]
