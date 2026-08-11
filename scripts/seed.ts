@@ -61,6 +61,8 @@ const {
   thankYouLayout,
 } = await import('./seed/layouts')
 const { CASE_STUDIES, postBody, padToWords } = await import('./seed/copy')
+const { SEED_CLIENTS, SEED_TESTIMONIALS } = await import('./seed/copy/social-proof')
+const { clientLogoSvg, avatarSvg, ensureSeedImage } = await import('./seed/media')
 const {
   SERVICES,
   PLATFORMS,
@@ -486,38 +488,92 @@ for (let i = 0; i < CASE_STUDIES.length; i++) {
 }
 
 // --- Testimonials, clients, OSS ---
-await upsertByWhere(
-  payload,
-  'testimonials',
-  { authorName: { equals: 'CTO' }, company: { equals: 'Confidential' } },
-  {
-    quote: 'Placeholder testimonial — replace with verified client quote before publish.',
-    authorName: 'CTO',
-    authorRole: 'Chief Technology Officer',
-    company: 'Confidential',
-  },
-)
-await upsertByWhere(
-  payload,
-  'testimonials',
-  { authorName: { equals: 'VP Engineering' }, company: { equals: 'Confidential' } },
-  {
-    quote: 'Second placeholder — engineering-led delivery with clear outcomes.',
-    authorName: 'VP Engineering',
-    authorRole: 'VP Engineering',
-    company: 'Confidential',
-  },
-)
+const testimonialIds: (string | number)[] = []
+for (const t of SEED_TESTIMONIALS) {
+  const headshotId = await ensureSeedImage(payload, {
+    filename: `seed-headshot-${t.key}.png`,
+    alt: `${t.authorName} headshot placeholder`,
+    svg: avatarSvg(t.initials, t.avatarColor),
+    user: adminUser as { id: string | number; roles?: ('admin' | 'editor')[] },
+  })
+  const platformId = t.platformSlug ? platformIds[t.platformSlug] : undefined
+  const { id } = await upsertByWhere(
+    payload,
+    'testimonials',
+    { authorName: { equals: t.authorName }, company: { equals: t.company } },
+    {
+      quote: t.quote,
+      authorName: t.authorName,
+      authorRole: t.authorRole,
+      company: t.company,
+      headshot: headshotId,
+      ...(platformId ? { platform: platformId } : {}),
+    },
+    upsertOpts,
+  )
+  testimonialIds.push(id)
+}
 
-for (let i = 1; i <= 4; i++) {
-  try {
-    await upsertByWhere(payload, 'clients', { name: { equals: `Client ${i}` } }, {
-      name: `Client ${i}`,
-      kind: 'client',
-      displayOrder: i,
+// Remove legacy placeholder testimonials
+for (const legacy of [
+  { authorName: 'CTO', company: 'Confidential' },
+  { authorName: 'VP Engineering', company: 'Confidential' },
+] as const) {
+  const stale = await payload.find({
+    collection: 'testimonials',
+    where: {
+      and: [
+        { authorName: { equals: legacy.authorName } },
+        { company: { equals: legacy.company } },
+      ],
+    },
+    limit: 1,
+    overrideAccess: true,
+  })
+  if (stale.docs[0]) {
+    await payload.delete({
+      collection: 'testimonials',
+      id: stale.docs[0].id,
+      overrideAccess: true,
     })
-  } catch (err) {
-    console.warn(`Skipped client-${i} (logo upload required):`, err instanceof Error ? err.message : err)
+  }
+}
+
+for (const client of SEED_CLIENTS) {
+  const logoId = await ensureSeedImage(payload, {
+    filename: `seed-client-${client.slug}.png`,
+    alt: `${client.name} logo placeholder`,
+    svg: clientLogoSvg(client.wordmark, client.color),
+    user: adminUser as { id: string | number; roles?: ('admin' | 'editor')[] },
+  })
+  await upsertByWhere(
+    payload,
+    'clients',
+    { name: { equals: client.name } },
+    {
+      name: client.name,
+      logo: logoId,
+      kind: 'client',
+      displayOrder: client.displayOrder,
+    },
+    upsertOpts,
+  )
+}
+
+// Remove legacy Client 1..4 placeholders without logos
+for (let i = 1; i <= 4; i++) {
+  const stale = await payload.find({
+    collection: 'clients',
+    where: { name: { equals: `Client ${i}` } },
+    limit: 1,
+    overrideAccess: true,
+  })
+  if (stale.docs[0]) {
+    await payload.delete({
+      collection: 'clients',
+      id: stale.docs[0].id,
+      overrideAccess: true,
+    })
   }
 }
 
@@ -583,7 +639,7 @@ const heroMediaId =
 function layoutForPage(p: (typeof pageRoutes)[number]) {
   switch (p.pageKind) {
     case 'home':
-      return homeLayout(caseStudyIds, heroMediaId)
+      return homeLayout(caseStudyIds, heroMediaId, testimonialIds)
     case 'index':
       if (p.routePath === '/work') {
         return workIndexLayout(caseStudyIds)
