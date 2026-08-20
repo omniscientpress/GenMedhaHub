@@ -1,7 +1,10 @@
 import type { Metadata } from 'next'
 
+import {
+  metadataForCollectionOrCmsPage,
+  renderCollectionOrCmsPage,
+} from '@/lib/cms/collection-or-page'
 import { getSolutionBySlug } from '@/lib/cms/fetch'
-import { metadataForLayoutDocument, renderLayoutDocument } from '@/lib/cms/layout-route'
 
 export const revalidate = 300
 
@@ -12,29 +15,28 @@ interface SolutionPageProps {
 export async function generateMetadata({ params }: SolutionPageProps): Promise<Metadata> {
   const { slug } = await params
   const solution = await getSolutionBySlug(slug)
-  return metadataForLayoutDocument({
+  return metadataForCollectionOrCmsPage({
     document: solution,
-    path: `/solutions/${slug}`,
+    routePath: `/solutions/${slug}`,
     getTitle: (doc) => doc.title,
     getDescription: (doc) => doc.painSummary,
-    getSeo: (doc) => doc.seo,
   })
 }
 
 export default async function SolutionPage({ params }: SolutionPageProps) {
   const { slug } = await params
   const solution = await getSolutionBySlug(slug)
+  const routePath = `/solutions/${slug}`
 
-  return renderLayoutDocument({
+  return renderCollectionOrCmsPage({
     document: solution,
-    path: `/solutions/${slug}`,
+    routePath,
     breadcrumbs: [
       { label: 'Home', href: '/' },
       { label: 'Solutions', href: '/solutions' },
-      { label: solution?.title ?? slug, href: `/solutions/${slug}` },
+      { label: solution?.title ?? slug, href: routePath },
     ],
     getTitle: (doc) => doc.title,
     getDescription: (doc) => doc.painSummary,
-    getBlockContext: (doc) => ({ relatedCaseStudies: doc.relatedCaseStudies }),
   })
 }

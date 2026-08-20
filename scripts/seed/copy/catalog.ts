@@ -208,7 +208,69 @@ export const PLATFORMS: Record<
       { icon: 'support', title: 'Ops handover', body: 'Runbooks for cloud ops vs self-host differences.' },
     ],
     faqs: [
-      { question: 'ACCS vs Medusa?', answer: 'ACCS preserves Adobe stack; Medusa removes license/GVM dynamics — TCO decides.' },
+      { question: 'ACCS vs Medusa?', answer: 'ACCS preserves Adobe stack; Medusa removes license/GMV dynamics — TCO decides.' },
+    ],
+  },
+  hydrogen: {
+    positioning:
+      'Shopify Hydrogen — React storefronts on Shopify when you need headless UX but commerce stays on Shopify.',
+    intro: `Hydrogen is Shopify's official React framework for custom storefronts. It is the right conversation when your constraint is theme flexibility — not Shopify's GMV fees or checkout ownership.\n\nWe implement Hydrogen when stay-put on Shopify is the honest TCO answer and the storefront must exceed Online Store 2.0. We also document the exit: Hydrogen teams often already have the React skills that make a later Medusa + Next.js move cheaper.\n\nThis hub does not pretend Hydrogen removes Plus fees. Payments, apps, and checkout still run through Shopify. If ownership economics are the pain, see Shopify → Medusa.`,
+    rightFit:
+      'Shopify Plus merchants who need custom UX, already committed to Shopify apps/checkout, engineering team comfortable with React.',
+    wrongFit:
+      'GMV fees or checkout lock-in is the actual problem — Hydrogen will not fix that. Model a Medusa migration instead.',
+    economics:
+      'Shopify Plus + Hydrogen hosting (Oxygen or self-host) + app stack. No GMV reduction vs theme storefronts.',
+    features: [
+      { icon: 'build', title: 'Hydrogen storefronts', body: 'React Server Components patterns, Storefront API, Oxygen or custom host.' },
+      { icon: 'migrate', title: 'When to leave Shopify', body: 'If fees or checkout ownership dominate, see /migrate/shopify-to-medusa.' },
+      { icon: 'support', title: 'App & checkout reality', body: 'Checkout Extensibility and apps remain Shopify-native — we say so upfront.' },
+    ],
+    faqs: [
+      { question: 'Hydrogen vs Next.js on Medusa?', answer: 'Hydrogen keeps Shopify as the system of record. Next.js on Medusa moves commerce off Shopify. Different jobs.' },
+      { question: 'Can you take over an existing Hydrogen repo?', answer: 'Yes — after an audit sprint for Storefront API usage, Oxygen config, and checkout extensions.' },
+      { question: 'Does Hydrogen help Magento merchants?', answer: 'No. Magento paths are Adobe Commerce, Magento Open Source, Hyvä, ACCS, or Medusa/Vendure.' },
+    ],
+  },
+  'magento-open-source': {
+    positioning:
+      'Magento Open Source — community Magento without Adobe Commerce licenses; still an EOS and SI-cost conversation.',
+    intro: `Magento Open Source (the community edition) is not Adobe Commerce, and treating them as one platform is how budgets blow up. There is no Adobe license line — but there is still hosting, extension debt, PHP upgrade tax, and security-patch cadence.\n\nWe help Open Source merchants choose: stay and harden (including Hyvä where frontend is the pain), plan a version upgrade, or replatform to Medusa or Vendure with the same cutover discipline we use on Adobe Commerce pairs.\n\nFear-selling “Magento is dead” is not a strategy. Sourced patch timelines and TCO are.`,
+    rightFit:
+      'Existing Magento Open Source catalogs, in-house PHP/Magento skills, or a need to exit before patch risk exceeds budget.',
+    wrongFit:
+      'Greenfield commerce with no Magento estate — start on Medusa. Adobe-licensed shops belong on the Adobe Commerce hub.',
+    economics:
+      'No Adobe license; infra + SI/extension cost dominate. Compare 3-year ops to Medusa Cloud + owned storefront.',
+    features: [
+      { icon: 'migrate', title: 'EOS & patch planning', body: 'Version matrix, extension compatibility, risk register — sourced dates only.' },
+      { icon: 'build', title: 'Hyvä / stay-put', body: 'Frontend rebuild when platform stay-put wins on TCO.' },
+      { icon: 'migrate', title: 'Open Source → Medusa', body: 'Same SEO, rollback, and parallel-run bar as Adobe pairs.' },
+    ],
+    faqs: [
+      { question: 'Is Open Source “free Magento”?', answer: 'The license is free. Hosting, extensions, and people are not. We model all three.' },
+      { question: 'Hyvä on Open Source?', answer: 'Often the fastest performance win if checkout and catalog model still fit Magento.' },
+      { question: 'Same migration playbook as Adobe Commerce?', answer: 'Cutover discipline is the same. License and support contracts differ — discovery captures that.' },
+    ],
+  },
+  webflow: {
+    positioning:
+      'Webflow — design-led marketing sites and small catalogs; we migrate when checkout and ops outgrow the Designer.',
+    intro: `Webflow is excellent for marketing sites, content operations, and small catalogs. It becomes expensive — in people time, not just fees — when merchandising rules, ERP sync, subscriptions, or B2B pricing appear.\n\nWe do not “hate Webflow.” We keep it for the brand site when that is the honest split, and we move commerce to Medusa + Next.js when the Designer is being asked to be an OMS.\n\nIf you only need a brochure with a few SKUs, stay. If you are past that, read the Webflow → Medusa playbook.`,
+    rightFit:
+      'Content-first brands, small SKU counts, Designer-fluent teams, marketing site remaining on Webflow after commerce split.',
+    wrongFit:
+      'High SKU, B2B rules, or heavy checkout customization — plan a commerce stack, do not stretch Webflow Ecommerce.',
+    economics:
+      'Webflow hosting + Ecommerce plan vs Medusa Cloud/VPS. Designer hours often dominate TCO before software fees do.',
+    features: [
+      { icon: 'build', title: 'Stay-put Webflow', body: 'CMS, SEO, and design-system hygiene when commerce is not the constraint.' },
+      { icon: 'migrate', title: 'Webflow → Medusa', body: 'Catalog, CMS, and URL map — /migrate/webflow-to-medusa.' },
+      { icon: 'web-app', title: 'Split architecture', body: 'Webflow for marketing, Medusa for cart — when that split is cleaner.' },
+    ],
+    faqs: [
+      { question: 'Can marketing stay on Webflow?', answer: 'Yes — a common outcome. Commerce moves; the Designer keeps the story.' },
+      { question: 'Webflow CMS to Payload?', answer: 'Content model mapped in discovery; not every Collection becomes a Payload type 1:1.' },
     ],
   },
 }
@@ -288,6 +350,34 @@ export const SOLUTIONS: Record<
       { question: 'Single stack multi-region?', answer: 'Yes with region modules — vs separate stores when brand requires.' },
     ],
   },
+  'd2c-launch': {
+    title: 'D2C Launch',
+    pain: 'First storefronts stall on stack choice, payments, and ops before the brand has a right to a six-month SI.',
+    intro: `D2C Launch is for brands shipping their first serious owned storefront — not a theme experiment and not a full replatform. The job is to get catalog, checkout, content, and analytics live on a stack you can still own in year three.\n\nWe default to Medusa + Next.js + Payload with a published timeline band. Shopify remains an honest option when speed-to-first-sale beats ownership — we will say so in discovery rather than force a headless build.\n\nThis page is the launch path. Scaled DTC operations live on /solutions/dtc-commerce.`,
+    capabilities: [
+      { icon: 'build', title: 'MVP commerce scope', body: 'Catalog, cart, checkout, CMS, and analytics — explicitly listed in the SOW.' },
+      { icon: 'web-app', title: 'Brand site + store', body: 'Payload or split Webflow marketing site when that split is cleaner.' },
+      { icon: 'support', title: 'Launch ops', body: 'Runbooks, handover, optional retainer — no forced lock-in after go-live.' },
+    ],
+    faqs: [
+      { question: 'Shopify instead of Medusa for launch?', answer: 'If you need first sale in weeks with no engineering bench, yes — we document that counter-case.' },
+      { question: 'How is this different from Ecommerce Builds?', answer: 'Builds cover greenfield at any scale. D2C Launch is the first-store narrative, pricing band, and decision checklist.' },
+    ],
+  },
+  'headless-storefront': {
+    title: 'Headless Storefront',
+    pain: 'Coupled themes block conversion work, performance budgets, and app experiences that share one catalog.',
+    intro: `A headless storefront separates merchandising UX from the commerce engine. We build Next.js storefronts against Medusa, Shopify Storefront API (Hydrogen), or Vendure — whichever engine discovery selects.\n\nHeadless is not a religion. If a Hyvä Magento frontend or a well-built Shopify theme meets the performance and editorial bar, we say stay coupled.\n\nThis site is itself a Next.js + Payload frontend. The patterns we sell are the patterns we run.`,
+    capabilities: [
+      { icon: 'build', title: 'Next.js App Router', body: 'Server components, streaming, CI performance budgets.' },
+      { icon: 'migrate', title: 'API contract', body: 'Typed SDK against Medusa, Shopify, or Vendure — one storefront, one domain model.' },
+      { icon: 'web-app', title: 'CMS decoupling', body: 'Payload (or Hydrogen + Shopify CMS) so merchandisers are not waiting on deploys for copy.' },
+    ],
+    faqs: [
+      { question: 'Headless on Shopify or Medusa?', answer: 'Shopify/Hydrogen if you keep Shopify commerce. Medusa + Next if you want to own checkout and drop GMV tax.' },
+      { question: 'Will headless slow the team down?', answer: 'It can, if CMS and preview are an afterthought. We scope preview and merchandiser workflow in discovery.' },
+    ],
+  },
 }
 
 export const MARKETS: Record<
@@ -300,14 +390,14 @@ export const MARKETS: Record<
   }
 > = {
   india: {
-    context: `India is a primary delivery hub for ${BRAND.name} — engineering leadership runs IST with overlap into EU mornings and US evenings. Demand spans D2C brands replatforming off marketplace dependency, B2B manufacturers modernizing dealer portals, and GCC-facing exporters needing multi-currency storefronts.\n\nWe sell remote-first: no physical-office claims. Contracting flows through Omniscient Press with USD/INR settlement options documented in the MSA.`,
+    context: `India is a primary delivery hub for ${BRAND.name} — engineering leadership runs IST with overlap into EU mornings and US evenings. Demand spans D2C brands replatforming off marketplace dependency, B2B manufacturers modernizing dealer portals, and GCC-facing exporters needing multi-currency storefronts.\n\nWe sell remote-first from documented India offices — no vanity WeWork claims abroad. Contracting flows through ${BRAND.legalName} with INR/USD settlement options documented in the MSA.`,
     logistics:
       'IST (UTC+5:30) core hours 10:00–19:00 IST. Overlap: 4–6 hours with CET mornings; US East afternoon/evening overlap for standups and demos.',
     compliance:
       'India Digital Personal Data Protection Act 2023 — data processing summaries, consent flows, and cross-border transfer notes documented in privacy register. Payment integrations include Razorpay and international wire where required.',
     features: [
       { icon: 'support', title: 'Timezone overlap', body: 'EU morning + US evening coverage from IST.' },
-      { icon: 'build', title: 'Contracting', body: 'INR/USD via Omniscient Press entity.' },
+      { icon: 'build', title: 'Contracting', body: `INR/USD via ${BRAND.legalName}.` },
       { icon: 'migrate', title: 'Local payments', body: 'UPI-adjacent flows via gateway partners.' },
     ],
   },
@@ -333,6 +423,18 @@ export const MARKETS: Record<
       { icon: 'migrate', title: 'Arabic/English', body: 'RTL storefront patterns in Next.js.' },
       { icon: 'build', title: 'Regional payments', body: 'Mada, Apple Pay GCC, BNPL where fit.' },
       { icon: 'support', title: 'PDPL', body: 'Processing records and DPA templates.' },
+    ],
+  },
+  'united-kingdom': {
+    context: `United Kingdom clients typically engage for Magento/Adobe exits, Shopify Plus fee reviews, and B2B portals that need GBP pricing, UK VAT, and GDPR-aware data handling. ${BRAND.name} delivers remote-first from India with documented UK business-hours overlap — we do not list a fictional London office.\n\nContracting is through ${BRAND.legalName}. Invoices can be issued in GBP or USD as agreed in the MSA. Discovery workshops sit in UK morning / IST afternoon bands so product and engineering stakeholders can share a live session without overnight-only standups.\n\nThis page is logistics and compliance context for UK work. Platform and migration decisions still live on the hubs and pair pages.`,
+    logistics:
+      'UK standups 09:00–12:00 UK time where needed; engineering continues IST with written handoff. Cutover windows scheduled for UK low-traffic periods (typically late evening UK).',
+    compliance:
+      'UK GDPR and PECR apply to UK personal data. We document lawful basis, subprocessors (hosting, email, calendar), and transfer notes in the privacy register and MSA. PCI scope is minimised via Stripe or equivalent tokenisation. This page is not legal advice.',
+    features: [
+      { icon: 'build', title: 'GBP or USD invoicing', body: 'Currency agreed in the MSA — GST/VAT treatment documented per engagement.' },
+      { icon: 'migrate', title: 'UK VAT & payments', body: 'VAT display and Stripe/UK acquiring patterns scoped in discovery.' },
+      { icon: 'support', title: 'UK hours overlap', body: 'Morning UK workshops; IST delivery with same-day notes.' },
     ],
   },
 }
@@ -477,6 +579,30 @@ export const MIGRATION_PAIRS: Record<
       { question: 'Timeline?', answer: 'Often 8–12 weeks for mid-market — data volume dependent.' },
     ],
   },
+  'webflow-to-medusa': {
+    title: 'Migrate Webflow Ecommerce to Medusa',
+    subhead: 'Keep the Designer for brand when it still earns its keep — move catalog, cart, and ops to an owned stack.',
+    costOfStaying:
+      'Webflow Ecommerce is priced and operated as a marketing CMS with checkout attached. Designer hours, CMS collection limits, and missing B2B/ERP primitives compound as SKU count and order complexity grow. Software fees are often not the largest line — people time is.',
+    whenNotToMigrate:
+      'Stay on Webflow when SKU count is small, checkout is simple, and the team is Designer-fluent. A common honest split: Webflow keeps the marketing site; only commerce moves.',
+    rollbackPlan:
+      'Webflow site remains live. Rollback re-enables Webflow Ecommerce checkout links and pauses Medusa order ingestion. CMS content on Webflow is not deleted during parallel run.',
+    cutoverSteps: [
+      { stepTitle: 'Collection & SKU audit', detail: 'Webflow CMS collections, Ecommerce products, and custom fields inventoried.', durationWeeks: '1–2' },
+      { stepTitle: 'Catalog import', detail: 'Products and variants into Medusa with validation against live Webflow.', durationWeeks: '2' },
+      { stepTitle: 'Storefront & CMS split', detail: 'Next.js commerce; Webflow or Payload for editorial — decided in discovery.', durationWeeks: '3–4' },
+      { stepTitle: 'Payments & fulfilment', detail: 'Stripe (or existing provider) parity tests; shipping rules rebuilt explicitly.', durationWeeks: '1–2' },
+      { stepTitle: 'URL map & cutover', detail: '301s for product/collection paths; DNS or reverse-proxy split if marketing stays on Webflow.', durationWeeks: '1–2' },
+    ],
+    tcoNote: 'Designer time vs Medusa build is the real comparison — we do not invent Webflow list prices.',
+    faqs: [
+      { question: 'Do we have to leave Webflow entirely?', answer: 'No. Many engagements keep Webflow for marketing and move only cart/checkout.' },
+      { question: 'CMS blog posts?', answer: 'Stay on Webflow, or migrate to Payload — scoped as a content workstream.' },
+      { question: 'Memberships / logic in Webflow?', answer: 'Custom logic is the usual trigger to leave Ecommerce — we map it in discovery, not in a template.' },
+      { question: 'SEO for Designer-generated paths?', answer: 'Crawl export + 301 map. Webflow’s path rules are part of the audit, not an afterthought.' },
+    ],
+  },
 }
 
 export const INDEX_PAGES = {
@@ -499,50 +625,50 @@ export const INDEX_PAGES = {
     intro: `Platform choice is a 3-year finance decision disguised as a tech decision. Each hub documents fit, counter-fit, and migration pairs.\n\nWe footnote vendor numbers at render time — no invented savings.`,
     features: [
       { icon: 'build', title: 'Medusa', body: '0% GMV — /platforms/medusa' },
+      { icon: 'support', title: 'Shopify / Hydrogen', body: 'Stay, headless, or exit — /platforms/shopify and /platforms/hydrogen' },
+      { icon: 'migrate', title: 'Adobe / Magento OSS', body: 'EOS-aware — /platforms/adobe-commerce and /platforms/magento-open-source' },
+      { icon: 'build', title: 'Webflow', body: 'Design-led until commerce outgrows it — /platforms/webflow' },
       { icon: 'build', title: 'Vendure', body: 'GraphQL enterprise — /platforms/vendure' },
-      { icon: 'support', title: 'Shopify', body: 'Stay or exit — /platforms/shopify' },
-      { icon: 'migrate', title: 'Adobe Commerce', body: 'EOS-aware — /platforms/adobe-commerce' },
       { icon: 'build', title: 'WooCommerce', body: 'SMB to scale — /platforms/woocommerce' },
-      { icon: 'migrate', title: 'ACCS', body: 'Adobe cloud — /platforms/adobe-commerce-cloud-service' },
     ],
   },
   migrate: {
     headline: 'Migrate',
-    subhead: 'Six pair-specific playbooks — TCO, cutover, SEO, rollback, and when not to migrate.',
-    intro: `Migration pages are the highest-stakes content on this site. Each pair includes cost-of-staying narrative, urgency anchors where EOS applies, timeline bands, and honest when-not-to-migrate sections.\n\nStart with the pair that matches your source platform — or book discovery if you are multi-brand.`,
+    subhead: 'Pair playbooks plus a legacy-platform audit — TCO, cutover, SEO, rollback, and when not to migrate.',
+    intro: `Migration pages are the highest-stakes content on this site. Each pair includes cost-of-staying narrative, urgency anchors where EOS applies, timeline bands, and honest when-not-to-migrate sections.\n\nStart with the pair that matches your source platform, run a Legacy Platform Audit if you are not sure, or book discovery if you are multi-brand.`,
     features: [
       { icon: 'migrate', title: 'Magento → Medusa', body: '/migrate/adobe-commerce-to-medusa' },
       { icon: 'migrate', title: 'Shopify → Medusa', body: '/migrate/shopify-to-medusa' },
       { icon: 'migrate', title: 'WooCommerce → Medusa', body: '/migrate/woocommerce-to-medusa' },
-      { icon: 'migrate', title: 'Shopify → Vendure', body: '/migrate/shopify-to-vendure' },
-      { icon: 'migrate', title: 'Magento → Vendure', body: '/migrate/adobe-commerce-to-vendure' },
+      { icon: 'migrate', title: 'Webflow → Medusa', body: '/migrate/webflow-to-medusa' },
       { icon: 'migrate', title: 'Adobe → ACCS', body: '/migrate/adobe-commerce-to-accs' },
+      { icon: 'support', title: 'Legacy Platform Audit', body: '/migrate/legacy-audit' },
     ],
   },
   solutions: {
     headline: 'Solutions',
-    subhead: 'Commerce models — B2B, DTC, marketplace, subscriptions, multi-region.',
+    subhead: 'Commerce models and storefront patterns — B2B, DTC, launch, headless, marketplace, multi-region.',
     intro: `Model pages describe pains, capability checklists, and recommended platforms without pretending one stack fits all.\n\nUse these pages to align stakeholders before platform hub deep-dives.`,
     features: [
       { icon: 'build', title: 'B2B Commerce', body: '/solutions/b2b-commerce' },
       { icon: 'build', title: 'DTC Commerce', body: '/solutions/dtc-commerce' },
+      { icon: 'build', title: 'D2C Launch', body: '/solutions/d2c-launch' },
+      { icon: 'web-app', title: 'Headless Storefront', body: '/solutions/headless-storefront' },
       { icon: 'support', title: 'Marketplace', body: '/solutions/marketplace' },
-      { icon: 'web-app', title: 'Subscriptions', body: '/solutions/subscriptions' },
       { icon: 'migrate', title: 'Multi-region', body: '/solutions/multi-region' },
-      { icon: 'support', title: 'Discovery', body: 'Model workshop in 2-week sprint.' },
     ],
   },
   markets: {
     headline: 'Markets',
-    subhead: 'India · USA · UAE & GCC — remote-first logistics, contracting, and compliance.',
+    subhead: 'India · USA · UK · UAE & GCC — remote-first logistics, contracting, and compliance.',
     intro: `We document how we work in each region without fake local offices. Timezone overlap, currency, and privacy regimes are part of the SOW — not footnotes after signature.`,
     features: [
       { icon: 'support', title: 'India', body: '/markets/india' },
-      { icon: 'build', title: 'United States', body: '/markets/usa' },
+      { icon: 'build', title: 'United States', body: '/markets/united-states' },
+      { icon: 'web-app', title: 'United Kingdom', body: '/markets/united-kingdom' },
       { icon: 'migrate', title: 'UAE & GCC', body: '/markets/uae-gcc' },
       { icon: 'support', title: 'Remote-first', body: 'Principal engineers in every engagement.' },
-      { icon: 'build', title: 'Contracting', body: 'USD/EUR/INR per MSA.' },
-      { icon: 'web-app', title: 'Contact', body: '/contact for region-specific questions.' },
+      { icon: 'build', title: 'Contracting', body: 'INR / USD / GBP per MSA.' },
     ],
   },
   resources: {

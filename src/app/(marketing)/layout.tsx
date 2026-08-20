@@ -11,8 +11,12 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   metadataBase: new URL(serverUrl),
-  title: 'GenMedha Hub',
-  description: 'GenMedha Hub — digital agency. Site under construction.',
+  title: {
+    default: 'GenMedha Hub',
+    template: '%s · GenMedha Hub',
+  },
+  description:
+    'Commerce engineering, headless storefronts, and platform migration — Medusa, Next.js, and Payload. A brand of GenMedha Solutions Private Limited.',
   ...(isStagingOrPreview ? { robots: { index: false, follow: false } } : {}),
 }
 

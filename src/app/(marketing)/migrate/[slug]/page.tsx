@@ -22,8 +22,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { getMigrationPageBySlug } from '@/lib/cms/fetch'
+import { getMigrationPageBySlug, getPageByRoutePath } from '@/lib/cms/fetch'
+import { isPublishedDocument } from '@/lib/cms/document'
 import { publishedOrNotFound } from '@/lib/cms/layout-route'
+import { LayoutPage } from '@/components/cms/layout-page'
 import { isPopulated } from '@/lib/cms/relationships'
 import { faqPageJsonLd, lexicalPlainText } from '@/lib/cms/schema'
 import { buildPageMetadata } from '@/lib/cms/seo'
@@ -37,20 +39,51 @@ interface MigrationPageProps {
 export async function generateMetadata({ params }: MigrationPageProps): Promise<Metadata> {
   const { slug } = await params
   const page = await getMigrationPageBySlug(slug)
-  if (!page) return { title: 'Migration guide not found' }
+  if (page) {
+    return buildPageMetadata({
+      title: page.seo?.metaTitle?.trim() || page.title,
+      description: page.seo?.metaDescription?.trim() || page.hero.subhead,
+      ogImage: page.seo?.ogImage,
+      noindex: page.seo?.noindex,
+      path: `/migrate/${page.slug}`,
+    })
+  }
 
-  return buildPageMetadata({
-    title: page.seo?.metaTitle?.trim() || page.title,
-    description: page.seo?.metaDescription?.trim() || page.hero.subhead,
-    ogImage: page.seo?.ogImage,
-    noindex: page.seo?.noindex,
-    path: `/migrate/${page.slug}`,
-  })
+  const cmsPage = await getPageByRoutePath(`/migrate/${slug}`)
+  if (cmsPage) {
+    return buildPageMetadata({
+      title: cmsPage.seo?.metaTitle?.trim() || cmsPage.title,
+      description: cmsPage.seo?.metaDescription?.trim() || cmsPage.title,
+      ogImage: cmsPage.seo?.ogImage,
+      noindex: cmsPage.seo?.noindex,
+      path: `/migrate/${slug}`,
+    })
+  }
+
+  return { title: 'Migration guide not found' }
 }
 
 export default async function MigrationGuidePage({ params }: MigrationPageProps) {
   const { slug } = await params
-  const page = publishedOrNotFound(await getMigrationPageBySlug(slug))
+  const pair = await getMigrationPageBySlug(slug)
+
+  if (!pair || pair._status !== 'published') {
+    const cmsPage = await getPageByRoutePath(`/migrate/${slug}`)
+    if (isPublishedDocument(cmsPage)) {
+      return (
+        <LayoutPage
+          layout={cmsPage.layout}
+          breadcrumbs={[
+            { label: 'Home', href: '/' },
+            { label: 'Migrate', href: '/migrate' },
+            { label: cmsPage.title, href: `/migrate/${slug}` },
+          ]}
+        />
+      )
+    }
+  }
+
+  const page = publishedOrNotFound(pair)
   const source = isPopulated(page.sourcePlatform) ? page.sourcePlatform.name : 'Source'
   const target = isPopulated(page.targetPlatform) ? page.targetPlatform.name : 'Target'
 

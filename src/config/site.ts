@@ -13,9 +13,9 @@ export const announcementConfig = {
 
 export const ctaConfig = {
   headerLabel: 'Book a call',
-  headerHref: '/contact',
+  headerHref: '/book',
   mobileLabel: 'Book a call',
-  mobileHref: '/contact',
+  mobileHref: '/book',
   /** Analytics event name for mobile sticky CTA (ch. 4.2 acceptance). */
   mobileEventName: 'cta_click',
   mobileEventPayload: { action: 'book-call' },
@@ -26,7 +26,7 @@ export const siteConfig = {
   domain: 'genmedha.in',
   /** Legacy domain — middleware 301s all traffic to domain (genmedha.in). */
   legacyDomain: 'genmedhahub.com',
-  marketsStrip: 'Serving India · USA · UAE & GCC',
+  marketsStrip: 'Serving India · USA · UK · UAE & GCC',
   marketsHref: '/markets',
   showTrustBadges: false,
 } as const

@@ -29,7 +29,7 @@ export async function buildPageMetadata(input: PageSeoInput): Promise<Metadata> 
     input.description?.trim() ||
     seoDefaults?.defaultMetaDescription ||
     siteSettings?.tagline ||
-    'GenMedha Hub — digital agency.'
+    'GenMedha Hub — commerce engineering, migration, and Build & Grow app development.'
 
   let ogImageUrl: string | undefined
   if (isPopulatedMedia(input.ogImage)) {

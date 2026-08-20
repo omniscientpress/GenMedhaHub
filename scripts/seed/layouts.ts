@@ -2,6 +2,7 @@ import { BRAND, COMPANY, HOME, LEGAL } from './copy'
 import {
   INDEX_PAGES,
   MARKETS,
+  MIGRATION_PAIRS,
   PLATFORMS,
   SERVICES,
   SOLUTIONS,
@@ -53,7 +54,7 @@ export function homeLayout(caseStudyIds: (string | number)[], heroMediaId?: stri
       { label: 'GMV fee (Medusa Cloud)', value: '0%', context: 'Vendor docs Aug 2026 — vs marketplace take rates' },
       { label: 'Typical migration window', value: '6–16 wks', context: 'Catalog complexity dependent' },
       { label: 'Discovery sprint', value: '2 wks', context: 'Roadmap you keep either way' },
-      { label: 'Markets served', value: '3', context: 'India · USA · UAE & GCC remote-first' },
+      { label: 'Markets served', value: '4', context: 'India · USA · UK · UAE & GCC remote-first' },
     ]),
     richTextSectionBlock(HOME.outcomesIntro, true),
     featureGridBlock('If you\'re looking to:', [...HOME.lookingTo]),
@@ -214,9 +215,31 @@ export function marketLayout(region: string, name: string) {
     richTextSectionBlock(copy.context),
     featureGridBlock(`Working in ${name}`, copy.features),
     metricsCalloutRowBlock([
-      { label: 'Timezone overlap', value: region === 'india' ? 'IST core' : region === 'usa' ? 'US hours' : 'GST overlap', context: copy.logistics.split('.')[0] ?? copy.logistics },
+      {
+        label: 'Timezone overlap',
+        value:
+          region === 'india'
+            ? 'IST core'
+            : region === 'usa'
+              ? 'US hours'
+              : region === 'united-kingdom'
+                ? 'UK hours'
+                : 'GST overlap',
+        context: copy.logistics.split('.')[0] ?? copy.logistics,
+      },
       { label: 'Contracting', value: 'MSA-ready', context: copy.logistics.split('.').slice(1).join('.').trim() || copy.logistics },
-      { label: 'Compliance', value: region === 'india' ? 'DPDP 2023' : region === 'usa' ? 'CCPA/state' : 'PDPL', context: copy.compliance.split('.')[0] ?? copy.compliance },
+      {
+        label: 'Compliance',
+        value:
+          region === 'india'
+            ? 'DPDP 2023'
+            : region === 'usa'
+              ? 'CCPA/state'
+              : region === 'united-kingdom'
+                ? 'UK GDPR'
+                : 'PDPL',
+        context: copy.compliance.split('.')[0] ?? copy.compliance,
+      },
     ]),
     richTextSectionBlock(`Compliance & data protection\n\n${copy.compliance}`),
     ctaBandBlock(
@@ -440,6 +463,145 @@ export function contactLayout() {
       `Our offices\n\n${COMPANY.offices.map((o) => `${o.label}: ${o.address}`).join('\n\n')}\n\nGrievance Officer: ${COMPANY.grievanceOfficer.name}, ${COMPANY.grievanceOfficer.role} — ${COMPANY.grievanceOfficer.phone}`,
     ),
     ctaBandBlock('Prefer a call?', 'Pick a slot that works for your timezone.', 'book-call'),
+  ]
+}
+
+export function webflowMigrateLayout() {
+  const copy = MIGRATION_PAIRS['webflow-to-medusa']
+  return [
+    heroBlock(copy.title, copy.subhead, 'Migrate'),
+    richTextSectionBlock(copy.costOfStaying),
+    richTextSectionBlock(`When not to migrate\n\n${copy.whenNotToMigrate}`),
+    featureGridBlock(
+      'Cutover sequence',
+      copy.cutoverSteps.slice(0, 3).map((step) => ({
+        icon: 'migrate',
+        title: step.stepTitle,
+        body: `${step.detail} (${step.durationWeeks} wks)`,
+      })),
+    ),
+    richTextSectionBlock(`Rollback\n\n${copy.rollbackPlan}`),
+    faqAccordionBlock('Webflow migration FAQ', copy.faqs),
+    ctaBandBlock('Scope a Webflow exit', 'Tell us SKU count, CMS collections, and whether marketing should stay on Webflow.', 'get-audit'),
+  ]
+}
+
+export function bookLayout() {
+  return [
+    heroBlock(
+      'Book a discovery call',
+      'Forty-five minutes: highest-ROI path, readiness read, rough architecture, timeline band, and recommended engagement model. Yours whether we work together or not.',
+      'Start here',
+    ),
+    richTextSectionBlock(
+      `Cal.com scheduling is not live on this site yet. Until it is, send a short brief via the contact form or email ${BRAND.email} — we reply within two business days and propose a slot in your timezone.\n\nCome prepared with current platform, catalog size (SKU band), whether B2B rules or ERP sync matter, and any EOS or contract dates. We will not sell a replatform if stay-put, Hyvä, or a version upgrade is the honest answer.`,
+    ),
+    featureGridBlock('What you walk away with', [
+      { icon: 'migrate', title: 'Path, not a pitch deck', body: 'Stay-put, rebuild, or migrate — named, with a why.' },
+      { icon: 'build', title: 'Architecture sketch', body: 'Stack, integrations, and the first risks we would de-risk.' },
+      { icon: 'support', title: 'Timeline band', body: 'Weeks, not “it depends” without a range. Discovery then tightens it.' },
+      { icon: 'web-app', title: 'Engagement shape', body: 'Discovery sprint, build, migration, or retainer — mapped to your team.' },
+    ]),
+    comparisonTableBlock(
+      'Who should book',
+      ['Good fit', 'Wrong room'],
+      [
+        { criterion: 'Commerce', cells: ['Catalog, checkout, migration, or portal work', 'Pure brand/creative with no engineering need'] },
+        { criterion: 'Decision', cells: ['You can sponsor a 2-week discovery', 'You need a same-week theme tweak only'] },
+        { criterion: 'Geography', cells: ['India, USA, UK, UAE & GCC overlap', 'On-site-only staff augmentation'] },
+      ],
+    ),
+    faqAccordionBlock('Before you write', [
+      { question: 'Is this a sales demo?', answer: 'No. If we are a poor fit we will say so and point at the counter-case.' },
+      { question: 'Do you sign NDAs?', answer: 'Yes, after a first pass on scope. Send your paper to hello@genmedha.in.' },
+      { question: 'INR or USD?', answer: 'Both. India-based work is typically INR; US/UK/UAE/GCC typically USD or GBP as agreed in the MSA.' },
+    ]),
+    ctaBandBlock(
+      'Send a brief',
+      `Use the contact form — we will schedule the call by email until booking software is wired. ${BRAND.email}`,
+      'scope-app',
+    ),
+  ]
+}
+
+export function careersLayout() {
+  return [
+    heroBlock(
+      'Careers',
+      `We are hiring. ${BRAND.name} is a brand of ${COMPANY.legalName} — commerce engineering, not an AI lab. If you want to ship Medusa, Next.js, and migrations that survive cutover, write to us.`,
+      'Join the bench',
+    ),
+    richTextSectionBlock(
+      `We hire principal-minded engineers, not ticket queues. You will work on client commerce systems and on this site — same stack, same standards.\n\nOffices: ${COMPANY.offices.map((o) => o.address).join('; ')}. Delivery is remote-first across India with overlap into US, UK, and Gulf hours. We do not invent headcount or “Google-style perks” we do not run.\n\nOpen roles are scoped to delivery demand. There is no public ATS yet — apply by email.`,
+    ),
+    featureGridBlock('Roles we hire for', [
+      { icon: 'build', title: 'Commerce engineer (Medusa / Next.js)', body: 'Catalog, checkout, integrations, CI. TypeScript daily.' },
+      { icon: 'web-app', title: 'Full-stack (Payload / React)', body: 'CMS, admin, storefront, and the unglamorous glue.' },
+      { icon: 'mobile-app', title: 'Mobile (React Native)', body: 'When a client’s portal needs a companion app on the same domain model.' },
+      { icon: 'migrate', title: 'Migration engineer', body: 'ETL, 301 maps, parallel runs, rollback drills — calm under DNS cutover.' },
+      { icon: 'support', title: 'How to apply', body: `Email ${BRAND.email} with role interest, CV or GitHub, and a short note on a system you are proud of.` },
+      { icon: 'build', title: 'What to send', body: 'No cover-letter theatre. A repo, a postmortem, or a migration story beats adjectives.' },
+    ]),
+    faqAccordionBlock('Working here', [
+      { question: 'Visa sponsorship?', answer: 'India-based employment is the default. Cross-border contractor arrangements are case-by-case in the MSA — ask in your email.' },
+      { question: 'Internships?', answer: 'Not a standing programme. If we open one we will say so on this page.' },
+      { question: 'Is this genmedha.com hiring too?', answer: 'Different site, different work (AI / agentic). Apply here for commerce engineering on genmedha.in.' },
+    ]),
+    ctaBandBlock('Apply', `Send your note to ${BRAND.email} with the subject line “Careers — [role]”.`, 'scope-app'),
+  ]
+}
+
+export function legalIndexLayout() {
+  return [
+    heroBlock(
+      'Legal',
+      `${BRAND.name} is a brand of ${COMPANY.legalName}. Policies for genmedha.in.`,
+      'Policies',
+    ),
+    richTextSectionBlock(
+      `Registered Office: ${COMPANY.offices[0]!.address}\n\nCorporate Office: ${COMPANY.offices[1]!.address}\n\nGrievance Officer (DPDP Act 2023): ${COMPANY.grievanceOfficer.name}, ${COMPANY.grievanceOfficer.role} — ${COMPANY.grievanceOfficer.phone} — ${COMPANY.grievanceOfficer.email}`,
+    ),
+    featureGridBlock('Documents', [
+      { icon: 'support', title: 'Privacy Policy', body: 'Personal data, subprocessors, DPDP grievance route — /legal/privacy' },
+      { icon: 'build', title: 'Terms of Service', body: 'Website use, SOW/MSA relationship, Indian jurisdiction — /legal/terms' },
+      { icon: 'web-app', title: 'Cookie Policy', body: 'Essential vs analytics cookies, calendar embeds — /legal/cookies' },
+      { icon: 'migrate', title: 'Questions', body: `Email ${BRAND.email}. We do not offer legal advice through this form.` },
+    ]),
+    ctaBandBlock('Need a DPA or MSA template?', 'Those sit in contracting, not on this page. Start with a discovery brief.', 'scope-app'),
+  ]
+}
+
+export function legacyAuditLayout() {
+  return [
+    heroBlock(
+      'Legacy Platform Audit',
+      'A two-week discovery that tells you whether to stay, rebuild, or migrate — with sourced TCO, not a slide that only recommends our favourite stack.',
+      'Migrate',
+    ),
+    richTextSectionBlock(
+      `Most “audits” are presales. Ours is a paid discovery sprint: architecture, integration map, SEO risk, EOS dates where they apply, and three named paths (stay-put, rebuild on current platform, migrate).\n\nYou keep the artefacts whether you hire us to implement or not. Pricing sits in the Discovery band on /pricing (from ₹4,00,000 / $5,000 — illustrative until scoped).`,
+    ),
+    featureGridBlock('What the audit produces', [
+      { icon: 'migrate', title: 'Platform & integration map', body: 'Commerce engine, OMS/ERP, payments, search, CMS, custom apps.' },
+      { icon: 'build', title: 'TCO frame', body: '3-year fees, SI load, internal cost — vendor numbers footnoted, never invented.' },
+      { icon: 'support', title: 'SEO & cutover risk', body: 'URL inventory method, 301 approach, rollback posture — even if you stay.' },
+      { icon: 'web-app', title: 'Go / no-go', body: 'A written recommendation including “do not migrate this year” when that is true.' },
+    ]),
+    comparisonTableBlock(
+      'Audit vs full migration',
+      ['Legacy Platform Audit', 'Migration engagement'],
+      [
+        { criterion: 'Duration', cells: ['2 weeks', '6–16 weeks typical'] },
+        { criterion: 'Output', cells: ['Decision pack you keep', 'Production cutover'] },
+        { criterion: 'Commitment', cells: ['Discovery SOW only', 'Implementation SOW after sign-off'] },
+      ],
+    ),
+    faqAccordionBlock('Audit FAQ', [
+      { question: 'Which platforms?', answer: 'Magento / Adobe, Magento Open Source, Shopify, WooCommerce, Webflow Ecommerce, and mixed estates.' },
+      { question: 'Do you need production access?', answer: 'Read-only where possible. We document the access list in week 1. No standing production keys after the sprint unless a retainer starts.' },
+      { question: 'What if the answer is stay-put?', answer: 'Then that is the deliverable. We would rather lose a migration than win a regret.' },
+    ]),
+    ctaBandBlock('Request an audit', 'Tell us platform, SKU band, and any EOS date — we reply with fit and a draft SOW.', 'get-audit'),
   ]
 }
 

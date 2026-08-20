@@ -50,7 +50,7 @@ export function resolveShellContent(
   siteSettings: SiteSetting | null,
   ctaHeader?: { label: string; href: string },
 ): ShellContent {
-  const bookCall = ctaHeader ?? { label: 'Book a call', href: '/contact' }
+  const bookCall = ctaHeader ?? { label: 'Book a call', href: '/book' }
   const logo = isPopulatedMedia(siteSettings?.logo) ? siteSettings.logo : null
   const logoDark = isPopulatedMedia(siteSettings?.logoDark) ? siteSettings.logoDark : null
 
@@ -62,7 +62,7 @@ export function resolveShellContent(
     primaryNav: navigation ? cmsPrimaryNav(navigation) : fallbackNav,
     footerColumns: navigation ? cmsFooterColumns(navigation) : fallbackFooter,
     showTrustBadges: navigation?.showTrustBadges ?? false,
-    marketsStrip: navigation?.marketsStrip ?? 'Serving India · USA · UAE & GCC',
+    marketsStrip: navigation?.marketsStrip ?? 'Serving India · USA · UK · UAE & GCC',
     marketsHref: navigation?.marketsHref ?? '/markets',
     headerCtaLabel: bookCall.label,
     headerCtaHref: bookCall.href,
