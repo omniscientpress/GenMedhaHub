@@ -1,10 +1,6 @@
 /**
- * Primary navigation structure (ch. 3.3 order).
- * Placeholder until CMS `navigation.primaryNav` is wired in a later phase.
- *
- * Nine top-level items; dropdowns on Services, Platforms, Migrate, Solutions.
- * Scope note: Digital Marketing is not a pillar — Web App + Mobile App only under Build & Grow.
- * Marketing may be offered as a complimentary add-on on request, not surfaced in nav/footer.
+ * Fallback nav when CMS navigation global is empty.
+ * Must only contain URLs that exist on genmedha.in.
  */
 
 export interface NavLink {
@@ -25,7 +21,6 @@ export function isNavGroup(item: NavItem): item is NavGroup {
   return 'groups' in item || 'items' in item
 }
 
-/** ch. 3.3 primary nav — exact order preserved for shell acceptance. */
 export const primaryNav: NavItem[] = [
   {
     label: 'Services',
@@ -51,19 +46,19 @@ export const primaryNav: NavItem[] = [
     label: 'Platforms',
     items: [
       { label: 'Medusa', href: '/platforms/medusa' },
-      { label: 'Vendure', href: '/platforms/vendure' },
-      { label: 'Shopify & Shopify Plus', href: '/platforms/shopify' },
+      { label: 'Shopify', href: '/platforms/shopify' },
       { label: 'Hydrogen', href: '/platforms/hydrogen' },
       { label: 'Adobe Commerce', href: '/platforms/adobe-commerce' },
       { label: 'Magento Open Source', href: '/platforms/magento-open-source' },
+      { label: 'Webflow', href: '/platforms/webflow' },
     ],
   },
   {
     label: 'Migrate',
     items: [
-      { label: 'Magento to Medusa', href: '/migrate/magento-to-medusa' },
+      { label: 'Magento to Medusa', href: '/migrate/adobe-commerce-to-medusa' },
       { label: 'Shopify to Medusa', href: '/migrate/shopify-to-medusa' },
-      { label: 'Webflow Migration', href: '/migrate/webflow' },
+      { label: 'Webflow to Medusa', href: '/migrate/webflow-to-medusa' },
       { label: 'Legacy Platform Audit', href: '/migrate/legacy-audit' },
     ],
   },
@@ -71,19 +66,19 @@ export const primaryNav: NavItem[] = [
     label: 'Solutions',
     items: [
       { label: 'B2B Commerce', href: '/solutions/b2b-commerce' },
+      { label: 'DTC Commerce', href: '/solutions/dtc-commerce' },
       { label: 'D2C Launch', href: '/solutions/d2c-launch' },
-      { label: 'Marketplace', href: '/solutions/marketplace' },
       { label: 'Headless Storefront', href: '/solutions/headless-storefront' },
+      { label: 'Marketplace', href: '/solutions/marketplace' },
     ],
   },
   { label: 'Work', href: '/work' },
   { label: 'Markets', href: '/markets' },
   { label: 'Pricing', href: '/pricing' },
-  { label: 'Company', href: '/company' },
+  { label: 'Company', href: '/about' },
   { label: 'Insights', href: '/insights' },
 ]
 
-/** Footer column structure (ch. 4.2) — five columns repeating every hub URL. */
 export interface FooterColumn {
   heading: string
   groups?: { heading: string; items: NavLink[] }[]
@@ -115,19 +110,16 @@ export const footerColumns: FooterColumn[] = [
     heading: 'Platforms',
     items: [
       { label: 'Medusa', href: '/platforms/medusa' },
-      { label: 'Vendure', href: '/platforms/vendure' },
-      { label: 'Shopify & Shopify Plus', href: '/platforms/shopify' },
       { label: 'Hydrogen', href: '/platforms/hydrogen' },
-      { label: 'Adobe Commerce', href: '/platforms/adobe-commerce' },
       { label: 'Magento Open Source', href: '/platforms/magento-open-source' },
+      { label: 'Webflow', href: '/platforms/webflow' },
     ],
   },
   {
     heading: 'Migrate',
     items: [
-      { label: 'Magento to Medusa', href: '/migrate/magento-to-medusa' },
-      { label: 'Shopify to Medusa', href: '/migrate/shopify-to-medusa' },
-      { label: 'Webflow Migration', href: '/migrate/webflow' },
+      { label: 'Magento to Medusa', href: '/migrate/adobe-commerce-to-medusa' },
+      { label: 'Webflow to Medusa', href: '/migrate/webflow-to-medusa' },
       { label: 'Legacy Platform Audit', href: '/migrate/legacy-audit' },
     ],
   },
@@ -136,14 +128,16 @@ export const footerColumns: FooterColumn[] = [
     items: [
       { label: 'All Markets', href: '/markets' },
       { label: 'India', href: '/markets/india' },
-      { label: 'USA', href: '/markets/usa' },
+      { label: 'USA', href: '/markets/united-states' },
+      { label: 'United Kingdom', href: '/markets/united-kingdom' },
       { label: 'UAE & GCC', href: '/markets/uae-gcc' },
     ],
   },
   {
     heading: 'Company',
     items: [
-      { label: 'About', href: '/company' },
+      { label: 'About', href: '/about' },
+      { label: 'Careers', href: '/careers' },
       { label: 'Work', href: '/work' },
       { label: 'Insights', href: '/insights' },
       { label: 'Pricing', href: '/pricing' },
@@ -153,7 +147,6 @@ export const footerColumns: FooterColumn[] = [
   },
 ]
 
-/** Breadcrumb validation fixtures (ch. 4.2 acceptance). Digital Marketing removed from pillar scope. */
 export const breadcrumbFixtures = [
   [
     { label: 'Home', href: '/' },

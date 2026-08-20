@@ -8,8 +8,8 @@ export interface ResolvedCta {
 }
 
 const fallbackCtas: Record<CtaKey, ResolvedCta> = {
-  'book-call': { label: 'Book a discovery call', href: '/contact', variant: 'cta-primary' },
-  'get-audit': { label: 'Get a Legacy Platform Audit', href: '/contact', variant: 'cta-audit' },
+  'book-call': { label: 'Book a discovery call', href: '/book', variant: 'cta-primary' },
+  'get-audit': { label: 'Get a Legacy Platform Audit', href: '/contact?offer=audit', variant: 'cta-audit' },
   'scope-app': { label: 'Scope my app', href: '/contact', variant: 'cta-scope' },
   'download-checklist': { label: 'Download the checklist', href: '/resources', variant: 'default' },
   subscribe: { label: 'Subscribe', href: '/insights', variant: 'default' },

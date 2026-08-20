@@ -54,11 +54,15 @@ const {
   indexLayout,
   workIndexLayout,
   insightsIndexLayout,
-  aboutLayout,
-  pricingLayout,
-  contactLayout,
-  legalLayout,
-  thankYouLayout,
+    aboutLayout,
+    pricingLayout,
+    contactLayout,
+    legalLayout,
+    legalIndexLayout,
+    bookLayout,
+    careersLayout,
+    legacyAuditLayout,
+    thankYouLayout,
 } = await import('./seed/layouts')
 const { CASE_STUDIES, postBody, padToWords } = await import('./seed/copy')
 const {
@@ -153,33 +157,68 @@ await payload.updateGlobal({
     primaryNav: [
       { label: 'Services', link: '/services', dropdown: [
         { label: 'Ecommerce Builds', link: '/services/ecommerce-builds' },
+        { label: 'Replatforming & Migration', link: '/services/replatforming-migration' },
+        { label: 'Support & Retainers', link: '/services/support-retainers' },
         { label: 'Web App Development', link: '/services/web-app-development' },
+        { label: 'Mobile App Development', link: '/services/mobile-app-development' },
       ]},
-      { label: 'Platforms', link: '/platforms', dropdown: [{ label: 'Medusa', link: '/platforms/medusa' }] },
-      { label: 'Migrate', link: '/migrate', dropdown: [{ label: 'Magento to Medusa', link: '/migrate/adobe-commerce-to-medusa' }] },
-      { label: 'Solutions', link: '/solutions', dropdown: [{ label: 'B2B Commerce', link: '/solutions/b2b' }] },
+      { label: 'Platforms', link: '/platforms', dropdown: [
+        { label: 'Medusa', link: '/platforms/medusa' },
+        { label: 'Shopify', link: '/platforms/shopify' },
+        { label: 'Hydrogen', link: '/platforms/hydrogen' },
+        { label: 'Adobe Commerce', link: '/platforms/adobe-commerce' },
+        { label: 'Magento Open Source', link: '/platforms/magento-open-source' },
+        { label: 'Webflow', link: '/platforms/webflow' },
+        { label: 'WooCommerce', link: '/platforms/woocommerce' },
+        { label: 'Vendure', link: '/platforms/vendure' },
+      ]},
+      { label: 'Migrate', link: '/migrate', dropdown: [
+        { label: 'Magento to Medusa', link: '/migrate/adobe-commerce-to-medusa' },
+        { label: 'Shopify to Medusa', link: '/migrate/shopify-to-medusa' },
+        { label: 'Webflow to Medusa', link: '/migrate/webflow-to-medusa' },
+        { label: 'Legacy Platform Audit', link: '/migrate/legacy-audit' },
+      ]},
+      { label: 'Solutions', link: '/solutions', dropdown: [
+        { label: 'B2B Commerce', link: '/solutions/b2b-commerce' },
+        { label: 'DTC Commerce', link: '/solutions/dtc-commerce' },
+        { label: 'D2C Launch', link: '/solutions/d2c-launch' },
+        { label: 'Headless Storefront', link: '/solutions/headless-storefront' },
+        { label: 'Marketplace', link: '/solutions/marketplace' },
+      ]},
       { label: 'Work', link: '/work' },
       { label: 'Markets', link: '/markets' },
       { label: 'Pricing', link: '/pricing' },
-      { label: 'Company', link: '/company' },
+      { label: 'Company', link: '/about' },
       { label: 'Insights', link: '/insights' },
     ],
     footerColumns: [
       { heading: 'Services', links: [
         { label: 'Ecommerce Builds', link: '/services/ecommerce-builds' },
         { label: 'Web App Development', link: '/services/web-app-development' },
+        { label: 'Mobile App Development', link: '/services/mobile-app-development' },
       ]},
-      { heading: 'Platforms', links: [{ label: 'Medusa', link: '/platforms/medusa' }] },
-      { heading: 'Migrate', links: [{ label: 'Magento to Medusa', link: '/migrate/adobe-commerce-to-medusa' }] },
+      { heading: 'Platforms', links: [
+        { label: 'Medusa', link: '/platforms/medusa' },
+        { label: 'Hydrogen', link: '/platforms/hydrogen' },
+        { label: 'Magento Open Source', link: '/platforms/magento-open-source' },
+        { label: 'Webflow', link: '/platforms/webflow' },
+      ]},
+      { heading: 'Migrate', links: [
+        { label: 'Magento to Medusa', link: '/migrate/adobe-commerce-to-medusa' },
+        { label: 'Webflow to Medusa', link: '/migrate/webflow-to-medusa' },
+        { label: 'Legacy Platform Audit', link: '/migrate/legacy-audit' },
+      ]},
       { heading: 'Company', links: [
-        { label: 'About', link: '/company' },
+        { label: 'About', link: '/about' },
+        { label: 'Careers', link: '/careers' },
         { label: 'Contact', link: '/contact' },
+        { label: 'Legal', link: '/legal' },
         { label: 'GenMedha AI (genmedha.com)', link: 'https://genmedha.com' },
       ]},
     ],
     showTrustBadges: false,
     mobileCtaLabel: 'Book a call',
-    marketsStrip: 'Serving India · USA · UAE & GCC',
+    marketsStrip: 'Serving India · USA · UK · UAE & GCC',
     marketsHref: '/markets',
   },
 })
@@ -194,7 +233,23 @@ await payload.updateGlobal({
   },
 })
 
-// Redirects global requires ≥1 row — leave operator-managed; do not seed empty.
+await payload.updateGlobal({
+  slug: 'redirects',
+  data: {
+    redirects: [
+      { from: '/company', to: '/about', type: '301', note: 'Company nav alias' },
+      { from: '/solutions/b2b', to: '/solutions/b2b-commerce', type: '301', note: 'Slug from title' },
+      { from: '/solutions/dtc', to: '/solutions/dtc-commerce', type: '301', note: 'Slug from title' },
+      { from: '/markets/usa', to: '/markets/united-states', type: '301', note: 'Slug from name' },
+      { from: '/markets/uk', to: '/markets/united-kingdom', type: '301', note: 'UK alias' },
+      { from: '/markets/uae', to: '/markets/uae-gcc', type: '301', note: 'UAE alias' },
+      { from: '/migrate/magento', to: '/migrate/adobe-commerce-to-medusa', type: '301', note: 'Short Magento alias' },
+      { from: '/migrate/magento-to-medusa', to: '/migrate/adobe-commerce-to-medusa', type: '301', note: 'Pair slug hook' },
+      { from: '/migrate/magento-to-vendure', to: '/migrate/adobe-commerce-to-vendure', type: '301', note: 'Pair slug hook' },
+      { from: '/migrate/webflow', to: '/migrate/webflow-to-medusa', type: '301', note: 'Short Webflow alias' },
+    ],
+  },
+})
 
 await payload.updateGlobal({
   slug: 'cta-config',
@@ -203,7 +258,7 @@ await payload.updateGlobal({
     primaryCtas: [
       { key: 'book-call', label: 'Book a discovery call', href: '/book' },
       { key: 'get-audit', label: 'Get a Legacy Platform Audit', href: '/contact?offer=audit' },
-      { key: 'scope-app', label: 'Scope my app', href: '/book' },
+      { key: 'scope-app', label: 'Send a project brief', href: '/contact' },
       { key: 'view-work', label: 'View our work', href: '/work' },
     ],
     bookingEventTypes: [
@@ -270,6 +325,9 @@ const platformSeeds = [
   { slug: 'adobe-commerce', name: 'Adobe Commerce', tier: 'hub', eosDate: '2026-08-11' },
   { slug: 'woocommerce', name: 'WooCommerce', tier: 'hub' },
   { slug: 'adobe-commerce-cloud-service', name: 'Adobe Commerce Cloud Service', tier: 'hub' },
+  { slug: 'hydrogen', name: 'Hydrogen', tier: 'hub' },
+  { slug: 'magento-open-source', name: 'Magento Open Source', tier: 'hub' },
+  { slug: 'webflow', name: 'Webflow', tier: 'hub' },
 ] as const
 
 const platformIds: Record<string, string | number> = {}
@@ -305,6 +363,7 @@ const pairSeeds = [
   { source: 'shopify', target: 'vendure' },
   { source: 'adobe-commerce', target: 'vendure' },
   { source: 'adobe-commerce', target: 'adobe-commerce-cloud-service' },
+  { source: 'webflow', target: 'medusa' },
 ] as const
 
 function migrationPairSlug(source: string, target: string): string {
@@ -436,8 +495,10 @@ for (const m of marketSeeds) {
     )),
     engagementLogistics: {
       timezoneOverlap: copy?.logistics.split('.')[0] ?? (m.region === 'india' ? 'IST = UTC+5:30; 4–6 h overlap with CET mornings' : 'US business hours overlap with IST evenings'),
-      contractingNotes: copy?.logistics ?? 'USD/EUR contracting via Omniscient Press entity; jurisdiction documented in MSA.',
-      paymentNotes: copy?.context.includes('INR') ? 'INR/USD via Omniscient Press; international wire where required.' : 'USD wire, Wise, and local options where applicable.',
+      contractingNotes: copy?.logistics ?? 'USD/INR contracting via GenMedha Solutions Private Limited; jurisdiction documented in MSA.',
+      paymentNotes: copy?.context?.includes('INR')
+        ? 'INR/USD via GenMedha Solutions Private Limited; international wire where required.'
+        : 'USD wire, Wise, and local options where applicable.',
     },
     complianceNotes: richTextFromParagraphs(copy?.compliance ?? (
       m.region === 'india'
@@ -563,9 +624,16 @@ const pageRoutes = [
   { routePath: '/insights', pageKind: 'index', title: 'Insights' },
   { routePath: '/resources', pageKind: 'index', title: 'Resources' },
   { routePath: '/markets', pageKind: 'index', title: 'Markets' },
+  { routePath: '/markets/united-kingdom', pageKind: 'index', title: 'United Kingdom' },
+  { routePath: '/migrate/legacy-audit', pageKind: 'index', title: 'Legacy Platform Audit' },
+  { routePath: '/solutions/d2c-launch', pageKind: 'index', title: 'D2C Launch' },
+  { routePath: '/solutions/headless-storefront', pageKind: 'index', title: 'Headless Storefront' },
   { routePath: '/about', pageKind: 'about', title: 'About' },
   { routePath: '/pricing', pageKind: 'pricing', title: 'Pricing' },
   { routePath: '/contact', pageKind: 'contact', title: 'Contact' },
+  { routePath: '/book', pageKind: 'contact', title: 'Book a discovery call' },
+  { routePath: '/careers', pageKind: 'about', title: 'Careers' },
+  { routePath: '/legal', pageKind: 'legal', title: 'Legal' },
   { routePath: '/legal/privacy', pageKind: 'legal', title: 'Privacy Policy' },
   { routePath: '/legal/terms', pageKind: 'legal', title: 'Terms of Service' },
   { routePath: '/legal/cookies', pageKind: 'legal', title: 'Cookie Policy' },
@@ -610,18 +678,39 @@ function layoutForPage(p: (typeof pageRoutes)[number]) {
       if (p.routePath === '/resources') {
         return richIndexLayout('resources')
       }
+      if (p.routePath === '/migrate/legacy-audit') {
+        return legacyAuditLayout()
+      }
+      if (p.routePath === '/solutions/d2c-launch') {
+        return solutionLayout('d2c-launch', 'D2C Launch')
+      }
+      if (p.routePath === '/solutions/headless-storefront') {
+        return solutionLayout('headless-storefront', 'Headless Storefront')
+      }
+      if (p.routePath === '/markets/united-kingdom') {
+        return marketLayout('united-kingdom', 'United Kingdom')
+      }
       return indexLayout('Index', 'Browse content — CMS-driven index from Payload.', [
         { icon: 'build', title: 'Explore', body: 'Explore related content from navigation.' },
         { icon: 'support', title: 'Proof', body: 'Case studies and insights linked from nav.' },
         { icon: 'web-app', title: 'Contact', body: 'Book a discovery call to scope your path.' },
       ])
     case 'about':
+      if (p.routePath === '/careers') {
+        return careersLayout()
+      }
       return aboutLayout()
     case 'pricing':
       return pricingLayout()
     case 'contact':
+      if (p.routePath === '/book') {
+        return bookLayout()
+      }
       return contactLayout()
     case 'legal':
+      if (p.routePath === '/legal') {
+        return legalIndexLayout()
+      }
       return legalLayout(p.title)
     case 'thank-you':
       return thankYouLayout(p.title)

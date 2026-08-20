@@ -120,7 +120,7 @@ export const Navigation: GlobalConfig = {
     {
       name: 'marketsStrip',
       type: 'text',
-      defaultValue: 'Serving India · USA · UAE & GCC',
+      defaultValue: 'Serving India · USA · UK · UAE & GCC',
       admin: { description: 'Footer markets strip exact string (addendum D9).' },
     },
     {

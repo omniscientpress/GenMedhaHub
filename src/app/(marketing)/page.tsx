@@ -19,7 +19,8 @@ export async function generateMetadata(): Promise<Metadata> {
       document: page,
       path: '/',
       getTitle: (doc) => doc.title,
-      getDescription: () => 'GenMedha Hub — digital agency for commerce and product engineering.',
+      getDescription: () =>
+        'GenMedha Hub — commerce engineering, migration, and Build & Grow app development.',
       getSeo: (doc) => doc.seo,
     })
   }
